@@ -68,11 +68,13 @@ def validate_layout() -> list[str]:
         if not link.is_symlink() or link.readlink().as_posix() != target:
             errors.append(f"{name} must be a Git symlink to {target}")
     for old in (
-        "notes/GOAL.md", "notes/PRD.md", "notes/ARCHITECTURE.md",
+        "notes/GOAL.md", "notes/PRD.md", "notes/ARCHITECTURE.md", "notes/TODO.md",
         "notes/requests", "notes/decisions", "notes/rules",
     ):
         if (WORKSPACE / old).exists():
             errors.append(f"Obsolete workspace path: .agents/{old}")
+    if not (WORKSPACE / "TODO.md").is_file():
+        errors.append("Missing canonical task file: .agents/TODO.md")
     profiles = sorted((WORKSPACE / "agents").glob("*.md"))
     skills = sorted((WORKSPACE / "skills").glob("*/SKILL.md"))
     if not profiles:

@@ -10,7 +10,7 @@ After editing published notes, approved requests, accepted decisions or active r
 
 ## Procedure
 
-1. Edit `.agents/notes/*.md` (front matter `status: published`) for README overview; leave ordinary working notes such as TODO unpublished.
+1. Edit `.agents/notes/*.md` (front matter `status: published`) for README overview; keep the task list in `.agents/TODO.md`, outside the published notes directory.
 2. Edit `.agents/requests/*.md` (approved) for PRD; `.agents/decisions/*.md` (accepted) for ARCHITECTURE; `.agents/rules/*.md` (active) for AGENTS.
 3. Run `python3 .github/scripts/generate_documents.py --write`.
 4. Run `python3 .github/scripts/generate_documents.py --check` and inspect the generated diff.

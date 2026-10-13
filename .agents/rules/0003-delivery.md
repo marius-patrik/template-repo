@@ -3,7 +3,7 @@ status: active
 ---
 # Planning and change delivery
 
-- Translate the request into explicit acceptance criteria and a bounded plan before implementing. Keep `.agents/PLAN.md` and `.agents/notes/TODO.md` aligned with actual progress.
+- Translate the request into explicit acceptance criteria and a bounded plan before implementing. Keep `.agents/PLAN.md` and `.agents/TODO.md` aligned with actual progress.
 - Prefer small, cohesive, independently verifiable changes. Delegate independent work only when boundaries and integration contracts are clear.
 - Work from a dedicated branch; feature and fix pull requests target `development`. Only `development` may propose changes to `main`.
 - Preserve human approval gates; never bypass a review or required check merely to unblock a merge.
