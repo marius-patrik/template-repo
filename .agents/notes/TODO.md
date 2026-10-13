@@ -1,7 +1,7 @@
 # TODO
 
-- [ ] Define project purpose, scope and success criteria in `GOAL.md` and `requests/`.
-- [ ] Decide the technology stack and record architecture trade-offs in `decisions/`.
+- [ ] Define project purpose, scope and success criteria in `.agents/GOAL.md` and `.agents/requests/`.
+- [ ] Decide the technology stack and record architecture trade-offs in `.agents/decisions/`.
 - [ ] Replace the starter development rules where project constraints require it.
-- [ ] Regenerate derived Markdown and run its consistency check.
+- [ ] Regenerate the README, PRD, architecture and agent guide after changing source records.
 - [ ] Implement application-specific tests and CI when code is added.

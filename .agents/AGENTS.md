@@ -6,11 +6,11 @@
 ## Orient before editing
 
 - Inspect the actual repository state, current branch, pending changes, open work and relevant documentation before choosing an implementation.
-- Treat `notes/requests/` as the source of approved requirements, `notes/decisions/` as recorded architecture choices, and `notes/rules/` as operational guidance.
+- Treat `.agents/requests/` as the source of approved requirements, `.agents/decisions/` as recorded architecture choices, and `.agents/rules/` as operational guidance.
 - Follow explicit project requirements and accepted decisions; do not invent a new scope or silently change established boundaries.
 - Report uncertainty as uncertainty. Do not represent unmerged code, planned work or failing checks as shipped behavior.
 
-_Source: [0001-orientation.md](notes/rules/0001-orientation.md)_
+_Source: [0001-orientation.md](rules/0001-orientation.md)_
 
 
 ## Architecture and ownership
@@ -21,19 +21,19 @@ _Source: [0001-orientation.md](notes/rules/0001-orientation.md)_
 - Avoid unrequested compatibility shims, legacy fallbacks and transitional production paths. Delete obsolete implementations only after verifying their consumers and state.
 - Record a material architecture change as an accepted decision and update relevant approved requirements when scope changes.
 
-_Source: [0002-architecture.md](notes/rules/0002-architecture.md)_
+_Source: [0002-architecture.md](rules/0002-architecture.md)_
 
 
 ## Planning and change delivery
 
-- Translate the request into explicit acceptance criteria and a bounded plan before implementing. Keep `.agents/PLAN.md` and `notes/TODO.md` aligned with actual progress.
+- Translate the request into explicit acceptance criteria and a bounded plan before implementing. Keep `.agents/PLAN.md` and `.agents/notes/TODO.md` aligned with actual progress.
 - Prefer small, cohesive, independently verifiable changes. Delegate independent work only when boundaries and integration contracts are clear.
 - Work from a dedicated branch; feature and fix pull requests target `development`. Only `development` may propose changes to `main`.
 - Preserve human approval gates; never bypass a review or required check merely to unblock a merge.
 - Describe actual changes, verification and remaining gaps precisely in the pull request. Keep unrelated discoveries visible as separate tracked work.
 - Use focused conventional commits such as `feat(ui): add navigation` or `fix(core): handle cancellation`.
 
-_Source: [0003-delivery.md](notes/rules/0003-delivery.md)_
+_Source: [0003-delivery.md](rules/0003-delivery.md)_
 
 
 ## Verification and evidence
@@ -45,18 +45,20 @@ _Source: [0003-delivery.md](notes/rules/0003-delivery.md)_
 - Do not weaken quality gates, manufacture passing results or ignore failing checks. Surface and fix defects with reproducible evidence.
 - Before merging, revalidate against the current integration branch and inspect the final diff for unintended files.
 
-_Source: [0004-verification.md](notes/rules/0004-verification.md)_
+_Source: [0004-verification.md](rules/0004-verification.md)_
 
 
 ## Documentation as part of the change
 
-- Change an authoritative record before regenerating its derived view. Never maintain `README.md`, `CONTRIBUTING.md`, `AGENTS.md`, `PRD.md` or `ARCHITECTURE.md` as competing copies.
-- Run `python3 .github/scripts/generate_documents.py --write` after changing requests, decisions or rules, and `--check` before submission.
+- Change the canonical source before regenerating its derived view: published `.agents/notes/*.md` own README; approved `.agents/requests/*.md` own PRD; accepted `.agents/decisions/*.md` own ARCHITECTURE; active `.agents/rules/*.md` own AGENTS.
+- Never maintain root `README.md`, root `CONTRIBUTING.md`, `.agents/README.md`, `.agents/AGENTS.md`, `.agents/PRD.md` or `.agents/ARCHITECTURE.md` as competing independent copies.
+- Run `python3 .github/scripts/generate_documents.py --write` after changing any source record, and `--check` before submission.
+- Keep `.agents/GOAL.md`, `.agents/PLAN.md` and `.agents/notes/TODO.md` aligned with current project state; they are not generated.
 - Update code-facing documentation and architecture decisions in the same change that introduces the corresponding behavior.
-- Describe what exists separately from what is planned or proposed. Keep generated documentation and released artifacts pinned to the actual source revision.
+- Describe what exists separately from what is planned. Keep generated documentation and release artifacts pinned to the actual source revision.
 - Write code, public identifiers, comments and repository documentation in English unless approved requirements mandate another language.
 
-_Source: [0005-documentation.md](notes/rules/0005-documentation.md)_
+_Source: [0005-documentation.md](rules/0005-documentation.md)_
 
 
 ## Safety, credentials and data
@@ -67,7 +69,7 @@ _Source: [0005-documentation.md](notes/rules/0005-documentation.md)_
 - Ensure failures are observable: a missing dependency or blocked operation must not silently succeed.
 - Do not claim that a repository policy is enforced merely because a workflow or config file declares it; confirm the actual GitHub settings and checks.
 
-_Source: [0006-security.md](notes/rules/0006-security.md)_
+_Source: [0006-security.md](rules/0006-security.md)_
 
 
 ## Repository hygiene
@@ -78,7 +80,7 @@ _Source: [0006-security.md](notes/rules/0006-security.md)_
 - Only create CI workflows or dependencies when they verify real behavior or support required delivery; avoid speculative scaffolding.
 - Treat failures, blockers and decisions as durable project records rather than ephemeral chat history.
 
-_Source: [0007-hygiene.md](notes/rules/0007-hygiene.md)_
+_Source: [0007-hygiene.md](rules/0007-hygiene.md)_
 
 
 ## Versioning and release discipline
@@ -88,4 +90,15 @@ _Source: [0007-hygiene.md](notes/rules/0007-hygiene.md)_
 - Publish releases only for merged `main` commits, and do not call a release successful until both its tag and GitHub Release are verified.
 - `development` is the integration lane; `main` is the release lane. Required checks, review and protection must be configured on GitHub, not just described in Markdown.
 
-_Source: [0008-version-and-release.md](notes/rules/0008-version-and-release.md)_
+_Source: [0008-version-and-release.md](rules/0008-version-and-release.md)_
+
+
+## Agent roles and reusable skills
+
+- Before selecting an agent role, inspect `.agents/agents/` and choose the smallest role that can own the task. The orchestrator coordinates and integrates; it does not replace independent verification.
+- Load `.agents/AGENTS.md` as the governing ruleset. Role files refine responsibility and deliverables but never override owner approvals, security constraints or required checks.
+- Select procedures from `.agents/skills/<name>/SKILL.md` according to their descriptions. Skills are instructions, not automatically installed executables or proof of runtime support.
+- If dispatching independent work, define explicit inputs, output, scope, acceptance criteria and the integration owner. Do not claim delegation occurred unless actual agents ran.
+- Review and verification roles report evidence and defects; neither role grants its own approval or makes an unverified merge claim.
+
+_Source: [0009-agent-roles-and-skills.md](rules/0009-agent-roles-and-skills.md)_
