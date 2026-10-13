@@ -30,8 +30,9 @@ _Source: [0001-overview.md](notes/0001-overview.md)_
 | `.agents/AGENTS.md` | Generated active operating rules (also root `CONTRIBUTING.md`) |
 | `.agents/README.md` | Generated public overview (also root `README.md`) |
 | `.agents/PLAN.md` | Human-authored near-term plan and verification gates |
+| `.agents/TODO.md` | Human-authored actionable worklist; not published in README |
 | `.agents/SCRATCHPAD.md` | Non-normative temporary notes |
-| `.agents/notes/` | Published README sections and private working notes (`TODO.md` is not published) |
+| `.agents/notes/` | Published README sections and supplemental project notes |
 | `.agents/requests/` | Independently reviewable requirement records |
 | `.agents/decisions/` | Independently reviewable architecture decisions |
 | `.agents/rules/` | Independently reviewable mandatory rules |

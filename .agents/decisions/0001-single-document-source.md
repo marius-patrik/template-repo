@@ -14,7 +14,7 @@ Four kinds of individually reviewable Markdown source records drive the four hum
 | `.agents/decisions/*.md` | `accepted` | `.agents/ARCHITECTURE.md` |
 | `.agents/rules/*.md` | `active` | `.agents/AGENTS.md` |
 
-All selected records require YAML-style front matter containing `status`. Plain notes without a status, including `.agents/notes/TODO.md`, do not contribute to README. Other source directories reject files without status rather than silently hiding them. Records assemble in lexical filename order with source backlinks relative to the generated document.
+All selected records require YAML-style front matter containing `status`. Unpublished notes do not contribute to README; `.agents/TODO.md` is a separate, non-generated task file. Other source directories reject files without status rather than silently hiding them. Records assemble in lexical filename order with source backlinks relative to the generated document.
 
 Derived Markdown is committed for review and GitHub rendering, but is not edited independently. A dependency-free Python generator writes it deterministically, and CI rejects stale outputs. Root `README.md` and `CONTRIBUTING.md` are Git symlinks to `.agents/README.md` and `.agents/AGENTS.md` respectively.
 

@@ -9,12 +9,12 @@ Provide a minimal, technology-neutral GitHub repository template for work coordi
 
 ## Canonical workspace
 
-- Keep `GOAL.md`, generated `PRD.md`, generated `ARCHITECTURE.md`, generated `AGENTS.md`, `PLAN.md` and `SCRATCHPAD.md` at the top of `.agents/`.
+- Keep `GOAL.md`, generated `PRD.md`, generated `ARCHITECTURE.md`, generated `AGENTS.md`, `PLAN.md`, `TODO.md` and `SCRATCHPAD.md` at the top of `.agents/`.
 - Keep small working notes under `.agents/notes/`, approved requirements under `.agents/requests/`, accepted architectural decisions under `.agents/decisions/` and active rules under `.agents/rules/`.
 - Keep reusable role descriptions in `.agents/agents/` and executable, runtime-agnostic guidance in `.agents/skills/<name>/SKILL.md`. A role is not a duplicate ruleset; a skill is a procedure, not automatically installed code.
 - Generate `.agents/README.md` from published records in `.agents/notes/`, `.agents/PRD.md` from approved requests, `.agents/ARCHITECTURE.md` from accepted decisions, and `.agents/AGENTS.md` from active rules. Generated documents must never be edited as independent sources.
 - Root `README.md` must be a Git symlink to `.agents/README.md`; root `CONTRIBUTING.md` must remain a Git symlink to `.agents/AGENTS.md`.
-- Keep `.agents/notes/TODO.md` as a non-public worklist unless explicitly marked for publication; it is not the project's README.
+- Keep `.agents/TODO.md` as the non-generated task worklist; it is not a README source.
 
 ## Delivery
 
