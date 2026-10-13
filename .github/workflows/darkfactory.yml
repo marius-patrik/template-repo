@@ -1,0 +1,30 @@
+# df-control-bridge: 1
+# GitHub requires issues, workflow_dispatch and schedules on the default branch.
+# Configuration and executable workflows reside on this repository's default branch.
+name: DarkFactory Runtime
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+  issues:
+    types: [opened, labeled, unlabeled, closed, reopened]
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+  workflow_dispatch:
+  schedule:
+    - cron: "43 5 * * *"
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: write
+  repository-projects: write
+jobs:
+  governed:
+    uses: ./.github/workflows/darkfactory-control.yml
+    secrets: inherit
