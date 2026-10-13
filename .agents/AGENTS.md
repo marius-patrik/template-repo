@@ -26,7 +26,7 @@ _Source: [0002-architecture.md](rules/0002-architecture.md)_
 
 ## Planning and change delivery
 
-- Translate the request into explicit acceptance criteria and a bounded plan before implementing. Keep `.agents/PLAN.md` and `.agents/notes/TODO.md` aligned with actual progress.
+- Translate the request into explicit acceptance criteria and a bounded plan before implementing. Keep `.agents/PLAN.md` and `.agents/TODO.md` aligned with actual progress.
 - Prefer small, cohesive, independently verifiable changes. Delegate independent work only when boundaries and integration contracts are clear.
 - Work from a dedicated branch; feature and fix pull requests target `development`. Only `development` may propose changes to `main`.
 - Preserve human approval gates; never bypass a review or required check merely to unblock a merge.
@@ -53,7 +53,7 @@ _Source: [0004-verification.md](rules/0004-verification.md)_
 - Change the canonical source before regenerating its derived view: published `.agents/notes/*.md` own README; approved `.agents/requests/*.md` own PRD; accepted `.agents/decisions/*.md` own ARCHITECTURE; active `.agents/rules/*.md` own AGENTS.
 - Never maintain root `README.md`, root `CONTRIBUTING.md`, `.agents/README.md`, `.agents/AGENTS.md`, `.agents/PRD.md` or `.agents/ARCHITECTURE.md` as competing independent copies.
 - Run `python3 .github/scripts/generate_documents.py --write` after changing any source record, and `--check` before submission.
-- Keep `.agents/GOAL.md`, `.agents/PLAN.md` and `.agents/notes/TODO.md` aligned with current project state; they are not generated.
+- Keep `.agents/GOAL.md`, `.agents/PLAN.md` and `.agents/TODO.md` aligned with current project state; they are not generated.
 - Update code-facing documentation and architecture decisions in the same change that introduces the corresponding behavior.
 - Describe what exists separately from what is planned. Keep generated documentation and release artifacts pinned to the actual source revision.
 - Write code, public identifiers, comments and repository documentation in English unless approved requirements mandate another language.
