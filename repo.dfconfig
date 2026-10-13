@@ -30,18 +30,9 @@
           "enforce_admins": true,
           "strict": true,
           "resolve_conversations": true
-        },
-        {
-          "branch": "development",
-          "required_checks": [
-            "generated-docs"
-          ],
-          "approvals": 1,
-          "enforce_admins": true,
-          "strict": true,
-          "resolve_conversations": true
         }
-      ]
+      ],
+      "$comment": "Only main is protected: PR version automation must push to the development head of the release PR. Feature PR branches remain governed by review on development."
     },
     "areas": {
       "$comment": "Replace with project-specific areas; only starter labels exist until then.",
