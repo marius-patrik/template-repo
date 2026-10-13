@@ -89,7 +89,7 @@ def matches(existing: dict, payload: dict) -> bool:
         checks.get("strict") is payload["required_status_checks"]["strict"]
         and set(payload["required_status_checks"]["contexts"]).issubset(actual_checks)
         and admin.get("enabled") is payload["enforce_admins"]
-        and reviews.get("required_approving_review_count")
+        and (reviews.get("required_approving_review_count") or 0)
         >= payload["required_pull_request_reviews"]["required_approving_review_count"]
         and resolution.get("enabled") is payload["required_conversation_resolution"]
         and force.get("enabled") is False
