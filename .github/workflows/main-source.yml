@@ -1,6 +1,6 @@
 name: Main source policy
 on:
-  pull_request_target:
+  pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, ready_for_review, edited]
   workflow_dispatch:
@@ -19,7 +19,7 @@ jobs:
           HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
-          if [ "$EVENT_NAME" != "pull_request_target" ]; then
+          if [ "$EVENT_NAME" != "pull_request" ]; then
             echo "Only pull request events enforce main source policy"; exit 0
           fi
           if [ "$HEAD_REPOSITORY" != "$BASE_REPOSITORY" ] || [ "$HEAD_BRANCH" != "development" ]; then
