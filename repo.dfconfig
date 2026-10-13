@@ -1,0 +1,72 @@
+{
+  "repo": {
+    "$comment": "Starter policy and repository identity. Review and replace project-specific values before installation; declarations do not configure GitHub protection by themselves.",
+    "identity": {
+      "owner": "marius-patrik",
+      "repo": "template-repo",
+      "display_name": "Repository Template",
+      "default_branch": "main",
+      "development_branch": "development"
+    },
+    "license": {
+      "spdx": "GPL-3.0",
+      "holder": "Patrik Marius",
+      "year": "2026"
+    },
+    "upstream": {
+      "$comment": "Select a tested released DarkFactory ref during installation; a null pin means no pinned installation yet.",
+      "repo": "marius-patrik/DarkFactory",
+      "ref": null
+    },
+    "protection": {
+      "lanes": [
+        {
+          "branch": "main",
+          "required_checks": [
+            "main-source",
+            "generated-docs"
+          ],
+          "approvals": 1,
+          "enforce_admins": true,
+          "strict": true,
+          "resolve_conversations": true
+        },
+        {
+          "branch": "development",
+          "required_checks": [
+            "generated-docs"
+          ],
+          "approvals": 1,
+          "enforce_admins": true,
+          "strict": true,
+          "resolve_conversations": true
+        }
+      ]
+    },
+    "areas": {
+      "$comment": "Replace with project-specific areas; only starter labels exist until then.",
+      "$default": "docs",
+      "docs": {
+        "description": "Documentation, requirements, architecture and rules",
+        "keywords": [
+          "docs",
+          "readme",
+          "architecture",
+          "rule",
+          "request"
+        ]
+      },
+      "ci": {
+        "description": "Continuous integration and release workflows",
+        "keywords": [
+          "ci",
+          "action",
+          "release",
+          "workflow"
+        ]
+      }
+    }
+  },
+  "docs": {},
+  "providers": {}
+}

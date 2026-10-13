@@ -1,0 +1,28 @@
+name: Main source policy
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review, edited]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  main-source:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Only development in this repository may target main
+        env:
+          BASE_REPOSITORY: ${{ github.repository }}
+          HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" != "pull_request_target" ]; then
+            echo "Only pull request events enforce main source policy"; exit 0
+          fi
+          if [ "$HEAD_REPOSITORY" != "$BASE_REPOSITORY" ] || [ "$HEAD_BRANCH" != "development" ]; then
+            echo "::error::PRs to main must originate from this repository's development branch"
+            exit 1
+          fi

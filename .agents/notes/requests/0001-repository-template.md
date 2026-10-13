@@ -1,0 +1,26 @@
+---
+status: approved
+---
+# Repository template requirements
+
+## Purpose
+
+Provide a minimal, technology-neutral GitHub repository template for work coordinated by humans and software agents. The template itself is infrastructure, not an application.
+
+## Required layout
+
+- Maintain canonical project documentation under `.agents/` and `.agents/notes/`.
+- Keep `PLAN.md` and `SCRATCHPAD.md` directly inside `.agents/`.
+- Keep `GOAL.md`, `TODO.md`, generated `PRD.md`, and generated `ARCHITECTURE.md` under `.agents/notes/`.
+- Track approved requirements in `notes/requests/`, accepted decisions in `notes/decisions/`, and active rules in `notes/rules/`.
+- Generate `PRD.md` from approved requests, `ARCHITECTURE.md` from accepted decisions, and `.agents/AGENTS.md` from active rules. Generated files must never be the editing source.
+- Root `README.md` must be a Git symlink to `.agents/notes/PRD.md`; root `CONTRIBUTING.md` must be a Git symlink to `.agents/AGENTS.md`.
+
+## Delivery
+
+- Keep a machine-readable `VERSION` file and combined `repo.dfconfig` at root.
+- Create a `development` integration branch. Allow pull requests into `main` only when their source is the same repository's `development` branch.
+- Bump the version once for each same-repository pull request, and tag and publish a GitHub Release after a change lands on `main`.
+- Declare GitHub branch protection and enforce required review, checks, and source branch restrictions.
+- License the template under GPL-3.0.
+- Do not install language-specific build tooling or pretend an empty template has functioning application tests.
