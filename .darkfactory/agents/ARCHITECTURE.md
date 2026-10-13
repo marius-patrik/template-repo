@@ -37,7 +37,7 @@ _Source: [0001-single-document-source.md](decisions/0001-single-document-source.
 
 The `development` branch is the integration branch; `main` is the release branch. Feature work targets `development`. A merge into `main` must originate from `development` and pass required checks and review. Release versions use the root `VERSION` file as their sole source.
 
-For a same-repository pull request, automation creates one version-bump commit on its head branch, using the next patch version greater than either the base or head version. A distinct `v<version>` tag and GitHub Release are created by automation for each new commit landing on `main`. Existing tags must never be moved.
+Where workflow discovery has been verified, a same-repository pull request receives one version-bump commit on its head branch and a distinct `v<version>` tag and GitHub Release for the merged `main` commit. Existing tags must never be moved. A symlinked `.github` root is **not evidence** that GitHub Actions recognizes workflows; if discovery fails, CI, PR version bump, development branch restoration and automated releases are blocked. A maintainer must verify the change and choose an explicitly approved GitHub-supported activation path before relying on these features.
 
 ### Rationale
 
