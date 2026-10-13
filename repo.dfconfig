@@ -14,9 +14,9 @@
       "year": "2026"
     },
     "upstream": {
-      "$comment": "Select a tested released DarkFactory ref during installation; a null pin means no pinned installation yet.",
+      "$comment": "The root .darkfactory Git submodule is pinned to this DarkFactory commit. Advance the submodule gitlink and this pin together.",
       "repo": "marius-patrik/DarkFactory",
-      "ref": null
+      "ref": "36a14ebe8d13d535ff2e367f8e147090b615cea4"
     },
     "protection": {
       "lanes": [
@@ -56,6 +56,10 @@
           "workflow"
         ]
       }
+    },
+    "versioning": {
+      "mode": "tags",
+      "$comment": "Default is Git-tag-based SemVer with no VERSION file. Set mode to file and add VERSION to opt in to automatic PR version bumps."
     }
   },
   "docs": {},

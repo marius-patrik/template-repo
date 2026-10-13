@@ -5,4 +5,3 @@
 - [ ] Replace the starter development rules where project constraints require it.
 - [ ] Regenerate the README, PRD, architecture and agent guide after changing source records.
 - [ ] Implement application-specific tests and CI when code is added.
-- [ ] Restore supported GitHub Actions discovery if the `.github` symlink prevents workflow execution; keep the consolidated source tree canonical.

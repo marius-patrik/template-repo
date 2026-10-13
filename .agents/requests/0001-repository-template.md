@@ -1,0 +1,30 @@
+---
+status: approved
+---
+# Repository template requirements
+
+## Purpose
+
+Provide a technology-neutral GitHub repository template with first-class guidance for human contributors and coding agents. The template is infrastructure, not an application.
+
+## Repository layout
+
+- Keep real, independent root `.agents/` and `.github/` directories; neither may be a symbolic link. Do not duplicate their contents elsewhere.
+- Keep `.agents/{GOAL,PLAN,TODO,SCRATCHPAD}.md` at its root and generate `.agents/{README,PRD,ARCHITECTURE,AGENTS}.md` from `.agents/notes/`, `.agents/requests/`, `.agents/decisions/` and `.agents/rules/` respectively.
+- Keep portable agent role descriptions in `.agents/agents/` and procedure-based skills in `.agents/skills/<name>/SKILL.md`.
+- Keep GitHub workflows, scripts, the PR template and **the complete repository test suite** under `.github/`. All tests, including fixtures, mocks, snapshots, integration and E2E tests, belong exclusively in `.github/tests/`; never in application directories or the submodule.
+- Keep root `README.md` and `CONTRIBUTING.md` as Git symlinks to `.agents/README.md` and `.agents/AGENTS.md` respectively.
+- Install the upstream `marius-patrik/DarkFactory` project as a **pinned root Git submodule** at `.darkfactory`, with its source and commit declared in `.gitmodules`. Do not mirror `.agents`, `.github`, or tests into the upstream submodule.
+
+## Versioning and releases
+
+- The default release strategy is **tags only**: the `VERSION` file is absent; the next SemVer patch is derived from existing `v<major>.<minor>.<patch>` Git tags at release time and a GitHub Release is published for the merged `main` commit.
+- Support the optional `file` strategy, configured by `repo.versioning.mode` in `repo.dfconfig`: a checked-in `VERSION` file is maintained automatically on same-repository pull requests and becomes the release tag authority. File mode must not silently drift from published tags.
+- Do not auto-bump the version or require a file when the mode is `tags`. Never retag another commit or publish a release for unmerged code.
+
+## Delivery and governance
+
+- Use `development` for integration and `main` for releases. A PR into `main` may originate only from the same repository's `development` branch.
+- Keep generated Markdown deterministic and ensure actual GitHub Actions CI uses physical files under `.github/workflows/`.
+- Document required branch protection but do not claim it is active until GitHub confirms the settings.
+- Use GPL-3.0 and avoid adding an application-specific toolchain to the template.

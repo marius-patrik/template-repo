@@ -11,7 +11,7 @@ During code changes and before opening a reviewable pull request.
 ## Procedure
 
 1. Trace the requested behavior to one existing owner and affected consumers.
-2. Write or update behavior-focused tests exclusively under `.darkfactory/tests/` (including integration tests, fixtures and helpers); move or delete test files elsewhere.
+2. Write or update behavior-focused tests exclusively under `.github/tests/` (including integration tests, fixtures and helpers); move or delete test files elsewhere.
 3. Make a minimal cohesive change and update affected inline docs or source records.
 4. Run only relevant scoped checks during iteration, then full affected integration checks.
 5. Inspect final Git diff, changes to lockfiles, links and generated artifacts.
