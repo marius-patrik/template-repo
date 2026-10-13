@@ -13,38 +13,43 @@ concurrency:
 
 jobs:
   publish:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Verify generated documents
-        run: python3 .darkfactory/github/scripts/generate_documents.py --check
-      - name: Run centralized repository tests
-        run: python3 -m unittest discover -s .darkfactory/tests -p 'test_*.py'
-      - name: Create immutable tag and GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
+          persist-credentials: true
+      - name: Verify the exact merged commit
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/generate_documents.py --check
+          python3 -m unittest discover -s .github/tests -p 'test_*.py'
+      - name: Resolve immutable release tag
+        id: version
         shell: bash
         run: |
           set -euo pipefail
-          version="$(cat VERSION)"
-          [[ "$version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || { echo "Invalid VERSION"; exit 1; }
-          tag="v$version"
-          git fetch --force --tags origin
-          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
-            existing="$(git rev-list -n 1 "$tag")"
-            if [ "$existing" != "$GITHUB_SHA" ]; then
-              echo "::error::Tag $tag already points to $existing, not $GITHUB_SHA"
+          git fetch origin --tags
+          echo "tag=$(python3 .github/scripts/versioning.py)" >> "$GITHUB_OUTPUT"
+      - name: Publish tag and release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git rev-parse -q --verify "refs/tags/$RELEASE_TAG" >/dev/null; then
+            existing="$(git rev-list -n 1 "$RELEASE_TAG")"
+            if [[ "$existing" != "$GITHUB_SHA" ]]; then
+              echo "::error::Tag $RELEASE_TAG belongs to $existing, not $GITHUB_SHA"
               exit 1
             fi
           else
-            git tag "$tag" "$GITHUB_SHA"
-            git push origin "refs/tags/$tag"
+            git tag "$RELEASE_TAG" "$GITHUB_SHA"
+            git push origin "refs/tags/$RELEASE_TAG"
           fi
-          if gh release view "$tag" >/dev/null 2>&1; then
-            echo "Release $tag already exists."
-          else
-            gh release create "$tag" --target "$GITHUB_SHA" --title "$tag" --generate-notes
+          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --target "$GITHUB_SHA" --title "$RELEASE_TAG" --generate-notes
           fi
-          gh release view "$tag" --json tagName,url
+          gh release view "$RELEASE_TAG" --json tagName,url

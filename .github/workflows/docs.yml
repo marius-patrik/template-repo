@@ -15,6 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Check canonical generated documents
-        run: python3 .darkfactory/github/scripts/generate_documents.py --check
-      - name: Run centralized repository tests
-        run: python3 -m unittest discover -s .darkfactory/tests -p 'test_*.py'
+        run: python3 .github/scripts/generate_documents.py --check
+      - name: Test source behavior and repository layout
+        run: python3 -m unittest discover -s .github/tests -p 'test_*.py'

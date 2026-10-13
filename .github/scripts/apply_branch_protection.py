@@ -14,7 +14,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[2]
 CONFIG = ROOT / "repo.dfconfig"
 API_VERSION = "2026-03-10"
 

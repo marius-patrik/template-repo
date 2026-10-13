@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 from unittest.mock import patch
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "github" / "scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import apply_branch_protection as protection
 
 
