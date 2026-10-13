@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import unittest
+import sys
+from pathlib import Path
 from unittest.mock import patch
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "github" / "scripts"))
 import apply_branch_protection as protection
 
 
