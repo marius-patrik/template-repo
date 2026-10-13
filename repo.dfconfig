@@ -6,7 +6,8 @@
       "repo": "template-repo",
       "display_name": "Repository Template",
       "default_branch": "main",
-      "development_branch": "development"
+      "development_branch": "development",
+      "project_title": "template-repo"
     },
     "license": {
       "spdx": "GPL-3.0",
@@ -14,9 +15,8 @@
       "year": "2026"
     },
     "upstream": {
-      "$comment": "The root .darkfactory Git submodule is pinned to this DarkFactory commit. Advance the submodule gitlink and this pin together.",
       "repo": "marius-patrik/DarkFactory",
-      "ref": "36a14ebe8d13d535ff2e367f8e147090b615cea4"
+      "ref": "ebc3a54a1dde15319969d1582c8b927b18a00808"
     },
     "protection": {
       "lanes": [
@@ -60,6 +60,13 @@
     "versioning": {
       "mode": "tags",
       "$comment": "Default is Git-tag-based SemVer with no VERSION file. Set mode to file and add VERSION to opt in to automatic PR version bumps."
+    },
+    "board": {
+      "global": "Global",
+      "boards": [
+        "Global",
+        "template-repo"
+      ]
     }
   },
   "docs": {},
