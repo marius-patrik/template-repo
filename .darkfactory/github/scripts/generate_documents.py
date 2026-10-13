@@ -100,12 +100,12 @@ def validate_layout() -> list[str]:
             parts = tracked.split("/")
             filename = parts[-1]
             test_directory = any(
-                part in {"test", "tests", "__tests__", "spec", "specs"}
+                part in {"test", "tests", "__tests__", "spec", "specs", "fixtures", "__fixtures__", "snapshots", "__snapshots__", "mocks", "__mocks__"}
                 for part in parts[:-1]
             )
             test_filename = (
                 filename.startswith(("test_", "test-"))
-                or bool(re.search(r"(?i)(?:[._-]test|[._-]spec)\.[^.]+$", filename))
+                or bool(re.search(r"(?i)(?:[._-]test|[._-]spec|[._-]e2e|[._-]cy)\.[^.]+$", filename))
             )
             if test_directory or test_filename:
                 errors.append(

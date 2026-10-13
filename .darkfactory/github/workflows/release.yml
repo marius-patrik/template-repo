@@ -20,6 +20,8 @@ jobs:
           fetch-depth: 0
       - name: Verify generated documents
         run: python3 .darkfactory/github/scripts/generate_documents.py --check
+      - name: Run centralized repository tests
+        run: python3 -m unittest discover -s .darkfactory/tests -p 'test_*.py'
       - name: Create immutable tag and GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}

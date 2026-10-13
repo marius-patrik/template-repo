@@ -53,11 +53,12 @@ class WorkspaceLayoutTests(unittest.TestCase):
     def test_rejects_separate_test_directory(self) -> None:
         fake_output = subprocess.CompletedProcess(
             args=["git", "ls-files", "-z"], returncode=0,
-            stdout="other/tests/test_elsewhere.py\0", stderr="",
+            stdout="other/tests/test_elsewhere.py\0other/fixtures/data.json\0", stderr="",
         )
         with patch.object(generator.subprocess, "run", return_value=fake_output):
             errors = generator.validate_layout()
         self.assertTrue(any("other/tests/test_elsewhere.py" in error for error in errors))
+        self.assertTrue(any("other/fixtures/data.json" in error for error in errors))
 
 
 if __name__ == "__main__":
