@@ -4,9 +4,9 @@
 
 - [ ] Replace the template goal and initial request with project-specific scope.
 - [ ] Add accepted architecture decisions and refine the rules where the project differs.
-- [ ] Generate and verify documentation: `python3 .github/scripts/generate_documents.py --write && python3 .github/scripts/generate_documents.py --check`.
+- [x] Generate and verify documentation: `python3 .github/scripts/generate_documents.py --write && python3 .github/scripts/generate_documents.py --check`.
 - [ ] Configure branch protection in GitHub Settings to match `repo.dfconfig`.
-- [ ] Verify the development-to-main pull request, version bump, tagging and release workflow end to end.
+- [x] Verify the development-to-main pull request, automatic version bump, tagging and release workflow (initial release verified at v0.1.1; follow-up release pending).
 
 ## Delivery protocol
 
