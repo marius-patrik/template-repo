@@ -1,0 +1,20 @@
+name: Generated documents
+on:
+  pull_request:
+    branches: [development, main]
+  push:
+    branches: [development, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generated-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check canonical generated documents
+        run: python3 .darkfactory/github/scripts/generate_documents.py --check
+      - name: Run centralized repository tests
+        run: python3 -m unittest discover -s .darkfactory/tests -p 'test_*.py'
