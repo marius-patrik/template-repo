@@ -10,7 +10,7 @@ Describe precisely what changed and why.
 
 ## Verification
 
-- [ ] Generated documentation is current (`python3 .github/scripts/generate_documents.py --check`).
+- [ ] Generated README, PRD, architecture and agent guide are current (`python3 .github/scripts/generate_documents.py --check`).
 - [ ] Relevant tests/checks were run (name commands and results).
 - [ ] Remaining risks or deferred work are recorded.
 
