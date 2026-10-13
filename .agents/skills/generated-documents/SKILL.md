@@ -12,7 +12,7 @@ After editing published notes, approved requests, accepted decisions or active r
 
 1. Edit `.agents/notes/*.md` (front matter `status: published`) for the README overview. Keep the worklist in `.agents/TODO.md`.
 2. Edit `.agents/requests/*.md` (approved) for PRD, `.agents/decisions/*.md` (accepted) for ARCHITECTURE, and `.agents/rules/*.md` (active) for AGENTS.
-3. Verify root `.agents` and `.github` resolve to `.darkfactory/agents` and `.darkfactory/github`; change only canonical source files.
+3. Verify `.agents/` and `.github/` are real directories, with `.darkfactory` reserved for the pinned Git submodule.
 4. Run `python3 .github/scripts/generate_documents.py --write`.
 5. Run `python3 .github/scripts/generate_documents.py --check` and inspect the generated diff.
 6. Verify root symlinks: README -> `.agents/README.md`, CONTRIBUTING -> `.agents/AGENTS.md`.
