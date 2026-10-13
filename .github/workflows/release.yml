@@ -1,0 +1,48 @@
+name: Release main
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify generated documents
+        run: python3 .github/scripts/generate_documents.py --check
+      - name: Create immutable tag and GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat VERSION)"
+          [[ "$version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || { echo "Invalid VERSION"; exit 1; }
+          tag="v$version"
+          git fetch --force --tags origin
+          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+            existing="$(git rev-list -n 1 "$tag")"
+            if [ "$existing" != "$GITHUB_SHA" ]; then
+              echo "::error::Tag $tag already points to $existing, not $GITHUB_SHA"
+              exit 1
+            fi
+          else
+            git tag "$tag" "$GITHUB_SHA"
+            git push origin "refs/tags/$tag"
+          fi
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release $tag already exists."
+          else
+            gh release create "$tag" --target "$GITHUB_SHA" --title "$tag" --generate-notes
+          fi
+          gh release view "$tag" --json tagName,url

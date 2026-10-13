@@ -1,17 +1,18 @@
 # Agent workspace
 
-`.agents/AGENTS.md` is the generated contributor and agent guide. Edit individual active rules in `.agents/notes/rules/` instead of changing that generated file.
+This directory holds project-level guidance, planning, and the source material for generated documents. It is independent of the code ecosystem.
 
-| Location | Purpose |
+| File or directory | Role |
 | --- | --- |
-| `PLAN.md` | Current plan, milestones, dependencies and verification gates. |
-| `SCRATCHPAD.md` | Ephemeral working notes; never authoritative. |
-| `notes/GOAL.md` | Project goal and success criteria. |
-| `notes/TODO.md` | Actionable, short-lived tasks. |
-| `notes/requests/` | Requirement sources (approved requests generate `notes/PRD.md`). |
-| `notes/decisions/` | Architecture decision sources (accepted decisions generate `notes/ARCHITECTURE.md`). |
-| `notes/rules/` | Contribution rule sources (active rules generate `AGENTS.md`). |
+| `AGENTS.md` | Generated rules for agents and contributors; do not edit directly. |
+| `PLAN.md` | Execution plan and verification gates. |
+| `SCRATCHPAD.md` | Temporary notes, never normative. |
+| `notes/GOAL.md` | Durable project goal and success criteria. |
+| `notes/TODO.md` | Small actionable items. |
+| `notes/requests/` | Approved requirement sources, generating `notes/PRD.md`. |
+| `notes/decisions/` | Accepted architectural decisions, generating `notes/ARCHITECTURE.md`. |
+| `notes/rules/` | Active development rules, generating `AGENTS.md`. |
 
-Run `python3 .github/scripts/generate_documents.py --write` after editing source files. CI uses `--check` to reject stale generated documents.
+To regenerate documents, run `python3 .github/scripts/generate_documents.py --write` from the repository root. CI checks the same outputs with `--check`. Change source files, not generated projections.
 
-Root `README.md` and `CONTRIBUTING.md` are symlinks to the generated PRD and agent guide respectively. Do not duplicate their content.
+The root `README.md` links to `.agents/notes/PRD.md`. The root `CONTRIBUTING.md` links to `.agents/AGENTS.md`. Git symlinks are intentional.
