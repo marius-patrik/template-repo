@@ -19,8 +19,8 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Install SHA256-verified released df
         env:
-          DF_TAG: "v0.292.0"
-          DF_SHA256: "609aeed818f0d2ae4f57f0cac61834b402b05c80e8190f2dd1d6e1ec46e8730e"
+          DF_TAG: "v0.292.1"
+          DF_SHA256: "6fd45af8897dae25a55f16f887d790e23a8b2324c659013ff32dcb6a8a6d6313"
         run: |
           set -euo pipefail
           curl --fail --location --silent --show-error --retry 3 "https://github.com/marius-patrik/DarkFactory/releases/download/$DF_TAG/df-linux-x64.tar.gz" --output "$RUNNER_TEMP/df.tar.gz"
@@ -130,23 +130,23 @@ jobs:
           if [ "$DF_HAS_ACTIONS" = "true" ]; then test "$DF_QUALITY" = "success"; fi
   agent:
     if: github.event_name == 'issues' || github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment'
-    uses: marius-patrik/DarkFactory/.github/workflows/agent.yml@8e6146e5423e1af3daca910d927e267467a59715
+    uses: marius-patrik/DarkFactory/.github/workflows/agent.yml@4a922f5be5ec3d928f9142424674b433e0f40b71
     with:
-      pipeline-ref: "8e6146e5423e1af3daca910d927e267467a59715"
+      pipeline-ref: "4a922f5be5ec3d928f9142424674b433e0f40b71"
       pipeline-repo: marius-patrik/DarkFactory
       agent-enabled: ${{ vars.AGENT_ENABLED }}
     secrets: inherit
   issue-binding:
     if: github.event_name == 'pull_request'
-    uses: marius-patrik/DarkFactory/.github/workflows/verify-pr-issue.yml@8e6146e5423e1af3daca910d927e267467a59715
+    uses: marius-patrik/DarkFactory/.github/workflows/verify-pr-issue.yml@4a922f5be5ec3d928f9142424674b433e0f40b71
     with:
-      pipeline-ref: "8e6146e5423e1af3daca910d927e267467a59715"
+      pipeline-ref: "4a922f5be5ec3d928f9142424674b433e0f40b71"
       pipeline-repo: marius-patrik/DarkFactory
     secrets: inherit
   approvals:
     if: github.event_name == 'pull_request_review' || github.event_name == 'issue_comment'
-    uses: marius-patrik/DarkFactory/.github/workflows/pr-approval-automerge.yml@8e6146e5423e1af3daca910d927e267467a59715
+    uses: marius-patrik/DarkFactory/.github/workflows/pr-approval-automerge.yml@4a922f5be5ec3d928f9142424674b433e0f40b71
     with:
-      pipeline-ref: "8e6146e5423e1af3daca910d927e267467a59715"
+      pipeline-ref: "4a922f5be5ec3d928f9142424674b433e0f40b71"
       pipeline-repo: marius-patrik/DarkFactory
     secrets: inherit
