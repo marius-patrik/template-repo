@@ -4,12 +4,12 @@
   "slug": "marius-patrik/template-repo",
   "sourceBranch": "main",
   "release": {
-    "tag": "v0.292.2",
-    "sha": "a39c404923882070ad98720f5f789fe279fa932e",
-    "digest": "1e97f748cca22d1c239f6f0f2d25c5e70032bbb48cf75c1c477a2a4d445dd822"
+    "tag": "v0.292.3",
+    "sha": "fc5896c9ffbf9b1ac5762a271ec2b26ee0efafd4",
+    "digest": "ce2899a8ca2cc65b4baffedd7c2992be29e99f604a12ce59d752b0b363d262ca"
   },
   "fileHashes": {
-    "repo.dfconfig": "f1346a304604005cee430342b217b5af9f9b81540f63fd6d228da90c51e8fabf",
-    ".github/workflows/darkfactory-control.yml": "c8754e25bdcf15a57d509a7d016f7584d8726171d8608282302e7ab31f37f358"
+    "repo.dfconfig": "b796fe8016bc7d2b615c812e240d53d067bbb4b385236744beceaa4a271c1301",
+    ".github/workflows/darkfactory-control.yml": "1e962c17c5c1da8e5f5b2a7679aeccb90be5ebfeb4fb4811290af8d7d5a3b266"
   }
 }
