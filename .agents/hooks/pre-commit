@@ -1,0 +1,7 @@
+#!/bin/sh
+set -eu
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+python3 .github/scripts/generate_documents.py --check
+python3 .agents/tools/canvas.py check
+python3 -m unittest discover -s .github/tests -p 'test_*.py'
