@@ -1,0 +1,8 @@
+{
+  "schema": 1,
+  "session_start": "python3 .agents/tools/canvas.py context --limit 16000",
+  "after_repository_change": "python3 .agents/tools/canvas.py write",
+  "before_release": "python3 .agents/tools/canvas.py check",
+  "git_pre_commit": ".agents/plugins/canvas/hooks/pre-commit",
+  "note": "Declarative only. Requires explicit host or Git opt-in, no separate state."
+}

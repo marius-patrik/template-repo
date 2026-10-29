@@ -1,0 +1,6 @@
+#!/bin/sh
+set -eu
+cd "$(git rev-parse --show-toplevel)"
+python3 .agents/tools/canvas.py write
+git add -- canvas.html
+python3 .agents/tools/canvas.py check

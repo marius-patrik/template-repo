@@ -1,0 +1,11 @@
+{
+  "name": "repository-canvas",
+  "version": "1.0.0",
+  "type": "portable-agent-plugin",
+  "state": "stateless",
+  "canvas": "canvas.html",
+  "tool": ".agents/tools/canvas.py",
+  "skill": ".agents/plugins/canvas/skills/repository-canvas/SKILL.md",
+  "hooks": ".agents/plugins/canvas/hooks/events.json",
+  "host_registration_required": true
+}
