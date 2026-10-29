@@ -93,3 +93,12 @@ GitHub workflow discovery requires an actual `.github/workflows/` tree. A symlin
 Do not put test files outside `.github/tests/`. Ensure all internal workflow/script paths use native root locations. Advance the pinned submodule commit explicitly and reviewably, and use `git submodule update --init --recursive` if local tooling needs its content.
 
 _Source: [0004-single-darkfactory-root.md](decisions/0004-single-darkfactory-root.md)_
+
+
+## Canvas is a projection, not a second data store
+
+Tracked repository contents own every durable fact. `canvas.html` is deterministically generated from the staged Git index, with HTML-escaped text and metadata for unsupported, binary, submodule, and sensitive files. It cannot contain unique records, browser state or JavaScript. Agent tools edit canonical files and re-render; portable hooks are opt-in.
+
+This avoids drift between a UI-specific database and the repository. Generated Canvas is committed and verified just like generated Markdown. No platform session callback is asserted merely from the presence of local plugin files.
+
+_Source: [0005-repository-canvas.md](decisions/0005-repository-canvas.md)_

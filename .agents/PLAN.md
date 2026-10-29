@@ -10,6 +10,12 @@
 - [x] Use Git tags by default, with optional auto-maintained file versioning.
 - [ ] Apply and verify native `main` branch protection using `python3 .github/scripts/apply_branch_protection.py --apply` from an administrator's GitHub CLI session.
 
+## Stateless Canvas integration
+
+- [x] Add portable skill, CLI, hook mapping, and deterministic static renderer.
+- [ ] Verify Canvas snapshot and unit tests.
+- [ ] Review, merge to development, release via main.
+
 ## Delivery protocol
 
 Keep this plan, approved requirements, architectural decisions and test evidence synchronized with changes. Verify branch refs, CI results and immutable release tags before reporting completion.

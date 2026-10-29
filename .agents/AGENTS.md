@@ -113,3 +113,13 @@ _Source: [0009-agent-roles-and-skills.md](rules/0009-agent-roles-and-skills.md)_
 - Update test discovery and execution commands whenever structure changes. Report unexecuted tests or unavailable CI as blocked, not passing.
 
 _Source: [0010-exclusive-tests.md](rules/0010-exclusive-tests.md)_
+
+
+## Canvas lifecycle
+
+- Start repository work by reading root `canvas.html` and checking its reproducibility. Load context using the Canvas CLI where available.
+- Keep all persistent facts in canonical tracked files; never hand-edit Canvas or add Canvas-only state.
+- Before committing, stage sources, run `canvas.py write`, stage `canvas.html`, then run `canvas.py check` and tests.
+- Show the current snapshot/link when responding where supported; do not promise automatic ChatGPT hook execution.
+
+_Source: [0011-repository-canvas.md](rules/0011-repository-canvas.md)_
