@@ -28,7 +28,7 @@ footer{max-width:1180px;padding:22px 24px;margin:auto;color:#687989;font-size:.8
 </style>
 </head>
 <body>
-<header><div class="eyebrow">Repository Canvas · Generated from tracked source</div><h1>template-repo</h1><p>Customize this repository into a well-specified project with a single authoritative requirement source, explicit architecture decisions, reproducible verification and an auditable release path.</p><p>73 source entries · static, read-only view · agent actions modify repository files and regenerate this document</p></header>
+<header><div class="eyebrow">Repository Canvas · Generated from tracked source</div><h1>template-repo</h1><p>Customize this repository into a well-specified project with a single authoritative requirement source, explicit architecture decisions, reproducible verification and an auditable release path.</p><p>74 source entries · static, read-only view · agent actions modify repository files and regenerate this document</p></header>
 <main><p class="hint"><strong>Source of truth:</strong> the Git repository. This HTML has no independent application state, external data feed or editing controls. The generated canvas is excluded from its own input inventory; Git submodules and binary assets are represented by identifiers or checksums, not expanded data.</p>
 
 <div class="layout"><nav class="navigator" aria-label="Repository index"><h2>Repository files</h2><ol>
@@ -93,18 +93,19 @@ footer{max-width:1180px;padding:22px 24px;margin:auto;color:#687989;font-size:.8
 <li><a href="#file-0059">.github/tests/test_canvas.py</a></li>
 <li><a href="#file-0060">.github/tests/test_repository_structure.py</a></li>
 <li><a href="#file-0061">.github/tests/test_versioning.py</a></li>
-<li><a href="#file-0062">.github/workflows/darkfactory-control.yml</a></li>
-<li><a href="#file-0063">.github/workflows/darkfactory.yml</a></li>
-<li><a href="#file-0064">.github/workflows/docs.yml</a></li>
-<li><a href="#file-0065">.github/workflows/keep-development.yml</a></li>
-<li><a href="#file-0066">.github/workflows/main-source.yml</a></li>
-<li><a href="#file-0067">.github/workflows/pr-version.yml</a></li>
-<li><a href="#file-0068">.github/workflows/release.yml</a></li>
-<li><a href="#file-0069">.gitmodules</a></li>
-<li><a href="#file-0070">CONTRIBUTING.md</a></li>
-<li><a href="#file-0071">LICENSE</a></li>
-<li><a href="#file-0072">README.md</a></li>
-<li><a href="#file-0073">repo.dfconfig</a></li>
+<li><a href="#file-0062">.github/workflows/canvas-sync.yml</a></li>
+<li><a href="#file-0063">.github/workflows/darkfactory-control.yml</a></li>
+<li><a href="#file-0064">.github/workflows/darkfactory.yml</a></li>
+<li><a href="#file-0065">.github/workflows/docs.yml</a></li>
+<li><a href="#file-0066">.github/workflows/keep-development.yml</a></li>
+<li><a href="#file-0067">.github/workflows/main-source.yml</a></li>
+<li><a href="#file-0068">.github/workflows/pr-version.yml</a></li>
+<li><a href="#file-0069">.github/workflows/release.yml</a></li>
+<li><a href="#file-0070">.gitmodules</a></li>
+<li><a href="#file-0071">CONTRIBUTING.md</a></li>
+<li><a href="#file-0072">LICENSE</a></li>
+<li><a href="#file-0073">README.md</a></li>
+<li><a href="#file-0074">repo.dfconfig</a></li>
 </ol></nav><div class="files">
 <section class="file" id="file-0001"><h3>.agents/AGENTS.md</h3><p class="meta">Git mode 100644 · fe682dfcf5d2d016885549f7aaf363189f4506a0</p><pre># Agent and contributor rules
 
@@ -1797,7 +1798,7 @@ def parse_source(file: Path, allow_plain_notes: bool) -&gt; tuple[str | None, st
         if allow_plain_notes:
             return None, &quot;&quot;
         raise ValueError(f&quot;Missing YAML-style front matter: {file.relative_to(ROOT)}&quot;)
-    status = re.search(r&quot;(?m)^status:\s*([a-z_-]+)\s*{{FILES}}quot;, front.group(1))
+    status = re.search(r&quot;(?m)^status:\s*([a-z_-]+)\s*$&quot;, front.group(1))
     if status is None:
         raise ValueError(f&quot;Missing status field: {file.relative_to(ROOT)}&quot;)
     return status.group(1), contents[front.end():].strip()
@@ -1883,7 +1884,7 @@ def validate_layout() -&gt; list[str]:
                 for p in segments[:-1]
             )
             is_test_filename = leaf.startswith((&quot;test_&quot;, &quot;test-&quot;)) or bool(
-                re.search(r&quot;(?i)(?:[._-]test|[._-]spec|[._-]e2e|[._-]cy)\.[^.]+{{FILES}}quot;, leaf)
+                re.search(r&quot;(?i)(?:[._-]test|[._-]spec|[._-]e2e|[._-]cy)\.[^.]+$&quot;, leaf)
             )
             if is_test_directory or is_test_filename:
                 errors.append(f&quot;Repository tests must live in .github/tests/: {path}&quot;)
@@ -1962,8 +1963,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-TAG = re.compile(r&quot;^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*){{FILES}}quot;)
-VERSION = re.compile(r&quot;^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*){{FILES}}quot;)
+TAG = re.compile(r&quot;^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$&quot;)
+VERSION = re.compile(r&quot;^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$&quot;)
 
 
 def parse_tag(tag: str) -&gt; tuple[int, int, int] | None:
@@ -2183,7 +2184,7 @@ class WorkspaceLayoutTests(unittest.TestCase):
             [&quot;git&quot;, &quot;ls-files&quot;, &quot;--stage&quot;, &quot;--&quot;, &quot;.darkfactory&quot;],
             cwd=ROOT, capture_output=True, text=True, check=True,
         )
-        self.assertRegex(result.stdout, r&quot;^160000 [0-9a-f]{40} 0\t\.darkfactory\n{{FILES}}quot;)
+        self.assertRegex(result.stdout, r&quot;^160000 [0-9a-f]{40} 0\t\.darkfactory\n$&quot;)
         self.assertIn(&quot;path = .darkfactory&quot;, (ROOT / &quot;.gitmodules&quot;).read_text(encoding=&quot;utf-8&quot;))
 
     def test_generated_documents_are_identical_to_approved_records(self) -&gt; None:
@@ -2288,7 +2289,52 @@ class VersioningTests(unittest.TestCase):
 if __name__ == &quot;__main__&quot;:
     unittest.main()
 </pre></section>
-<section class="file" id="file-0062"><h3>.github/workflows/darkfactory-control.yml</h3><p class="meta">Git mode 100644 · 75fa15c2604451203799ec160fabea908221cee9</p><pre># df-control-managed: 1
+<section class="file" id="file-0062"><h3>.github/workflows/canvas-sync.yml</h3><p class="meta">Git mode 100644 · f17c4d43c66ab1c4767be3ae734ec9ed5dd4880a</p><pre>name: Synchronize repository Canvas
+on:
+  push:
+    branches:
+      - &#x27;feat/**&#x27;
+      - &#x27;fix/**&#x27;
+      - &#x27;agent/**&#x27;
+      - &#x27;chore/**&#x27;
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: canvas-sync-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  canvas-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Verify canonical source documents
+        run: python3 .github/scripts/generate_documents.py --check
+      - name: Render complete Canvas from repository source
+        run: |
+          python3 .agents/tools/canvas.py render
+          python3 .agents/tools/canvas.py check
+      - name: Run repository behavior tests
+        run: python3 -m unittest discover -s .github/tests -p &#x27;test_*.py&#x27;
+      - name: Commit updated Canvas projection
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- canvas.html; then
+            echo &quot;Canvas already matches repository source&quot;
+            exit 0
+          fi
+          git config user.name &quot;github-actions[bot]&quot;
+          git config user.email &quot;41898282+github-actions[bot]@users.noreply.github.com&quot;
+          git add -- canvas.html
+          git commit -m &quot;docs(canvas): synchronize generated repository view&quot;
+          git push origin &quot;HEAD:${GITHUB_REF_NAME}&quot;
+</pre></section>
+<section class="file" id="file-0063"><h3>.github/workflows/darkfactory-control.yml</h3><p class="meta">Git mode 100644 · 75fa15c2604451203799ec160fabea908221cee9</p><pre># df-control-managed: 1
 name: DarkFactory Control
 on:
   workflow_call:
@@ -2441,7 +2487,7 @@ jobs:
       pipeline-repo: marius-patrik/DarkFactory
     secrets: inherit
 </pre></section>
-<section class="file" id="file-0063"><h3>.github/workflows/darkfactory.yml</h3><p class="meta">Git mode 100644 · 0573b940cd16a9932acdaeb9f9b0200e0a91e493</p><pre># df-control-bridge: 1
+<section class="file" id="file-0064"><h3>.github/workflows/darkfactory.yml</h3><p class="meta">Git mode 100644 · 0573b940cd16a9932acdaeb9f9b0200e0a91e493</p><pre># df-control-bridge: 1
 # GitHub requires issues, workflow_dispatch and schedules on the default branch.
 # Configuration and executable workflows reside on this repository&#x27;s default branch.
 name: DarkFactory Runtime
@@ -2472,7 +2518,7 @@ jobs:
     uses: ./.github/workflows/darkfactory-control.yml
     secrets: inherit
 </pre></section>
-<section class="file" id="file-0064"><h3>.github/workflows/docs.yml</h3><p class="meta">Git mode 100644 · 09be66ac95b3bf75130e8cecb9ca33cebe0b2e87</p><pre>name: Generated documents
+<section class="file" id="file-0065"><h3>.github/workflows/docs.yml</h3><p class="meta">Git mode 100644 · 09be66ac95b3bf75130e8cecb9ca33cebe0b2e87</p><pre>name: Generated documents
 on:
   pull_request:
     branches: [development, main]
@@ -2495,7 +2541,7 @@ jobs:
       - name: Test source behavior and repository layout
         run: python3 -m unittest discover -s .github/tests -p &#x27;test_*.py&#x27;
 </pre></section>
-<section class="file" id="file-0065"><h3>.github/workflows/keep-development.yml</h3><p class="meta">Git mode 100644 · e0ca712e55a67121efc47a56e32dd751a17c0109</p><pre>name: Keep development branch
+<section class="file" id="file-0066"><h3>.github/workflows/keep-development.yml</h3><p class="meta">Git mode 100644 · e0ca712e55a67121efc47a56e32dd751a17c0109</p><pre>name: Keep development branch
 on:
   delete:
   workflow_run:
@@ -2556,7 +2602,7 @@ jobs:
               core.info(&#x27;Concurrent restoration completed at &#x27; + current.data.object.sha);
             }
 </pre></section>
-<section class="file" id="file-0066"><h3>.github/workflows/main-source.yml</h3><p class="meta">Git mode 100644 · ab63ee227e23d1a329cb15a0da037e27cabe2b43</p><pre>name: Main source policy
+<section class="file" id="file-0067"><h3>.github/workflows/main-source.yml</h3><p class="meta">Git mode 100644 · ab63ee227e23d1a329cb15a0da037e27cabe2b43</p><pre>name: Main source policy
 on:
   pull_request:
     branches: [main]
@@ -2597,7 +2643,7 @@ jobs:
             }
             core.info(&#x27;Authorized main PR: #&#x27; + pr.number + &#x27; from development.&#x27;);
 </pre></section>
-<section class="file" id="file-0067"><h3>.github/workflows/pr-version.yml</h3><p class="meta">Git mode 100644 · 728984d9be66d5b399ac00b5f79b178210f2ecc0</p><pre>name: Bump version on PR
+<section class="file" id="file-0068"><h3>.github/workflows/pr-version.yml</h3><p class="meta">Git mode 100644 · 728984d9be66d5b399ac00b5f79b178210f2ecc0</p><pre>name: Bump version on PR
 on:
   pull_request_target:
     branches: [development, main]
@@ -2688,7 +2734,7 @@ jobs:
             core.info(&#x27;Bumped VERSION to &#x27; + newVersion.trim());
             await dispatchChecks();
 </pre></section>
-<section class="file" id="file-0068"><h3>.github/workflows/release.yml</h3><p class="meta">Git mode 100644 · 5f3ac29dcbf6152e40e1c5fe0b22a3065ad24cfe</p><pre>name: Release main
+<section class="file" id="file-0069"><h3>.github/workflows/release.yml</h3><p class="meta">Git mode 100644 · 5f3ac29dcbf6152e40e1c5fe0b22a3065ad24cfe</p><pre>name: Release main
 on:
   push:
     branches: [main]
@@ -2744,14 +2790,14 @@ jobs:
           fi
           gh release view &quot;$RELEASE_TAG&quot; --json tagName,url
 </pre></section>
-<section class="file" id="file-0069"><h3>.gitmodules</h3><p class="meta">Git mode 100644 · 674a1ce0b95f16d9c0b222911e1be9b2ef0b1ccc</p><pre>[submodule &quot;.darkfactory&quot;]
+<section class="file" id="file-0070"><h3>.gitmodules</h3><p class="meta">Git mode 100644 · 674a1ce0b95f16d9c0b222911e1be9b2ef0b1ccc</p><pre>[submodule &quot;.darkfactory&quot;]
 	path = .darkfactory
 	url = https://github.com/marius-patrik/DarkFactory.git
 	branch = main
 </pre></section>
-<section class="file" id="file-0070"><h3>CONTRIBUTING.md</h3><p class="meta">Git mode 120000 · 41280d2fa808081dc9c5bd47c047fe1ea62e6aae</p><pre>Symbolic link to: .agents/AGENTS.md
+<section class="file" id="file-0071"><h3>CONTRIBUTING.md</h3><p class="meta">Git mode 120000 · 41280d2fa808081dc9c5bd47c047fe1ea62e6aae</p><pre>Symbolic link to: .agents/AGENTS.md
 </pre></section>
-<section class="file" id="file-0071"><h3>LICENSE</h3><p class="meta">Git mode 100644 · f288702d2fa16d3cdf0035b15a9fcbc552cd88e7</p><pre>                    GNU GENERAL PUBLIC LICENSE
+<section class="file" id="file-0072"><h3>LICENSE</h3><p class="meta">Git mode 100644 · f288702d2fa16d3cdf0035b15a9fcbc552cd88e7</p><pre>                    GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
  Copyright (C) 2007 Free Software Foundation, Inc. &lt;https://fsf.org/&gt;
@@ -3426,9 +3472,9 @@ the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 &lt;https://www.gnu.org/licenses/why-not-lgpl.html&gt;.
 </pre></section>
-<section class="file" id="file-0072"><h3>README.md</h3><p class="meta">Git mode 120000 · fa67a2d3e2abc3d138f3534762f958e4fe16fc25</p><pre>Symbolic link to: .agents/README.md
+<section class="file" id="file-0073"><h3>README.md</h3><p class="meta">Git mode 120000 · fa67a2d3e2abc3d138f3534762f958e4fe16fc25</p><pre>Symbolic link to: .agents/README.md
 </pre></section>
-<section class="file" id="file-0073"><h3>repo.dfconfig</h3><p class="meta">Git mode 100644 · dc53ee610d6da1ba8672730abced245644781334</p><pre>{
+<section class="file" id="file-0074"><h3>repo.dfconfig</h3><p class="meta">Git mode 100644 · dc53ee610d6da1ba8672730abced245644781334</p><pre>{
   &quot;repo&quot;: {
     &quot;$comment&quot;: &quot;Starter policy and repository identity. Review and replace project-specific values before installation; declarations do not configure GitHub protection by themselves.&quot;,
     &quot;identity&quot;: {
