@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "name": "repository-canvas",
+  "kind": "repository-scoped-agent-plugin",
+  "description": "Read-only HTML repository projection with agent-driven read, update, render and verification tools.",
+  "authority": "Git-tracked repository files only",
+  "interface": "canvas.html",
+  "skills": [
+    ".agents/skills/repository-canvas/SKILL.md"
+  ],
+  "tools": [
+    {
+      "name": "canvas.snapshot",
+      "command": "python3 .agents/tools/canvas.py snapshot"
+    },
+    {
+      "name": "canvas.list",
+      "command": "python3 .agents/tools/canvas.py list"
+    },
+    {
+      "name": "canvas.read",
+      "command": "python3 .agents/tools/canvas.py read <tracked-path>"
+    },
+    {
+      "name": "canvas.put",
+      "command": "python3 .agents/tools/canvas.py put <tracked-path> --input <local-file>"
+    },
+    {
+      "name": "canvas.render",
+      "command": "python3 .agents/tools/canvas.py render"
+    },
+    {
+      "name": "canvas.check",
+      "command": "python3 .agents/tools/canvas.py check"
+    }
+  ],
+  "hooks": {
+    "agent_session_start": ".agents/hooks/session-start.sh",
+    "git_pre_commit": ".agents/hooks/pre-commit",
+    "regenerate_after_repo_edit": ".agents/hooks/after-change.sh"
+  },
+  "limitations": [
+    "Manifest is repository-local and not an installed ChatGPT plugin or registered MCP server.",
+    "ChatGPT cannot automatically execute a repository hook on every chat turn without a host integration.",
+    "Agent actions must update the repository's authoritative source and regenerate canvas.html."
+  ]
+}
