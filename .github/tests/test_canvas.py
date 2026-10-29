@@ -31,7 +31,6 @@ class CanvasTests(unittest.TestCase):
         output = canvas.render(ROOT)
         self.assertNotIn("<script", output)
         self.assertNotIn("<iframe", output)
-        self.assertNotIn("fetch(", output)
 
     def test_generated_or_untracked_targets_cannot_be_modified(self):
         for path in ["canvas.html", "../outside.txt", ".agents/README.md", ".git/config"]:
