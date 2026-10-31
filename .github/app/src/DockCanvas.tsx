@@ -285,6 +285,7 @@ export default function DockCanvas({
     const api = apiRef.current,
       panel = api?.getPanel(panelId);
     if (!api || !panel) return;
+    alreadyOpenedRoute.current = `/${view}`;
     api.addPanel({
       id: `split:${view}:${++sequence}`,
       component: "page",
