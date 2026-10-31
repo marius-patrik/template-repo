@@ -132,6 +132,10 @@ try {
   await page.locator(".cx-overview-scroll").waitFor();
   await page.getByRole("button", { name: "Knowledge graph" }).last().click();
   await page.getByTestId("canvas-graph").waitFor();
+  const sourceGraphNodes = await page.locator(".cx-graph-canvas .react-flow__node").count();
+  const sourceGraphEdges = await page.locator(".cx-graph-canvas .react-flow__edge").count();
+  if (sourceGraphNodes < 3 || sourceGraphNodes > 9 || sourceGraphEdges === 0)
+    throw new Error("Graph must show a bounded readable neighborhood with real document links");
   await page.locator(".canvas-perspectives").getByRole("button", { name: "Overview" }).click();
   await page.locator(".canvas-perspectives").getByRole("button", { name: "Agents" }).click();
   await page.locator(".canvas-inspector").getByText("AGENTS.md").first().waitFor();
