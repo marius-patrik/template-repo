@@ -5,6 +5,7 @@ import { appHotkeys } from "./commands";
 import { createRoot } from "react-dom/client";
 import { Router } from "wouter";
 import { useHashLocation } from "wouter/use-hash-location";
+import "./i18n";
 import App from "./App";
 import "./styles.css";
 import "@xyflow/react/dist/style.css";
