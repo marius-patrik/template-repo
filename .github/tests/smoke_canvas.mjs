@@ -119,7 +119,10 @@ try {
   await page.getByTestId("breadcrumb-view").click();
   await page.getByRole("option", { name: "Canvas" }).click();
   await page.getByTestId("canvas-studio").waitFor();
+  await page.locator(".cx-overview-scroll").waitFor();
+  await page.getByRole("button", { name: "Knowledge graph" }).last().click();
   await page.getByTestId("canvas-graph").waitFor();
+  await page.locator(".canvas-perspectives").getByRole("button", { name: "Overview" }).click();
   await page.locator(".canvas-perspectives").getByRole("button", { name: "Agents" }).click();
   await page.locator(".canvas-inspector").getByText("AGENTS.md").first().waitFor();
   await page.locator(".canvas-perspectives").getByRole("button", { name: "Artifacts" }).click();

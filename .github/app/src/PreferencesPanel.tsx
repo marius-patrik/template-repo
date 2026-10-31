@@ -97,13 +97,31 @@ export default function PreferencesPanel() {
   const colors = dark ? prefs.darkColors : prefs.lightColors;
   const language = i18n.resolvedLanguage?.split("-")[0] ?? "en";
   return (
-    <div className="page settings-page" data-testid="settings-page">
-      <header className="page-intro">
-        <p className="eyebrow">{t("Preferences")}</p>
-        <h1>{t("Settings")}</h1>
-        <p className="muted">{t("Changes are stored in this browser only.")}</p>
-      </header>
-      <div className="settings-group">
+    <div className="page settings-page cx-preferences" data-testid="settings-page">
+      <div className="cx-preferences-layout">
+        <aside className="cx-preferences-nav" aria-label={t("Preferences")}>
+          <div className="cx-preferences-nav-head">
+            <span className="cx-overline">WORKSPACE</span>
+            <strong>{t("Preferences")}</strong>
+          </div>
+          {[
+            { id: "appearance", label: t("Appearance"), icon: "settings" },
+            { id: "workspace", label: t("Preferences"), icon: "overview" },
+            { id: "tokens", label: t("Component token mapping"), icon: "artifacts" },
+            { id: "language", label: t("Language"), icon: "context" },
+            { id: "controls", label: t("Controls"), icon: "editor" },
+          ].map((item) => <button key={item.id} type="button" onClick={() =>
+            document.getElementById(`cx-preference-${item.id}`)?.scrollIntoView({ behavior: "smooth", block: "start" })
+          }><AnimatedIcon name={item.icon} size={16} /><span>{item.label}</span><AnimatedIcon name="right" size={13} /></button>)}
+          <p>{t("Changes are stored in this browser only.")}</p>
+        </aside>
+        <div className="cx-preferences-content">
+          <header className="page-intro">
+            <p className="eyebrow">{t("WORKSPACE CUSTOMIZATION")}</p>
+            <h1>{t("Make Canvas yours")}</h1>
+            <p className="muted">{t("Control how the workspace looks, behaves, and responds.")}</p>
+          </header>
+      <div className="settings-group" id="cx-preference-appearance">
         <h2>{t("Appearance")}</h2>
         <Choice
           label="Color mode"
@@ -172,7 +190,7 @@ export default function PreferencesPanel() {
           ))}
         </div>
       </div>
-      <div className="settings-group">
+      <div className="settings-group" id="cx-preference-workspace">
         <h2>{t("Preferences")}</h2>
         <Choice
           label="Navigation position"
@@ -289,7 +307,7 @@ export default function PreferencesPanel() {
           }
         />
       </div>
-      <div className="settings-group">
+      <div className="settings-group" id="cx-preference-tokens">
         <h2>{t("Component token mapping")}</h2>
         <p className="muted">
           {t(
@@ -330,7 +348,7 @@ export default function PreferencesPanel() {
           ))}
         </div>
       </div>
-      <div className="settings-group">
+      <div className="settings-group" id="cx-preference-language">
         <h2>{t("Language")}</h2>
         <Choice
           label="Interface language"
@@ -341,12 +359,14 @@ export default function PreferencesPanel() {
           }}
         />
       </div>
-      <KeyboardSettings />
+      <section id="cx-preference-controls"><KeyboardSettings /></section>
       <div className="settings-group">
         <button type="button" className="canvas-button canvas-button-subtle" onClick={reset}>
           <AnimatedIcon name="reset" size={16} />
           {t("Reset appearance")}
         </button>
+      </div>
+        </div>
       </div>
     </div>
   );
