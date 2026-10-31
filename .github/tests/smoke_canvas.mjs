@@ -67,7 +67,7 @@ try {
   await page.getByTestId("breadcrumb-view").click();
   await page.getByRole("option", { name: "Monaco" }).click();
   await page.locator('[data-testid="monaco-editor"] .monaco-editor').waitFor({ timeout: 20000 });
-  await page.locator('.canvas-dock-tab[data-canvas-tab="monaco"] .app-icon').waitFor();
+  await page.locator('.canvas-dock-tab[data-canvas-tab="monaco"] > .app-icon').first().waitFor();
 
   // Settings expose all placement and unified scale controls.
   await page.locator(".title-actions").getByRole("button", { name: "Settings" }).click();
