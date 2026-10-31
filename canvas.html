@@ -1784,17 +1784,23 @@ export default defineConfig({
   performance: { chunkSplit: { strategy: &quot;all-in-one&quot; } },
 });
 </pre></section>
-<section class="file" id="file-0062"><h3>.github/app/scripts/generate-context.mjs</h3><p class="meta">Git mode 100644 · 2a80de2bf2018d7590dce3e26253e35e55aceac1</p><pre>import { execFileSync } from &quot;node:child_process&quot;;
+<section class="file" id="file-0062"><h3>.github/app/scripts/generate-context.mjs</h3><p class="meta">Git mode 100644 · 259d54f0b5a19e264047ed9672fb5ffe73202ca5</p><pre>import { execFileSync } from &quot;node:child_process&quot;;
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from &quot;node:fs&quot;;
 import { resolve, dirname, join } from &quot;node:path&quot;;
 import { fileURLToPath } from &quot;node:url&quot;;
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), &quot;../../..&quot;);
 const tracked = execFileSync(&quot;git&quot;, [&quot;ls-files&quot;, &quot;-z&quot;], { cwd: root, encoding: &quot;utf8&quot; })
-  .split(&quot;\0&quot;).filter(Boolean).sort();
+  .split(&quot;\0&quot;)
+  .filter(Boolean)
+  .sort();
 const sourcePaths = [
-  &quot;AGENTS.md&quot;, &quot;.agents/GOAL.md&quot;, &quot;.agents/PRD.md&quot;, &quot;.agents/ARCHITECTURE.md&quot;,
-  &quot;.agents/AGENTS.md&quot;, &quot;.agents/README.md&quot;,
+  &quot;AGENTS.md&quot;,
+  &quot;.agents/GOAL.md&quot;,
+  &quot;.agents/PRD.md&quot;,
+  &quot;.agents/ARCHITECTURE.md&quot;,
+  &quot;.agents/AGENTS.md&quot;,
+  &quot;.agents/README.md&quot;,
 ];
 const read = (path) =&gt; {
   const target = join(root, path);
@@ -1806,27 +1812,39 @@ const raw = read(&quot;repo.dfconfig&quot;);
 let config = {};
 if (raw) config = JSON.parse(raw);
 const identity = config?.repo?.identity ?? {};
-const docs = sourcePaths.map(path =&gt; ({ path, content: read(path) }))
-  .filter(doc =&gt; doc.content !== null);
+const docs = sourcePaths
+  .map((path) =&gt; ({ path, content: read(path) }))
+  .filter((doc) =&gt; doc.content !== null);
 const snapshot = {
   schema: 1,
   repository: [identity.owner, identity.repo].filter(Boolean).join(&quot;/&quot;) || &quot;Current repository&quot;,
   name: identity.display_name || identity.project_title || identity.repo || &quot;Repository&quot;,
   branch: process.env.GITHUB_REF_NAME || &quot;local&quot;,
-  revision: execFileSync(&quot;git&quot;, [&quot;rev-parse&quot;, &quot;--short=12&quot;, &quot;HEAD&quot;], { cwd: root, encoding: &quot;utf8&quot; }).trim(),
+  revision: execFileSync(&quot;git&quot;, [&quot;rev-parse&quot;, &quot;--short=12&quot;, &quot;HEAD&quot;], {
+    cwd: root,
+    encoding: &quot;utf8&quot;,
+  }).trim(),
   goal: read(&quot;.agents/GOAL.md&quot;) ?? &quot;No goal document available.&quot;,
   documents: docs,
   // Only publish structural paths from known, documentation-oriented directories.
   // Excludes private records, secret files and general source-code dumps.
-  paths: tracked.filter(p =&gt; /^(\.agents\/(?:requests|decisions|notes|rules)\/[^/]+\.md|AGENTS\.md|repo\.dfconfig)$/.test(p)),
+  paths: tracked.filter((p) =&gt;
+    /^(\.agents\/(?:requests|decisions|notes|rules)\/[^/]+\.md|AGENTS\.md|repo\.dfconfig)$/.test(p),
+  ),
   publication: &quot;Curated repository-authored documentation. No live backend.&quot;,
 };
 const dest = join(root, &quot;.github/app/src/generated/context.json&quot;);
 mkdirSync(dirname(dest), { recursive: true });
 writeFileSync(dest, JSON.stringify(snapshot, null, 2) + &quot;\n&quot;, &quot;utf8&quot;);
-console.log(&quot;Generated Canvas source snapshot:&quot;, docs.length, &quot;documents,&quot;, snapshot.paths.length, &quot;source records&quot;);
+console.log(
+  &quot;Generated Canvas source snapshot:&quot;,
+  docs.length,
+  &quot;documents,&quot;,
+  snapshot.paths.length,
+  &quot;source records&quot;,
+);
 </pre></section>
-<section class="file" id="file-0063"><h3>.github/app/src/App.tsx</h3><p class="meta">Git mode 100644 · 139fa5dcb0fe625dfa7cbae7c7e4068d6f7b9d06</p><pre>import { useEffect, useMemo, useRef, useState } from &quot;react&quot;;
+<section class="file" id="file-0063"><h3>.github/app/src/App.tsx</h3><p class="meta">Git mode 100644 · d849a3b68cf724bbb983e0cd499ef844abbc4f5a</p><pre>import { useEffect, useMemo, useRef, useState } from &quot;react&quot;;
 import * as DropdownMenu from &quot;@radix-ui/react-dropdown-menu&quot;;
 import { Link, Route, Switch, useLocation } from &quot;wouter&quot;;
 import { motion, AnimatePresence } from &quot;motion/react&quot;;
@@ -1836,245 +1854,619 @@ import Graph from &quot;./Graph&quot;;
 import Workbench from &quot;./Workbench&quot;;
 import context from &quot;./generated/context.json&quot;;
 
-type View = &quot;overview&quot; | &quot;workspace&quot; | &quot;projects&quot; | &quot;agents&quot; | &quot;graph&quot; |
-  &quot;roadmap&quot; | &quot;artifacts&quot; | &quot;activity&quot; | &quot;context&quot; | &quot;settings&quot;;
+type View =
+  | &quot;overview&quot;
+  | &quot;workspace&quot;
+  | &quot;projects&quot;
+  | &quot;agents&quot;
+  | &quot;graph&quot;
+  | &quot;roadmap&quot;
+  | &quot;artifacts&quot;
+  | &quot;activity&quot;
+  | &quot;context&quot;
+  | &quot;settings&quot;;
 type Theme = &quot;dark&quot; | &quot;light&quot; | &quot;system&quot;;
 type Accent = &quot;neutral&quot; | &quot;blue&quot; | &quot;sage&quot; | &quot;violet&quot;;
-type Preferences = {theme:Theme; accent:Accent; fontSize:number; iconSize:number};
-const defaults: Preferences = { theme:&quot;dark&quot;,accent:&quot;neutral&quot;,fontSize:14,iconSize:18 };
-const nav: {id:View;label:string;group:string}[] = [
-  {id:&quot;overview&quot;,label:&quot;Overview&quot;,group:&quot;Workspace&quot;},
-  {id:&quot;workspace&quot;,label:&quot;Workspace&quot;,group:&quot;Workspace&quot;},
-  {id:&quot;projects&quot;,label:&quot;Projects&quot;,group:&quot;Workspace&quot;},
-  {id:&quot;agents&quot;,label:&quot;Agents&quot;,group:&quot;Workspace&quot;},
-  {id:&quot;graph&quot;,label:&quot;Knowledge graph&quot;,group:&quot;Workspace&quot;},
-  {id:&quot;roadmap&quot;,label:&quot;Roadmap&quot;,group:&quot;Workspace&quot;},
-  {id:&quot;artifacts&quot;,label:&quot;Artifacts&quot;,group:&quot;Workspace&quot;},
-  {id:&quot;activity&quot;,label:&quot;Activity&quot;,group:&quot;Workspace&quot;},
-  {id:&quot;context&quot;,label:&quot;Context&quot;,group:&quot;System&quot;},
-  {id:&quot;settings&quot;,label:&quot;Settings&quot;,group:&quot;System&quot;}
+type Preferences = { theme: Theme; accent: Accent; fontSize: number; iconSize: number };
+const defaults: Preferences = { theme: &quot;dark&quot;, accent: &quot;neutral&quot;, fontSize: 14, iconSize: 18 };
+const nav: { id: View; label: string; group: string }[] = [
+  { id: &quot;overview&quot;, label: &quot;Overview&quot;, group: &quot;Workspace&quot; },
+  { id: &quot;workspace&quot;, label: &quot;Workspace&quot;, group: &quot;Workspace&quot; },
+  { id: &quot;projects&quot;, label: &quot;Projects&quot;, group: &quot;Workspace&quot; },
+  { id: &quot;agents&quot;, label: &quot;Agents&quot;, group: &quot;Workspace&quot; },
+  { id: &quot;graph&quot;, label: &quot;Knowledge graph&quot;, group: &quot;Workspace&quot; },
+  { id: &quot;roadmap&quot;, label: &quot;Roadmap&quot;, group: &quot;Workspace&quot; },
+  { id: &quot;artifacts&quot;, label: &quot;Artifacts&quot;, group: &quot;Workspace&quot; },
+  { id: &quot;activity&quot;, label: &quot;Activity&quot;, group: &quot;Workspace&quot; },
+  { id: &quot;context&quot;, label: &quot;Context&quot;, group: &quot;System&quot; },
+  { id: &quot;settings&quot;, label: &quot;Settings&quot;, group: &quot;System&quot; },
 ];
 
-function loadPrefs():Preferences {
+function loadPrefs(): Preferences {
   try {
-    const data=JSON.parse(localStorage.getItem(&quot;canvas-preferences&quot;) || &quot;null&quot;);
-    if (data &amp;&amp; [&quot;dark&quot;,&quot;light&quot;,&quot;system&quot;].includes(data.theme) &amp;&amp;
-      [&quot;neutral&quot;,&quot;blue&quot;,&quot;sage&quot;,&quot;violet&quot;].includes(data.accent) &amp;&amp;
-      [13,14,15,16].includes(data.fontSize) &amp;&amp; [16,18,20].includes(data.iconSize)) return data;
-  } catch { /* Browser may disable storage */ }
+    const data = JSON.parse(localStorage.getItem(&quot;canvas-preferences&quot;) || &quot;null&quot;);
+    if (
+      data &amp;&amp;
+      [&quot;dark&quot;, &quot;light&quot;, &quot;system&quot;].includes(data.theme) &amp;&amp;
+      [&quot;neutral&quot;, &quot;blue&quot;, &quot;sage&quot;, &quot;violet&quot;].includes(data.accent) &amp;&amp;
+      [13, 14, 15, 16].includes(data.fontSize) &amp;&amp;
+      [16, 18, 20].includes(data.iconSize)
+    )
+      return data;
+  } catch {
+    /* Browser may disable storage */
+  }
   return defaults;
 }
-function MarkdownSource({value}:{value:string}) {
+function MarkdownSource({ value }: { value: string }) {
   return &lt;pre className=&quot;source-preview&quot;&gt;{value}&lt;/pre&gt;;
 }
-function PageIntro({title,detail}:{title:string;detail:string}) {
-  return &lt;header className=&quot;page-intro&quot;&gt;&lt;p className=&quot;eyebrow&quot;&gt;Repository / {context.name}&lt;/p&gt;
-    &lt;h1&gt;{title}&lt;/h1&gt;&lt;p className=&quot;muted&quot;&gt;{detail}&lt;/p&gt;&lt;/header&gt;;
+function PageIntro({ title, detail }: { title: string; detail: string }) {
+  return (
+    &lt;header className=&quot;page-intro&quot;&gt;
+      &lt;p className=&quot;eyebrow&quot;&gt;Repository / {context.name}&lt;/p&gt;
+      &lt;h1&gt;{title}&lt;/h1&gt;
+      &lt;p className=&quot;muted&quot;&gt;{detail}&lt;/p&gt;
+    &lt;/header&gt;
+  );
 }
-function SourceIndex({onOpen}:{onOpen:(id:string)=&gt;void}) {
-  return &lt;div className=&quot;source-index&quot;&gt;
-    {context.documents.map(d=&gt;&lt;button key={d.path} className=&quot;doc-row&quot;
-      onClick={()=&gt;onOpen(d.path)}&gt;&lt;span&gt;&lt;AnimatedIcon name=&quot;artifacts&quot;/&gt;{d.path}&lt;/span&gt;
-      &lt;small&gt;Open document &lt;AnimatedIcon name=&quot;right&quot; size={13}/&gt;&lt;/small&gt;&lt;/button&gt;)}
-  &lt;/div&gt;;
+function SourceIndex({ onOpen }: { onOpen: (id: string) =&gt; void }) {
+  return (
+    &lt;div className=&quot;source-index&quot;&gt;
+      {context.documents.map((d) =&gt; (
+        &lt;button key={d.path} className=&quot;doc-row&quot; onClick={() =&gt; onOpen(d.path)}&gt;
+          &lt;span&gt;
+            &lt;AnimatedIcon name=&quot;artifacts&quot; /&gt;
+            {d.path}
+          &lt;/span&gt;
+          &lt;small&gt;
+            Open document &lt;AnimatedIcon name=&quot;right&quot; size={13} /&gt;
+          &lt;/small&gt;
+        &lt;/button&gt;
+      ))}
+    &lt;/div&gt;
+  );
 }
-function Overview({to}:{to:(p:string)=&gt;void}) {
-  return &lt;div className=&quot;page&quot;&gt;
-    &lt;PageIntro title={context.name} detail=&quot;A repository-authored workspace. This view is generated from tracked source at build time, not a live service.&quot;/&gt;
-    &lt;div className=&quot;overview-grid&quot;&gt;
-      &lt;section className=&quot;panel overview-primary&quot;&gt;
-        &lt;div className=&quot;panel-heading&quot;&gt;&lt;div&gt;&lt;p className=&quot;eyebrow&quot;&gt;Workspace map&lt;/p&gt;
-          &lt;h2&gt;Documentation relationships&lt;/h2&gt;&lt;/div&gt;&lt;Button onClick={()=&gt;to(&quot;/graph&quot;)} variant=&quot;subtle&quot;&gt;Expand &lt;AnimatedIcon name=&quot;arrow&quot; size={15}/&gt;&lt;/Button&gt;&lt;/div&gt;
-        &lt;div className=&quot;map-viewport&quot;&gt;&lt;Graph/&gt;&lt;/div&gt;
-        &lt;div className=&quot;panel-footnote&quot;&gt;{context.documents.length} source documents · {context.paths.length} documented records&lt;/div&gt;
-      &lt;/section&gt;
-      &lt;div className=&quot;stack&quot;&gt;
-        &lt;section className=&quot;panel padded&quot;&gt;
-          &lt;p className=&quot;eyebrow&quot;&gt;Project identity&lt;/p&gt;&lt;h2&gt;{context.repository}&lt;/h2&gt;
-          &lt;p className=&quot;muted&quot;&gt;Build source: Git-tracked documents. Revision {context.revision}.&lt;/p&gt;
-          &lt;div className=&quot;meta-list&quot;&gt;&lt;span&gt;Current branch&lt;/span&gt;&lt;strong&gt;{context.branch}&lt;/strong&gt;
-          &lt;span&gt;Publication&lt;/span&gt;&lt;strong&gt;Static · read-only&lt;/strong&gt;&lt;/div&gt;
+function Overview({ to }: { to: (p: string) =&gt; void }) {
+  return (
+    &lt;div className=&quot;page&quot;&gt;
+      &lt;PageIntro
+        title={context.name}
+        detail=&quot;A repository-authored workspace. This view is generated from tracked source at build time, not a live service.&quot;
+      /&gt;
+      &lt;div className=&quot;overview-grid&quot;&gt;
+        &lt;section className=&quot;panel overview-primary&quot;&gt;
+          &lt;div className=&quot;panel-heading&quot;&gt;
+            &lt;div&gt;
+              &lt;p className=&quot;eyebrow&quot;&gt;Workspace map&lt;/p&gt;
+              &lt;h2&gt;Documentation relationships&lt;/h2&gt;
+            &lt;/div&gt;
+            &lt;Button onClick={() =&gt; to(&quot;/graph&quot;)} variant=&quot;subtle&quot;&gt;
+              Expand &lt;AnimatedIcon name=&quot;arrow&quot; size={15} /&gt;
+            &lt;/Button&gt;
+          &lt;/div&gt;
+          &lt;div className=&quot;map-viewport&quot;&gt;
+            &lt;Graph /&gt;
+          &lt;/div&gt;
+          &lt;div className=&quot;panel-footnote&quot;&gt;
+            {context.documents.length} source documents · {context.paths.length} documented records
+          &lt;/div&gt;
         &lt;/section&gt;
-        &lt;section className=&quot;panel padded&quot;&gt;
-          &lt;p className=&quot;eyebrow&quot;&gt;Authoritative goal&lt;/p&gt;
-          &lt;p className=&quot;goal-text&quot;&gt;{context.goal.replace(/^#.*\n/, &quot;&quot;).trim()}&lt;/p&gt;
-          &lt;Button variant=&quot;subtle&quot; onClick={()=&gt;to(&quot;/context&quot;)}&gt;View original source &lt;AnimatedIcon name=&quot;right&quot; size={15}/&gt;&lt;/Button&gt;
-        &lt;/section&gt;
+        &lt;div className=&quot;stack&quot;&gt;
+          &lt;section className=&quot;panel padded&quot;&gt;
+            &lt;p className=&quot;eyebrow&quot;&gt;Project identity&lt;/p&gt;
+            &lt;h2&gt;{context.repository}&lt;/h2&gt;
+            &lt;p className=&quot;muted&quot;&gt;
+              Build source: Git-tracked documents. Revision {context.revision}.
+            &lt;/p&gt;
+            &lt;div className=&quot;meta-list&quot;&gt;
+              &lt;span&gt;Current branch&lt;/span&gt;
+              &lt;strong&gt;{context.branch}&lt;/strong&gt;
+              &lt;span&gt;Publication&lt;/span&gt;
+              &lt;strong&gt;Static · read-only&lt;/strong&gt;
+            &lt;/div&gt;
+          &lt;/section&gt;
+          &lt;section className=&quot;panel padded&quot;&gt;
+            &lt;p className=&quot;eyebrow&quot;&gt;Authoritative goal&lt;/p&gt;
+            &lt;p className=&quot;goal-text&quot;&gt;{context.goal.replace(/^#.*\n/, &quot;&quot;).trim()}&lt;/p&gt;
+            &lt;Button variant=&quot;subtle&quot; onClick={() =&gt; to(&quot;/context&quot;)}&gt;
+              View original source &lt;AnimatedIcon name=&quot;right&quot; size={15} /&gt;
+            &lt;/Button&gt;
+          &lt;/section&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div className=&quot;section-header&quot;&gt;
+        &lt;h2&gt;Repository source&lt;/h2&gt;
+        &lt;span&gt;Generated from tracked records&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;div className=&quot;panel&quot;&gt;
+        &lt;SourceIndex onOpen={(id) =&gt; to(&quot;/artifacts?file=&quot; + encodeURIComponent(id))} /&gt;
       &lt;/div&gt;
     &lt;/div&gt;
-    &lt;div className=&quot;section-header&quot;&gt;&lt;h2&gt;Repository source&lt;/h2&gt;&lt;span&gt;Generated from tracked records&lt;/span&gt;&lt;/div&gt;
-    &lt;div className=&quot;panel&quot;&gt;&lt;SourceIndex onOpen={id=&gt;to(&quot;/artifacts?file=&quot;+encodeURIComponent(id))}/&gt;&lt;/div&gt;
-  &lt;/div&gt;;
+  );
 }
-function SimplePage({id,to}:{id:View;to:(p:string)=&gt;void}) {
-  const docs=context.documents;
-  const prd=docs.find(x=&gt;x.path===&quot;.agents/PRD.md&quot;);
-  const agents=docs.find(x=&gt;x.path===&quot;.agents/AGENTS.md&quot;);
-  const ctx=docs.find(x=&gt;x.path===&quot;AGENTS.md&quot;);
-  if (id===&quot;workspace&quot;) return &lt;div className=&quot;workbench-page&quot;&gt;&lt;PageIntro title=&quot;Workspace&quot; detail=&quot;Dockable, resizable panels for interacting with repository-derived context.&quot;/&gt;&lt;Workbench dark={document.documentElement.dataset.theme !== &quot;light&quot;}/&gt;&lt;/div&gt;;
-  if (id===&quot;graph&quot;) return &lt;div className=&quot;workbench-page&quot;&gt;&lt;PageIntro title=&quot;Knowledge graph&quot; detail=&quot;Document links derived from the repository&#x27;s existing authoring structure.&quot;/&gt;&lt;div className=&quot;full-graph&quot;&gt;&lt;Graph/&gt;&lt;/div&gt;&lt;/div&gt;;
-  if (id===&quot;projects&quot;) return &lt;div className=&quot;page&quot;&gt;&lt;PageIntro title=&quot;Projects&quot; detail=&quot;Repositories available in this compiled snapshot.&quot;/&gt;
-    &lt;div className=&quot;panel padded project-card&quot;&gt;&lt;p className=&quot;eyebrow&quot;&gt;Source repository&lt;/p&gt;&lt;h2&gt;{context.name}&lt;/h2&gt;&lt;p className=&quot;muted&quot;&gt;{context.repository}&lt;/p&gt;
-    &lt;p&gt;{context.goal.replace(/^#.*\n/,&quot;&quot;).trim()}&lt;/p&gt;&lt;Button variant=&quot;subtle&quot; onClick={()=&gt;to(&quot;/overview&quot;)}&gt;Open workspace &lt;AnimatedIcon name=&quot;right&quot; size={15}/&gt;&lt;/Button&gt;&lt;/div&gt;&lt;/div&gt;;
-  if (id===&quot;roadmap&quot;) return &lt;div className=&quot;page&quot;&gt;&lt;PageIntro title=&quot;Roadmap&quot; detail=&quot;Requirements and plans are sourced from the repository rather than simulated task statuses.&quot;/&gt;
-    &lt;div className=&quot;panel padded&quot;&gt;&lt;h2&gt;Requirements source&lt;/h2&gt;{prd?&lt;MarkdownSource value={prd.content}/&gt;:&lt;p className=&quot;muted&quot;&gt;No generated PRD is available in this snapshot.&lt;/p&gt;}&lt;/div&gt;&lt;/div&gt;;
-  if (id===&quot;agents&quot;) return &lt;div className=&quot;page&quot;&gt;&lt;PageIntro title=&quot;Agents&quot; detail=&quot;Agent rules are sourced from the generated repository guidance.&quot;/&gt;
-    &lt;div className=&quot;panel padded&quot;&gt;&lt;h2&gt;Current agent guidance&lt;/h2&gt;{agents?&lt;MarkdownSource value={agents.content}/&gt;:&lt;p className=&quot;muted&quot;&gt;No agent-rule document is available.&lt;/p&gt;}&lt;/div&gt;&lt;/div&gt;;
-  if (id===&quot;context&quot;) return &lt;div className=&quot;page&quot;&gt;&lt;PageIntro title=&quot;Context&quot; detail=&quot;Context authority and repository-authored Markdown.&quot;/&gt;
-    &lt;div className=&quot;panel padded&quot;&gt;&lt;h2&gt;{ctx?&quot;AGENTS.md&quot;:&quot;Root AGENTS.md is not configured&quot;}&lt;/h2&gt;
-    {ctx?&lt;MarkdownSource value={ctx.content}/&gt;:&lt;p className=&quot;muted&quot;&gt;The template currently generates .agents/AGENTS.md from its agent rules. A separate root context file has not been assumed or fabricated.&lt;/p&gt;}
-    &lt;h3&gt;Available source documents&lt;/h3&gt;&lt;SourceIndex onOpen={p=&gt;to(&quot;/artifacts?file=&quot;+encodeURIComponent(p))}/&gt;&lt;/div&gt;&lt;/div&gt;;
-  if (id===&quot;activity&quot;) return &lt;div className=&quot;page&quot;&gt;&lt;PageIntro title=&quot;Activity&quot; detail=&quot;The published snapshot does not represent live execution telemetry.&quot;/&gt;
-    &lt;div className=&quot;panel padded&quot;&gt;&lt;p className=&quot;eyebrow&quot;&gt;Build provenance&lt;/p&gt;&lt;h2&gt;Source revision {context.revision}&lt;/h2&gt;
-    &lt;p className=&quot;muted&quot;&gt;Built from tracked repository documents. No agent activity or task completion is inferred.&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;;
-  if (id===&quot;artifacts&quot;) return &lt;Artifacts/&gt;;
-  return &lt;div className=&quot;page&quot;&gt;&lt;PageIntro title=&quot;Page&quot; detail=&quot;Source-backed view.&quot;/&gt;&lt;/div&gt;;
+function SimplePage({ id, to }: { id: View; to: (p: string) =&gt; void }) {
+  const docs = context.documents;
+  const prd = docs.find((x) =&gt; x.path === &quot;.agents/PRD.md&quot;);
+  const agents = docs.find((x) =&gt; x.path === &quot;.agents/AGENTS.md&quot;);
+  const ctx = docs.find((x) =&gt; x.path === &quot;AGENTS.md&quot;);
+  if (id === &quot;workspace&quot;)
+    return (
+      &lt;div className=&quot;workbench-page&quot;&gt;
+        &lt;PageIntro
+          title=&quot;Workspace&quot;
+          detail=&quot;Dockable, resizable panels for interacting with repository-derived context.&quot;
+        /&gt;
+        &lt;Workbench dark={document.documentElement.dataset.theme !== &quot;light&quot;} /&gt;
+      &lt;/div&gt;
+    );
+  if (id === &quot;graph&quot;)
+    return (
+      &lt;div className=&quot;workbench-page&quot;&gt;
+        &lt;PageIntro
+          title=&quot;Knowledge graph&quot;
+          detail=&quot;Document links derived from the repository&#x27;s existing authoring structure.&quot;
+        /&gt;
+        &lt;div className=&quot;full-graph&quot;&gt;
+          &lt;Graph /&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    );
+  if (id === &quot;projects&quot;)
+    return (
+      &lt;div className=&quot;page&quot;&gt;
+        &lt;PageIntro title=&quot;Projects&quot; detail=&quot;Repositories available in this compiled snapshot.&quot; /&gt;
+        &lt;div className=&quot;panel padded project-card&quot;&gt;
+          &lt;p className=&quot;eyebrow&quot;&gt;Source repository&lt;/p&gt;
+          &lt;h2&gt;{context.name}&lt;/h2&gt;
+          &lt;p className=&quot;muted&quot;&gt;{context.repository}&lt;/p&gt;
+          &lt;p&gt;{context.goal.replace(/^#.*\n/, &quot;&quot;).trim()}&lt;/p&gt;
+          &lt;Button variant=&quot;subtle&quot; onClick={() =&gt; to(&quot;/overview&quot;)}&gt;
+            Open workspace &lt;AnimatedIcon name=&quot;right&quot; size={15} /&gt;
+          &lt;/Button&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    );
+  if (id === &quot;roadmap&quot;)
+    return (
+      &lt;div className=&quot;page&quot;&gt;
+        &lt;PageIntro
+          title=&quot;Roadmap&quot;
+          detail=&quot;Requirements and plans are sourced from the repository rather than simulated task statuses.&quot;
+        /&gt;
+        &lt;div className=&quot;panel padded&quot;&gt;
+          &lt;h2&gt;Requirements source&lt;/h2&gt;
+          {prd ? (
+            &lt;MarkdownSource value={prd.content} /&gt;
+          ) : (
+            &lt;p className=&quot;muted&quot;&gt;No generated PRD is available in this snapshot.&lt;/p&gt;
+          )}
+        &lt;/div&gt;
+      &lt;/div&gt;
+    );
+  if (id === &quot;agents&quot;)
+    return (
+      &lt;div className=&quot;page&quot;&gt;
+        &lt;PageIntro
+          title=&quot;Agents&quot;
+          detail=&quot;Agent rules are sourced from the generated repository guidance.&quot;
+        /&gt;
+        &lt;div className=&quot;panel padded&quot;&gt;
+          &lt;h2&gt;Current agent guidance&lt;/h2&gt;
+          {agents ? (
+            &lt;MarkdownSource value={agents.content} /&gt;
+          ) : (
+            &lt;p className=&quot;muted&quot;&gt;No agent-rule document is available.&lt;/p&gt;
+          )}
+        &lt;/div&gt;
+      &lt;/div&gt;
+    );
+  if (id === &quot;context&quot;)
+    return (
+      &lt;div className=&quot;page&quot;&gt;
+        &lt;PageIntro title=&quot;Context&quot; detail=&quot;Context authority and repository-authored Markdown.&quot; /&gt;
+        &lt;div className=&quot;panel padded&quot;&gt;
+          &lt;h2&gt;{ctx ? &quot;AGENTS.md&quot; : &quot;Root AGENTS.md is not configured&quot;}&lt;/h2&gt;
+          {ctx ? (
+            &lt;MarkdownSource value={ctx.content} /&gt;
+          ) : (
+            &lt;p className=&quot;muted&quot;&gt;
+              The template currently generates .agents/AGENTS.md from its agent rules. A separate
+              root context file has not been assumed or fabricated.
+            &lt;/p&gt;
+          )}
+          &lt;h3&gt;Available source documents&lt;/h3&gt;
+          &lt;SourceIndex onOpen={(p) =&gt; to(&quot;/artifacts?file=&quot; + encodeURIComponent(p))} /&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    );
+  if (id === &quot;activity&quot;)
+    return (
+      &lt;div className=&quot;page&quot;&gt;
+        &lt;PageIntro
+          title=&quot;Activity&quot;
+          detail=&quot;The published snapshot does not represent live execution telemetry.&quot;
+        /&gt;
+        &lt;div className=&quot;panel padded&quot;&gt;
+          &lt;p className=&quot;eyebrow&quot;&gt;Build provenance&lt;/p&gt;
+          &lt;h2&gt;Source revision {context.revision}&lt;/h2&gt;
+          &lt;p className=&quot;muted&quot;&gt;
+            Built from tracked repository documents. No agent activity or task completion is
+            inferred.
+          &lt;/p&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    );
+  if (id === &quot;artifacts&quot;) return &lt;Artifacts /&gt;;
+  return (
+    &lt;div className=&quot;page&quot;&gt;
+      &lt;PageIntro title=&quot;Page&quot; detail=&quot;Source-backed view.&quot; /&gt;
+    &lt;/div&gt;
+  );
 }
 function Artifacts() {
-  const requested=decodeURIComponent(new URLSearchParams(window.location.hash.split(&quot;?&quot;)[1] || &quot;&quot;).get(&quot;file&quot;) || &quot;&quot;);
-  const [active,setActive]=useState(requested);
-  useEffect(()=&gt;{setActive(requested)},[requested]);
-  const doc=context.documents.find(d=&gt;d.path===active) ?? context.documents[0];
-  return &lt;div className=&quot;page&quot;&gt;&lt;PageIntro title=&quot;Artifacts&quot; detail=&quot;Source documents embedded during the GitHub Actions build.&quot;/&gt;
-    &lt;div className=&quot;artifact-layout&quot;&gt;&lt;div className=&quot;panel artifact-list&quot;&gt;&lt;SourceIndex onOpen={setActive}/&gt;&lt;/div&gt;
-      &lt;article className=&quot;panel padded artifact-content&quot;&gt;&lt;h2&gt;{doc?.path ?? &quot;No documents&quot;}&lt;/h2&gt;
-      {doc ? &lt;MarkdownSource value={doc.content}/&gt; : &lt;p className=&quot;muted&quot;&gt;No source documents available.&lt;/p&gt;}&lt;/article&gt;&lt;/div&gt;&lt;/div&gt;;
+  const requested = decodeURIComponent(
+    new URLSearchParams(window.location.hash.split(&quot;?&quot;)[1] || &quot;&quot;).get(&quot;file&quot;) || &quot;&quot;,
+  );
+  const [active, setActive] = useState(requested);
+  useEffect(() =&gt; {
+    setActive(requested);
+  }, [requested]);
+  const doc = context.documents.find((d) =&gt; d.path === active) ?? context.documents[0];
+  return (
+    &lt;div className=&quot;page&quot;&gt;
+      &lt;PageIntro
+        title=&quot;Artifacts&quot;
+        detail=&quot;Source documents embedded during the GitHub Actions build.&quot;
+      /&gt;
+      &lt;div className=&quot;artifact-layout&quot;&gt;
+        &lt;div className=&quot;panel artifact-list&quot;&gt;
+          &lt;SourceIndex onOpen={setActive} /&gt;
+        &lt;/div&gt;
+        &lt;article className=&quot;panel padded artifact-content&quot;&gt;
+          &lt;h2&gt;{doc?.path ?? &quot;No documents&quot;}&lt;/h2&gt;
+          {doc ? (
+            &lt;MarkdownSource value={doc.content} /&gt;
+          ) : (
+            &lt;p className=&quot;muted&quot;&gt;No source documents available.&lt;/p&gt;
+          )}
+        &lt;/article&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
 }
-function Settings({prefs,setPrefs}:{prefs:Preferences;setPrefs:(p:Preferences)=&gt;void}) {
-  const options=(key:keyof Preferences,values:readonly (string|number)[],label:string) =&gt;
-    &lt;div className=&quot;setting-row&quot;&gt;&lt;div&gt;&lt;strong&gt;{label}&lt;/strong&gt;&lt;/div&gt;
-      &lt;div className=&quot;segmented&quot;&gt;{values.map(v=&gt;&lt;button key={String(v)} className={prefs[key]===v?&quot;selected&quot;:&quot;&quot;}
-        onClick={()=&gt;setPrefs({...prefs,[key]:v})}&gt;{String(v)}&lt;/button&gt;)}&lt;/div&gt;&lt;/div&gt;;
-  return &lt;div className=&quot;page&quot;&gt;&lt;PageIntro title=&quot;Settings&quot; detail=&quot;Local appearance preferences only. No repository configuration is changed.&quot;/&gt;
-    &lt;section className=&quot;panel padded settings-panel&quot;&gt;&lt;h2&gt;Appearance&lt;/h2&gt;
-      {options(&quot;theme&quot;,[&quot;dark&quot;,&quot;light&quot;,&quot;system&quot;] as const,&quot;Theme&quot;)}
-      {options(&quot;accent&quot;,[&quot;neutral&quot;,&quot;blue&quot;,&quot;sage&quot;,&quot;violet&quot;] as const,&quot;Accent&quot;)}
-      {options(&quot;fontSize&quot;,[13,14,15,16] as const,&quot;Text size&quot;)}
-      {options(&quot;iconSize&quot;,[16,18,20] as const,&quot;Icon size&quot;)}&lt;/section&gt;
-    &lt;p className=&quot;muted settings-note&quot;&gt;Canvas v0.6.0 · Prototype. Local UI settings are not authoritative project data.&lt;/p&gt;&lt;/div&gt;;
+function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Preferences) =&gt; void }) {
+  const options = (key: keyof Preferences, values: readonly (string | number)[], label: string) =&gt; (
+    &lt;div className=&quot;setting-row&quot;&gt;
+      &lt;div&gt;
+        &lt;strong&gt;{label}&lt;/strong&gt;
+      &lt;/div&gt;
+      &lt;div className=&quot;segmented&quot;&gt;
+        {values.map((v) =&gt; (
+          &lt;button
+            key={String(v)}
+            className={prefs[key] === v ? &quot;selected&quot; : &quot;&quot;}
+            onClick={() =&gt; setPrefs({ ...prefs, [key]: v })}
+          &gt;
+            {String(v)}
+          &lt;/button&gt;
+        ))}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+  return (
+    &lt;div className=&quot;page&quot;&gt;
+      &lt;PageIntro
+        title=&quot;Settings&quot;
+        detail=&quot;Local appearance preferences only. No repository configuration is changed.&quot;
+      /&gt;
+      &lt;section className=&quot;panel padded settings-panel&quot;&gt;
+        &lt;h2&gt;Appearance&lt;/h2&gt;
+        {options(&quot;theme&quot;, [&quot;dark&quot;, &quot;light&quot;, &quot;system&quot;] as const, &quot;Theme&quot;)}
+        {options(&quot;accent&quot;, [&quot;neutral&quot;, &quot;blue&quot;, &quot;sage&quot;, &quot;violet&quot;] as const, &quot;Accent&quot;)}
+        {options(&quot;fontSize&quot;, [13, 14, 15, 16] as const, &quot;Text size&quot;)}
+        {options(&quot;iconSize&quot;, [16, 18, 20] as const, &quot;Icon size&quot;)}
+      &lt;/section&gt;
+      &lt;p className=&quot;muted settings-note&quot;&gt;
+        Canvas v0.6.0 · Prototype. Local UI settings are not authoritative project data.
+      &lt;/p&gt;
+    &lt;/div&gt;
+  );
 }
 export default function App() {
-  const [path,navigate]=useLocation();
-  const [collapsed,setCollapsed]=useState(false);
-  const [mobileOpen,setMobileOpen]=useState(false);
-  const [paletteOpen,setPaletteOpen]=useState(false);
-  const [search,setSearch]=useState(&quot;&quot;);
-  const [selection,setSelection]=useState(0);
-  const [prefs,setPrefs]=useState(loadPrefs);
-  const input=useRef&lt;HTMLInputElement&gt;(null);
-  const page:View=nav.find(x=&gt;path.startsWith(&quot;/&quot;+x.id))?.id ?? &quot;overview&quot;;
-  const title=nav.find(x=&gt;x.id===page)?.label ?? &quot;Overview&quot;;
-  useEffect(()=&gt;{if(path===&quot;/&quot;)navigate(&quot;/overview&quot;,{replace:true})},[path,navigate]);
-  useEffect(()=&gt;{
-    const resolved=prefs.theme===&quot;system&quot;?(window.matchMedia(&quot;(prefers-color-scheme: dark)&quot;).matches?&quot;dark&quot;:&quot;light&quot;):prefs.theme;
-    document.documentElement.dataset.theme=resolved;
-    document.documentElement.dataset.accent=prefs.accent;
-    document.documentElement.style.setProperty(&quot;--app-font-size&quot;,prefs.fontSize+&quot;px&quot;);
-    document.documentElement.style.setProperty(&quot;--app-icon-size&quot;,prefs.iconSize+&quot;px&quot;);
-    try{localStorage.setItem(&quot;canvas-preferences&quot;,JSON.stringify(prefs))}catch{ /* storage may be disabled */ }
-  },[prefs]);
-  const filtered=useMemo(()=&gt;nav.filter(x=&gt;(x.group+&quot; &quot;+context.name+&quot; &quot;+x.label).toLowerCase().includes(search.toLowerCase())),[search]);
-  useEffect(()=&gt;{setSelection(0)},[search]);
-  useEffect(()=&gt;{const onKey=(e:KeyboardEvent)=&gt;{
-    if((e.ctrlKey||e.metaKey)&amp;&amp;e.key.toLowerCase()===&quot;k&quot;){e.preventDefault();setPaletteOpen(v=&gt;!v)}
-    if(e.key===&quot;Escape&quot;)setPaletteOpen(false);
-  };window.addEventListener(&quot;keydown&quot;,onKey);return()=&gt;window.removeEventListener(&quot;keydown&quot;,onKey)},[]);
-  useEffect(()=&gt;{if(paletteOpen)requestAnimationFrame(()=&gt;input.current?.focus())},[paletteOpen]);
-  const go=(dest:string)=&gt;{navigate(dest);setMobileOpen(false);setPaletteOpen(false);setSearch(&quot;&quot;)};
-  const icon=(name:string,size=prefs.iconSize)=&gt;&lt;AnimatedIcon name={name} size={size}/&gt;;
-  return &lt;div className=&quot;app-root&quot;&gt;
-    &lt;div className=&quot;window-titlebar&quot;&gt;
-      &lt;div className=&quot;title-left&quot;&gt;
-        &lt;Button size=&quot;icon&quot; className=&quot;mobile-toggle&quot; aria-label=&quot;Toggle navigation&quot;
-          onClick={()=&gt;setMobileOpen(v=&gt;!v)}&gt;{icon(&quot;expand&quot;)}&lt;/Button&gt;
-        &lt;span className=&quot;app-symbol&quot;&gt;{icon(&quot;workspace&quot;,16)}&lt;/span&gt;
-        &lt;strong&gt;Canvas&lt;/strong&gt;&lt;span className=&quot;title-separator&quot;&gt;/&lt;/span&gt;&lt;span className=&quot;title-product&quot;&gt;{context.name}&lt;/span&gt;
-      &lt;/div&gt;
-      &lt;div className=&quot;omnibar-area&quot;&gt;
-        &lt;button className=&quot;omnibar-trigger&quot; aria-label=&quot;Open navigation tree&quot; onClick={()=&gt;setPaletteOpen(true)}&gt;
-          {icon(&quot;search&quot;,14)}&lt;span className=&quot;crumb&quot;&gt;Personal workspace&lt;/span&gt;
-          {icon(&quot;right&quot;,12)}&lt;span className=&quot;crumb&quot;&gt;{context.name}&lt;/span&gt;
-          {icon(&quot;right&quot;,12)}&lt;strong&gt;{title}&lt;/strong&gt;&lt;kbd&gt;⌘ K&lt;/kbd&gt;&lt;/button&gt;
-      &lt;/div&gt;
-      &lt;Button size=&quot;icon&quot; aria-label=&quot;Settings&quot; title=&quot;Settings&quot; onClick={()=&gt;go(&quot;/settings&quot;)}
-        className=&quot;title-settings&quot;&gt;{icon(&quot;settings&quot;)}&lt;/Button&gt;
-    &lt;/div&gt;
-
-    &lt;div className=&quot;window-main&quot;&gt;
-      {mobileOpen &amp;&amp; &lt;button aria-label=&quot;Close navigation&quot; className=&quot;sidebar-scrim&quot; onClick={()=&gt;setMobileOpen(false)}/&gt;}
-      &lt;aside className={[&quot;sidebar&quot;,collapsed?&quot;collapsed&quot;:&quot;&quot;,mobileOpen?&quot;mobile-open&quot;:&quot;&quot;].join(&quot; &quot;)} aria-label=&quot;Main navigation&quot;&gt;
-        &lt;div className=&quot;sidebar-top&quot;&gt;&lt;Button size=&quot;icon&quot; title={collapsed?&quot;Expand sidebar&quot;:&quot;Collapse sidebar&quot;}
-          aria-label={collapsed?&quot;Expand sidebar&quot;:&quot;Collapse sidebar&quot;} onClick={()=&gt;setCollapsed(v=&gt;!v)}&gt;
-          {icon(collapsed?&quot;expand&quot;:&quot;collapse&quot;)}&lt;/Button&gt;&lt;/div&gt;
-        &lt;nav className=&quot;sidebar-navigation&quot;&gt;
-          {[&quot;Workspace&quot;,&quot;System&quot;].map(group=&gt;&lt;div className=&quot;nav-group&quot; key={group}&gt;
-            {!collapsed&amp;&amp;&lt;div className=&quot;nav-group-label&quot;&gt;{group}&lt;/div&gt;}
-            {nav.filter(n=&gt;n.group===group).map(n=&gt;&lt;Link href={&quot;/&quot;+n.id} key={n.id}
-              className={&quot;nav-link &quot;+(page===n.id?&quot;active&quot;:&quot;&quot;)}
-              onClick={()=&gt;setMobileOpen(false)} title={n.label} aria-current={page===n.id?&quot;page&quot;:undefined}&gt;
-              {icon(n.id)}{!collapsed&amp;&amp;&lt;span&gt;{n.label}&lt;/span&gt;}&lt;/Link&gt;)}&lt;/div&gt;)}
-        &lt;/nav&gt;
-        &lt;div className=&quot;sidebar-footer&quot;&gt;{!collapsed&amp;&amp;&lt;small&gt;Repository snapshot · read-only&lt;/small&gt;}&lt;/div&gt;
-      &lt;/aside&gt;
-      &lt;div className=&quot;main-column&quot;&gt;
-        &lt;div className=&quot;project-header&quot;&gt;
-          &lt;div className=&quot;selector-group&quot;&gt;
-            &lt;DropdownMenu.Root&gt;&lt;DropdownMenu.Trigger asChild&gt;&lt;button className=&quot;context-selector&quot;&gt;
-              &lt;span className=&quot;eyebrow&quot;&gt;Workspace&lt;/span&gt;&lt;strong&gt;Personal workspace&lt;/strong&gt;{icon(&quot;down&quot;,13)}
-            &lt;/button&gt;&lt;/DropdownMenu.Trigger&gt;
-            &lt;DropdownMenu.Portal&gt;&lt;DropdownMenu.Content sideOffset={7} align=&quot;start&quot; className=&quot;menu-content&quot;&gt;
-              &lt;DropdownMenu.Item className=&quot;menu-item&quot;&gt;Personal workspace&lt;/DropdownMenu.Item&gt;
-            &lt;/DropdownMenu.Content&gt;&lt;/DropdownMenu.Portal&gt;&lt;/DropdownMenu.Root&gt;
-            {icon(&quot;right&quot;,13)}
-            &lt;DropdownMenu.Root&gt;&lt;DropdownMenu.Trigger asChild&gt;&lt;button className=&quot;context-selector&quot;&gt;
-              &lt;span className=&quot;eyebrow&quot;&gt;Project&lt;/span&gt;&lt;strong&gt;{context.name}&lt;/strong&gt;{icon(&quot;down&quot;,13)}
-            &lt;/button&gt;&lt;/DropdownMenu.Trigger&gt;
-            &lt;DropdownMenu.Portal&gt;&lt;DropdownMenu.Content sideOffset={7} align=&quot;start&quot; className=&quot;menu-content&quot;&gt;
-              &lt;DropdownMenu.Item className=&quot;menu-item&quot; onSelect={()=&gt;go(&quot;/overview&quot;)}&gt;{context.name}&lt;/DropdownMenu.Item&gt;
-            &lt;/DropdownMenu.Content&gt;&lt;/DropdownMenu.Portal&gt;&lt;/DropdownMenu.Root&gt;
-          &lt;/div&gt;
-          &lt;div className=&quot;snapshot-reference&quot;&gt;REVISION / {context.revision}&lt;/div&gt;
+  const [path, navigate] = useLocation();
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [search, setSearch] = useState(&quot;&quot;);
+  const [selection, setSelection] = useState(0);
+  const [prefs, setPrefs] = useState(loadPrefs);
+  const input = useRef&lt;HTMLInputElement&gt;(null);
+  const page: View = nav.find((x) =&gt; path.startsWith(&quot;/&quot; + x.id))?.id ?? &quot;overview&quot;;
+  const title = nav.find((x) =&gt; x.id === page)?.label ?? &quot;Overview&quot;;
+  useEffect(() =&gt; {
+    if (path === &quot;/&quot;) navigate(&quot;/overview&quot;, { replace: true });
+  }, [path, navigate]);
+  useEffect(() =&gt; {
+    const resolved =
+      prefs.theme === &quot;system&quot;
+        ? window.matchMedia(&quot;(prefers-color-scheme: dark)&quot;).matches
+          ? &quot;dark&quot;
+          : &quot;light&quot;
+        : prefs.theme;
+    document.documentElement.dataset.theme = resolved;
+    document.documentElement.dataset.accent = prefs.accent;
+    document.documentElement.style.setProperty(&quot;--app-font-size&quot;, prefs.fontSize + &quot;px&quot;);
+    document.documentElement.style.setProperty(&quot;--app-icon-size&quot;, prefs.iconSize + &quot;px&quot;);
+    try {
+      localStorage.setItem(&quot;canvas-preferences&quot;, JSON.stringify(prefs));
+    } catch {
+      /* storage may be disabled */
+    }
+  }, [prefs]);
+  const filtered = useMemo(
+    () =&gt;
+      nav.filter((x) =&gt;
+        (x.group + &quot; &quot; + context.name + &quot; &quot; + x.label).toLowerCase().includes(search.toLowerCase()),
+      ),
+    [search],
+  );
+  useEffect(() =&gt; {
+    setSelection(0);
+  }, [search]);
+  useEffect(() =&gt; {
+    const onKey = (e: KeyboardEvent) =&gt; {
+      if ((e.ctrlKey || e.metaKey) &amp;&amp; e.key.toLowerCase() === &quot;k&quot;) {
+        e.preventDefault();
+        setPaletteOpen((v) =&gt; !v);
+      }
+      if (e.key === &quot;Escape&quot;) setPaletteOpen(false);
+    };
+    window.addEventListener(&quot;keydown&quot;, onKey);
+    return () =&gt; window.removeEventListener(&quot;keydown&quot;, onKey);
+  }, []);
+  useEffect(() =&gt; {
+    if (paletteOpen) requestAnimationFrame(() =&gt; input.current?.focus());
+  }, [paletteOpen]);
+  const go = (dest: string) =&gt; {
+    navigate(dest);
+    setMobileOpen(false);
+    setPaletteOpen(false);
+    setSearch(&quot;&quot;);
+  };
+  const icon = (name: string, size = prefs.iconSize) =&gt; &lt;AnimatedIcon name={name} size={size} /&gt;;
+  return (
+    &lt;div className=&quot;app-root&quot;&gt;
+      &lt;div className=&quot;window-titlebar&quot;&gt;
+        &lt;div className=&quot;title-left&quot;&gt;
+          &lt;Button
+            size=&quot;icon&quot;
+            className=&quot;mobile-toggle&quot;
+            aria-label=&quot;Toggle navigation&quot;
+            onClick={() =&gt; setMobileOpen((v) =&gt; !v)}
+          &gt;
+            {icon(&quot;expand&quot;)}
+          &lt;/Button&gt;
+          &lt;span className=&quot;app-symbol&quot;&gt;{icon(&quot;workspace&quot;, 16)}&lt;/span&gt;
+          &lt;strong&gt;Canvas&lt;/strong&gt;
+          &lt;span className=&quot;title-separator&quot;&gt;/&lt;/span&gt;
+          &lt;span className=&quot;title-product&quot;&gt;{context.name}&lt;/span&gt;
         &lt;/div&gt;
-        &lt;main className=&quot;page-container&quot;&gt;
-          &lt;Switch&gt;
-            &lt;Route path=&quot;/overview&quot;&gt;&lt;Overview to={go}/&gt;&lt;/Route&gt;
-            &lt;Route path=&quot;/settings&quot;&gt;&lt;Settings prefs={prefs} setPrefs={setPrefs}/&gt;&lt;/Route&gt;
-            {nav.filter(n=&gt;n.id!==&quot;overview&quot;&amp;&amp;n.id!==&quot;settings&quot;).map(n=&gt;
-              &lt;Route key={n.id} path={&quot;/&quot;+n.id}&gt;&lt;SimplePage id={n.id} to={go}/&gt;&lt;/Route&gt;)}
-            &lt;Route&gt;&lt;Overview to={go}/&gt;&lt;/Route&gt;
-          &lt;/Switch&gt;
-        &lt;/main&gt;
+        &lt;div className=&quot;omnibar-area&quot;&gt;
+          &lt;button
+            className=&quot;omnibar-trigger&quot;
+            aria-label=&quot;Open navigation tree&quot;
+            onClick={() =&gt; setPaletteOpen(true)}
+          &gt;
+            {icon(&quot;search&quot;, 14)}
+            &lt;span className=&quot;crumb&quot;&gt;Personal workspace&lt;/span&gt;
+            {icon(&quot;right&quot;, 12)}
+            &lt;span className=&quot;crumb&quot;&gt;{context.name}&lt;/span&gt;
+            {icon(&quot;right&quot;, 12)}
+            &lt;strong&gt;{title}&lt;/strong&gt;
+            &lt;kbd&gt;⌘ K&lt;/kbd&gt;
+          &lt;/button&gt;
+        &lt;/div&gt;
+        &lt;Button
+          size=&quot;icon&quot;
+          aria-label=&quot;Settings&quot;
+          title=&quot;Settings&quot;
+          onClick={() =&gt; go(&quot;/settings&quot;)}
+          className=&quot;title-settings&quot;
+        &gt;
+          {icon(&quot;settings&quot;)}
+        &lt;/Button&gt;
       &lt;/div&gt;
-    &lt;/div&gt;
-    &lt;footer className=&quot;window-statusbar&quot;&gt;&lt;span&gt;Canvas · Git snapshot&lt;/span&gt;&lt;span className=&quot;version&quot;&gt;Version: 0.6.0 · Prototype&lt;/span&gt;
-      &lt;span&gt;{context.repository} / {context.revision}&lt;/span&gt;&lt;/footer&gt;
-    &lt;AnimatePresence&gt;
-      {paletteOpen &amp;&amp; &lt;motion.div className=&quot;palette-cover&quot; initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
-        onMouseDown={e=&gt;{if(e.target===e.currentTarget)setPaletteOpen(false)}}&gt;
-        &lt;motion.div role=&quot;dialog&quot; aria-modal=&quot;true&quot; aria-label=&quot;Omnibar navigation tree&quot; className=&quot;palette&quot;
-          initial={{y:-12,opacity:0}} animate={{y:0,opacity:1}} exit={{y:-8,opacity:0}}&gt;
-          &lt;div className=&quot;palette-search&quot;&gt;{icon(&quot;search&quot;,18)}
-            &lt;input ref={input} value={search} aria-label=&quot;Search routes&quot; placeholder=&quot;Search pages and commands&quot;
-              onChange={e=&gt;setSearch(e.target.value)} onKeyDown={e=&gt;{
-                if(e.key===&quot;ArrowDown&quot;){e.preventDefault();setSelection(s=&gt;Math.min(s+1,filtered.length-1))}
-                if(e.key===&quot;ArrowUp&quot;){e.preventDefault();setSelection(s=&gt;Math.max(s-1,0))}
-                if(e.key===&quot;Enter&quot;&amp;&amp;filtered[selection])go(&quot;/&quot;+filtered[selection].id);
-              }}/&gt;&lt;kbd&gt;ESC&lt;/kbd&gt;&lt;/div&gt;
-          &lt;div className=&quot;palette-tree&quot;&gt;
-            &lt;div className=&quot;palette-root&quot;&gt;Personal workspace {icon(&quot;right&quot;,13)} {context.name}&lt;/div&gt;
-            {filtered.map((n,i)=&gt;&lt;button key={n.id} className={&quot;palette-result &quot;+(i===selection?&quot;focused&quot;:&quot;&quot;)}
-              onMouseEnter={()=&gt;setSelection(i)} onClick={()=&gt;go(&quot;/&quot;+n.id)}&gt;
-              {icon(n.id)}&lt;span&gt;{n.label}&lt;/span&gt;&lt;small&gt;{n.group}&lt;/small&gt;{icon(&quot;right&quot;,13)}&lt;/button&gt;)}
-            {!filtered.length&amp;&amp;&lt;p className=&quot;empty-state&quot;&gt;No matching routes.&lt;/p&gt;}
+
+      &lt;div className=&quot;window-main&quot;&gt;
+        {mobileOpen &amp;&amp; (
+          &lt;button
+            aria-label=&quot;Close navigation&quot;
+            className=&quot;sidebar-scrim&quot;
+            onClick={() =&gt; setMobileOpen(false)}
+          /&gt;
+        )}
+        &lt;aside
+          className={[
+            &quot;sidebar&quot;,
+            collapsed ? &quot;collapsed&quot; : &quot;&quot;,
+            mobileOpen ? &quot;mobile-open&quot; : &quot;&quot;,
+          ].join(&quot; &quot;)}
+          aria-label=&quot;Main navigation&quot;
+        &gt;
+          &lt;div className=&quot;sidebar-top&quot;&gt;
+            &lt;Button
+              size=&quot;icon&quot;
+              title={collapsed ? &quot;Expand sidebar&quot; : &quot;Collapse sidebar&quot;}
+              aria-label={collapsed ? &quot;Expand sidebar&quot; : &quot;Collapse sidebar&quot;}
+              onClick={() =&gt; setCollapsed((v) =&gt; !v)}
+            &gt;
+              {icon(collapsed ? &quot;expand&quot; : &quot;collapse&quot;)}
+            &lt;/Button&gt;
           &lt;/div&gt;
-          &lt;div className=&quot;palette-footer&quot;&gt;↑ ↓ navigate · ↵ open · Esc dismiss&lt;/div&gt;
-        &lt;/motion.div&gt;
-      &lt;/motion.div&gt;}
-    &lt;/AnimatePresence&gt;
-  &lt;/div&gt;;
+          &lt;nav className=&quot;sidebar-navigation&quot;&gt;
+            {[&quot;Workspace&quot;, &quot;System&quot;].map((group) =&gt; (
+              &lt;div className=&quot;nav-group&quot; key={group}&gt;
+                {!collapsed &amp;&amp; &lt;div className=&quot;nav-group-label&quot;&gt;{group}&lt;/div&gt;}
+                {nav
+                  .filter((n) =&gt; n.group === group)
+                  .map((n) =&gt; (
+                    &lt;Link
+                      href={&quot;/&quot; + n.id}
+                      key={n.id}
+                      className={&quot;nav-link &quot; + (page === n.id ? &quot;active&quot; : &quot;&quot;)}
+                      onClick={() =&gt; setMobileOpen(false)}
+                      title={n.label}
+                      aria-current={page === n.id ? &quot;page&quot; : undefined}
+                    &gt;
+                      {icon(n.id)}
+                      {!collapsed &amp;&amp; &lt;span&gt;{n.label}&lt;/span&gt;}
+                    &lt;/Link&gt;
+                  ))}
+              &lt;/div&gt;
+            ))}
+          &lt;/nav&gt;
+          &lt;div className=&quot;sidebar-footer&quot;&gt;
+            {!collapsed &amp;&amp; &lt;small&gt;Repository snapshot · read-only&lt;/small&gt;}
+          &lt;/div&gt;
+        &lt;/aside&gt;
+        &lt;div className=&quot;main-column&quot;&gt;
+          &lt;div className=&quot;project-header&quot;&gt;
+            &lt;div className=&quot;selector-group&quot;&gt;
+              &lt;DropdownMenu.Root&gt;
+                &lt;DropdownMenu.Trigger asChild&gt;
+                  &lt;button className=&quot;context-selector&quot;&gt;
+                    &lt;span className=&quot;eyebrow&quot;&gt;Workspace&lt;/span&gt;
+                    &lt;strong&gt;Personal workspace&lt;/strong&gt;
+                    {icon(&quot;down&quot;, 13)}
+                  &lt;/button&gt;
+                &lt;/DropdownMenu.Trigger&gt;
+                &lt;DropdownMenu.Portal&gt;
+                  &lt;DropdownMenu.Content sideOffset={7} align=&quot;start&quot; className=&quot;menu-content&quot;&gt;
+                    &lt;DropdownMenu.Item className=&quot;menu-item&quot;&gt;Personal workspace&lt;/DropdownMenu.Item&gt;
+                  &lt;/DropdownMenu.Content&gt;
+                &lt;/DropdownMenu.Portal&gt;
+              &lt;/DropdownMenu.Root&gt;
+              {icon(&quot;right&quot;, 13)}
+              &lt;DropdownMenu.Root&gt;
+                &lt;DropdownMenu.Trigger asChild&gt;
+                  &lt;button className=&quot;context-selector&quot;&gt;
+                    &lt;span className=&quot;eyebrow&quot;&gt;Project&lt;/span&gt;
+                    &lt;strong&gt;{context.name}&lt;/strong&gt;
+                    {icon(&quot;down&quot;, 13)}
+                  &lt;/button&gt;
+                &lt;/DropdownMenu.Trigger&gt;
+                &lt;DropdownMenu.Portal&gt;
+                  &lt;DropdownMenu.Content sideOffset={7} align=&quot;start&quot; className=&quot;menu-content&quot;&gt;
+                    &lt;DropdownMenu.Item className=&quot;menu-item&quot; onSelect={() =&gt; go(&quot;/overview&quot;)}&gt;
+                      {context.name}
+                    &lt;/DropdownMenu.Item&gt;
+                  &lt;/DropdownMenu.Content&gt;
+                &lt;/DropdownMenu.Portal&gt;
+              &lt;/DropdownMenu.Root&gt;
+            &lt;/div&gt;
+            &lt;div className=&quot;snapshot-reference&quot;&gt;REVISION / {context.revision}&lt;/div&gt;
+          &lt;/div&gt;
+          &lt;main className=&quot;page-container&quot;&gt;
+            &lt;Switch&gt;
+              &lt;Route path=&quot;/overview&quot;&gt;
+                &lt;Overview to={go} /&gt;
+              &lt;/Route&gt;
+              &lt;Route path=&quot;/settings&quot;&gt;
+                &lt;Settings prefs={prefs} setPrefs={setPrefs} /&gt;
+              &lt;/Route&gt;
+              {nav
+                .filter((n) =&gt; n.id !== &quot;overview&quot; &amp;&amp; n.id !== &quot;settings&quot;)
+                .map((n) =&gt; (
+                  &lt;Route key={n.id} path={&quot;/&quot; + n.id}&gt;
+                    &lt;SimplePage id={n.id} to={go} /&gt;
+                  &lt;/Route&gt;
+                ))}
+              &lt;Route&gt;
+                &lt;Overview to={go} /&gt;
+              &lt;/Route&gt;
+            &lt;/Switch&gt;
+          &lt;/main&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;footer className=&quot;window-statusbar&quot;&gt;
+        &lt;span&gt;Canvas · Git snapshot&lt;/span&gt;
+        &lt;span className=&quot;version&quot;&gt;Version: 0.6.0 · Prototype&lt;/span&gt;
+        &lt;span&gt;
+          {context.repository} / {context.revision}
+        &lt;/span&gt;
+      &lt;/footer&gt;
+      &lt;AnimatePresence&gt;
+        {paletteOpen &amp;&amp; (
+          &lt;motion.div
+            className=&quot;palette-cover&quot;
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onMouseDown={(e) =&gt; {
+              if (e.target === e.currentTarget) setPaletteOpen(false);
+            }}
+          &gt;
+            &lt;motion.div
+              role=&quot;dialog&quot;
+              aria-modal=&quot;true&quot;
+              aria-label=&quot;Omnibar navigation tree&quot;
+              className=&quot;palette&quot;
+              initial={{ y: -12, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -8, opacity: 0 }}
+            &gt;
+              &lt;div className=&quot;palette-search&quot;&gt;
+                {icon(&quot;search&quot;, 18)}
+                &lt;input
+                  ref={input}
+                  value={search}
+                  aria-label=&quot;Search routes&quot;
+                  placeholder=&quot;Search pages and commands&quot;
+                  onChange={(e) =&gt; setSearch(e.target.value)}
+                  onKeyDown={(e) =&gt; {
+                    if (e.key === &quot;ArrowDown&quot;) {
+                      e.preventDefault();
+                      setSelection((s) =&gt; Math.min(s + 1, filtered.length - 1));
+                    }
+                    if (e.key === &quot;ArrowUp&quot;) {
+                      e.preventDefault();
+                      setSelection((s) =&gt; Math.max(s - 1, 0));
+                    }
+                    if (e.key === &quot;Enter&quot; &amp;&amp; filtered[selection]) go(&quot;/&quot; + filtered[selection].id);
+                  }}
+                /&gt;
+                &lt;kbd&gt;ESC&lt;/kbd&gt;
+              &lt;/div&gt;
+              &lt;div className=&quot;palette-tree&quot;&gt;
+                &lt;div className=&quot;palette-root&quot;&gt;
+                  Personal workspace {icon(&quot;right&quot;, 13)} {context.name}
+                &lt;/div&gt;
+                {filtered.map((n, i) =&gt; (
+                  &lt;button
+                    key={n.id}
+                    className={&quot;palette-result &quot; + (i === selection ? &quot;focused&quot; : &quot;&quot;)}
+                    onMouseEnter={() =&gt; setSelection(i)}
+                    onClick={() =&gt; go(&quot;/&quot; + n.id)}
+                  &gt;
+                    {icon(n.id)}
+                    &lt;span&gt;{n.label}&lt;/span&gt;
+                    &lt;small&gt;{n.group}&lt;/small&gt;
+                    {icon(&quot;right&quot;, 13)}
+                  &lt;/button&gt;
+                ))}
+                {!filtered.length &amp;&amp; &lt;p className=&quot;empty-state&quot;&gt;No matching routes.&lt;/p&gt;}
+              &lt;/div&gt;
+              &lt;div className=&quot;palette-footer&quot;&gt;↑ ↓ navigate · ↵ open · Esc dismiss&lt;/div&gt;
+            &lt;/motion.div&gt;
+          &lt;/motion.div&gt;
+        )}
+      &lt;/AnimatePresence&gt;
+    &lt;/div&gt;
+  );
 }
 </pre></section>
-<section class="file" id="file-0064"><h3>.github/app/src/Graph.tsx</h3><p class="meta">Git mode 100644 · df8f962994bb9ba839e97fe5b7a72fda62f1cab1</p><pre>import { useMemo, useState } from &quot;react&quot;;
+<section class="file" id="file-0064"><h3>.github/app/src/Graph.tsx</h3><p class="meta">Git mode 100644 · 7c74f993bb60cc8659c60c249e665673a78d5be0</p><pre>import { useMemo, useState } from &quot;react&quot;;
 import { ReactFlow, Background, Controls, type Node, type Edge } from &quot;@xyflow/react&quot;;
 import dagre from &quot;dagre&quot;;
 import context from &quot;./generated/context.json&quot;;
@@ -2091,7 +2483,7 @@ const labels: Record&lt;string, string&gt; = {
 export default function Graph() {
   const [selected, setSelected] = useState&lt;string | null&gt;(null);
   const { nodes, edges } = useMemo(() =&gt; {
-    const present = context.documents.map(doc =&gt; doc.path);
+    const present = context.documents.map((doc) =&gt; doc.path);
     const g = new dagre.graphlib.Graph();
     g.setGraph({ rankdir: &quot;LR&quot;, ranksep: 92, nodesep: 38, marginx: 35, marginy: 35 });
     g.setDefaultEdgeLabel(() =&gt; ({}));
@@ -2101,121 +2493,213 @@ export default function Graph() {
       [&quot;.agents/ARCHITECTURE.md&quot;, &quot;.agents/AGENTS.md&quot;],
       [&quot;.agents/AGENTS.md&quot;, &quot;.agents/README.md&quot;],
       [&quot;AGENTS.md&quot;, &quot;.agents/GOAL.md&quot;],
-    ].filter(([a,b]) =&gt; present.includes(a) &amp;&amp; present.includes(b));
-    present.forEach(id =&gt; g.setNode(id, { width: 170, height: 58 }));
-    links.forEach(([a,b]) =&gt; g.setEdge(a,b));
+    ].filter(([a, b]) =&gt; present.includes(a) &amp;&amp; present.includes(b));
+    present.forEach((id) =&gt; g.setNode(id, { width: 170, height: 58 }));
+    links.forEach(([a, b]) =&gt; g.setEdge(a, b));
     dagre.layout(g);
-    const nodes: Node[] = present.map(id =&gt; {
+    const nodes: Node[] = present.map((id) =&gt; {
       const pos = g.node(id);
-      return { id, position: { x: pos.x - 85, y: pos.y - 29 },
-        data: { label: labels[id] ?? id }, type: &quot;default&quot;,
-        style: { width: 170, minHeight: 58, borderRadius: 10,
-          fontFamily: &quot;inherit&quot;, fontSize: 12, padding: 10,
-          color: &quot;var(--text)&quot;, background: &quot;var(--surface)&quot;, border: &quot;1px solid var(--border)&quot; } };
+      return {
+        id,
+        position: { x: pos.x - 85, y: pos.y - 29 },
+        data: { label: labels[id] ?? id },
+        type: &quot;default&quot;,
+        style: {
+          width: 170,
+          minHeight: 58,
+          borderRadius: 10,
+          fontFamily: &quot;inherit&quot;,
+          fontSize: 12,
+          padding: 10,
+          color: &quot;var(--text)&quot;,
+          background: &quot;var(--surface)&quot;,
+          border: &quot;1px solid var(--border)&quot;,
+        },
+      };
     });
-    const edges: Edge[] = links.map(([source,target],index) =&gt; ({
-      id: &quot;edge-&quot;+index, source, target, type: &quot;smoothstep&quot;,
-      style: { stroke: &quot;var(--muted)&quot;, strokeWidth: 1.1 }
+    const edges: Edge[] = links.map(([source, target], index) =&gt; ({
+      id: &quot;edge-&quot; + index,
+      source,
+      target,
+      type: &quot;smoothstep&quot;,
+      style: { stroke: &quot;var(--muted)&quot;, strokeWidth: 1.1 },
     }));
-    return {nodes,edges};
-  },[]);
-  return &lt;div className=&quot;graph-pane&quot; aria-label=&quot;Repository document relationships&quot;&gt;
-    &lt;ReactFlow nodes={nodes} edges={edges} fitView fitViewOptions={{padding: .18}}
-      onNodeClick={(_,node)=&gt;setSelected(node.id)} nodesConnectable={false}
-      nodesDraggable={false} colorMode=&quot;dark&quot; proOptions={{hideAttribution: true}}&gt;
-      &lt;Background color=&quot;var(--border)&quot; gap={22} size={1}/&gt;
-      &lt;Controls showInteractive={false} /&gt;
-    &lt;/ReactFlow&gt;
-    {selected &amp;&amp; &lt;div className=&quot;graph-selected&quot;&gt;
-      &lt;strong&gt;{labels[selected] || selected}&lt;/strong&gt;
-      &lt;span&gt;{selected}&lt;/span&gt;
-      &lt;button aria-label=&quot;Close selection&quot; onClick={()=&gt;setSelected(null)}&gt;×&lt;/button&gt;
-    &lt;/div&gt;}
-  &lt;/div&gt;;
+    return { nodes, edges };
+  }, []);
+  return (
+    &lt;div className=&quot;graph-pane&quot; aria-label=&quot;Repository document relationships&quot;&gt;
+      &lt;ReactFlow
+        nodes={nodes}
+        edges={edges}
+        fitView
+        fitViewOptions={{ padding: 0.18 }}
+        onNodeClick={(_, node) =&gt; setSelected(node.id)}
+        nodesConnectable={false}
+        nodesDraggable={false}
+        colorMode=&quot;dark&quot;
+        proOptions={{ hideAttribution: true }}
+      &gt;
+        &lt;Background color=&quot;var(--border)&quot; gap={22} size={1} /&gt;
+        &lt;Controls showInteractive={false} /&gt;
+      &lt;/ReactFlow&gt;
+      {selected &amp;&amp; (
+        &lt;div className=&quot;graph-selected&quot;&gt;
+          &lt;strong&gt;{labels[selected] || selected}&lt;/strong&gt;
+          &lt;span&gt;{selected}&lt;/span&gt;
+          &lt;button aria-label=&quot;Close selection&quot; onClick={() =&gt; setSelected(null)}&gt;
+            ×
+          &lt;/button&gt;
+        &lt;/div&gt;
+      )}
+    &lt;/div&gt;
+  );
 }
 </pre></section>
-<section class="file" id="file-0065"><h3>.github/app/src/Workbench.tsx</h3><p class="meta">Git mode 100644 · 5f1ef8923f522cb5fefbbeb01e9f19a1ea31939d</p><pre>import { useMemo } from &quot;react&quot;;
+<section class="file" id="file-0065"><h3>.github/app/src/Workbench.tsx</h3><p class="meta">Git mode 100644 · eb6836720ef3b348783b9ae32b2980fd85cc7d7d</p><pre>import { useMemo } from &quot;react&quot;;
 import { DockviewReact, themeDark, themeLight, type DockviewReadyEvent } from &quot;dockview-react&quot;;
 import Graph from &quot;./Graph&quot;;
 import context from &quot;./generated/context.json&quot;;
 
 function AboutPanel() {
-  return &lt;div className=&quot;dock-body&quot;&gt;
-    &lt;p className=&quot;eyebrow&quot;&gt;Repository overview&lt;/p&gt;
-    &lt;h2&gt;{context.name}&lt;/h2&gt;
-    &lt;p className=&quot;muted&quot;&gt;{context.repository}&lt;/p&gt;
-    &lt;pre className=&quot;source-preview&quot;&gt;{context.goal}&lt;/pre&gt;
-  &lt;/div&gt;;
+  return (
+    &lt;div className=&quot;dock-body&quot;&gt;
+      &lt;p className=&quot;eyebrow&quot;&gt;Repository overview&lt;/p&gt;
+      &lt;h2&gt;{context.name}&lt;/h2&gt;
+      &lt;p className=&quot;muted&quot;&gt;{context.repository}&lt;/p&gt;
+      &lt;pre className=&quot;source-preview&quot;&gt;{context.goal}&lt;/pre&gt;
+    &lt;/div&gt;
+  );
 }
 function DocumentsPanel() {
-  return &lt;div className=&quot;dock-body&quot;&gt;
-    &lt;p className=&quot;eyebrow&quot;&gt;Tracked documents&lt;/p&gt;
-    {context.documents.map(doc =&gt; &lt;div key={doc.path} className=&quot;doc-row&quot;&gt;
-      &lt;span&gt;{doc.path}&lt;/span&gt;&lt;small&gt;{doc.content.split(&quot;\n&quot;).length} lines&lt;/small&gt;
-    &lt;/div&gt;)}
-  &lt;/div&gt;;
+  return (
+    &lt;div className=&quot;dock-body&quot;&gt;
+      &lt;p className=&quot;eyebrow&quot;&gt;Tracked documents&lt;/p&gt;
+      {context.documents.map((doc) =&gt; (
+        &lt;div key={doc.path} className=&quot;doc-row&quot;&gt;
+          &lt;span&gt;{doc.path}&lt;/span&gt;
+          &lt;small&gt;{doc.content.split(&quot;\n&quot;).length} lines&lt;/small&gt;
+        &lt;/div&gt;
+      ))}
+    &lt;/div&gt;
+  );
 }
-export default function Workbench({dark}:{dark:boolean}) {
-  const components = useMemo(() =&gt; ({
-    summary: AboutPanel, graph: Graph, files: DocumentsPanel
-  }), []);
+export default function Workbench({ dark }: { dark: boolean }) {
+  const components = useMemo(
+    () =&gt; ({
+      summary: AboutPanel,
+      graph: Graph,
+      files: DocumentsPanel,
+    }),
+    [],
+  );
   const onReady = (event: DockviewReadyEvent) =&gt; {
     if (event.api.panels.length) return;
-    event.api.addPanel({id:&quot;summary&quot;,component:&quot;summary&quot;,title:&quot;Overview&quot;});
-    event.api.addPanel({id:&quot;graph&quot;,component:&quot;graph&quot;,title:&quot;Relationships&quot;,
-      position:{referencePanel:&quot;summary&quot;,direction:&quot;right&quot;}});
-    event.api.addPanel({id:&quot;files&quot;,component:&quot;files&quot;,title:&quot;Documents&quot;});
+    event.api.addPanel({ id: &quot;summary&quot;, component: &quot;summary&quot;, title: &quot;Overview&quot; });
+    event.api.addPanel({
+      id: &quot;graph&quot;,
+      component: &quot;graph&quot;,
+      title: &quot;Relationships&quot;,
+      position: { referencePanel: &quot;summary&quot;, direction: &quot;right&quot; },
+    });
+    event.api.addPanel({ id: &quot;files&quot;, component: &quot;files&quot;, title: &quot;Documents&quot; });
   };
-  return &lt;div className=&quot;workbench-pane&quot;&gt;
-    &lt;DockviewReact theme={dark ? themeDark : themeLight}
-      components={components} onReady={onReady}/&gt;
-  &lt;/div&gt;;
+  return (
+    &lt;div className=&quot;workbench-pane&quot;&gt;
+      &lt;DockviewReact
+        theme={dark ? themeDark : themeLight}
+        components={components}
+        onReady={onReady}
+      /&gt;
+    &lt;/div&gt;
+  );
 }
 </pre></section>
-<section class="file" id="file-0066"><h3>.github/app/src/components/AnimatedIcon.tsx</h3><p class="meta">Git mode 100644 · c21e94e11baf9541534bf0efed457e88494ae923</p><pre>import type { ComponentType } from &quot;react&quot;;
+<section class="file" id="file-0066"><h3>.github/app/src/components/AnimatedIcon.tsx</h3><p class="meta">Git mode 100644 · a5b326910fa0ba45248c0f3c494418bc0b225054</p><pre>import type { ComponentType } from &quot;react&quot;;
 import {
-  LayoutGridIcon, BlocksIcon, FolderOpenIcon, BotIcon, GitForkIcon,
-  FileTextIcon, HistoryIcon, SettingsIcon, SearchIcon, ChevronRightIcon,
-  ChevronDownIcon, PanelLeftCloseIcon, PanelLeftOpenIcon, SunIcon, MoonIcon,
-  CircleCheckIcon, CircleHelpIcon, ArrowRightIcon
+  LayoutGridIcon,
+  BlocksIcon,
+  FolderOpenIcon,
+  BotIcon,
+  GitForkIcon,
+  FileTextIcon,
+  HistoryIcon,
+  SettingsIcon,
+  SearchIcon,
+  ChevronRightIcon,
+  ChevronDownIcon,
+  PanelLeftCloseIcon,
+  PanelLeftOpenIcon,
+  SunIcon,
+  MoonIcon,
+  CircleCheckIcon,
+  CircleHelpIcon,
+  ArrowRightIcon,
 } from &quot;lucide-animated&quot;;
 
 const registry: Record&lt;string, ComponentType&lt;any&gt;&gt; = {
-  overview: LayoutGridIcon, workspace: BlocksIcon, projects: FolderOpenIcon,
-  agents: BotIcon, graph: GitForkIcon, roadmap: BlocksIcon,
-  artifacts: FileTextIcon, activity: HistoryIcon, context: FileTextIcon,
-  settings: SettingsIcon, search: SearchIcon, right: ChevronRightIcon,
-  down: ChevronDownIcon, collapse: PanelLeftCloseIcon, expand: PanelLeftOpenIcon,
-  sun: SunIcon, moon: MoonIcon, check: CircleCheckIcon, help: CircleHelpIcon,
-  arrow: ArrowRightIcon
+  overview: LayoutGridIcon,
+  workspace: BlocksIcon,
+  projects: FolderOpenIcon,
+  agents: BotIcon,
+  graph: GitForkIcon,
+  roadmap: BlocksIcon,
+  artifacts: FileTextIcon,
+  activity: HistoryIcon,
+  context: FileTextIcon,
+  settings: SettingsIcon,
+  search: SearchIcon,
+  right: ChevronRightIcon,
+  down: ChevronDownIcon,
+  collapse: PanelLeftCloseIcon,
+  expand: PanelLeftOpenIcon,
+  sun: SunIcon,
+  moon: MoonIcon,
+  check: CircleCheckIcon,
+  help: CircleHelpIcon,
+  arrow: ArrowRightIcon,
 };
-export function AnimatedIcon({ name, size = 18, className }: {
-  name: string; size?: number; className?: string;
+export function AnimatedIcon({
+  name,
+  size = 18,
+  className,
+}: {
+  name: string;
+  size?: number;
+  className?: string;
 }) {
   const Icon = registry[name] ?? CircleHelpIcon;
-  return &lt;span className={className ?? &quot;app-icon&quot;} aria-hidden=&quot;true&quot;&gt;
-    &lt;Icon size={size} /&gt;
-  &lt;/span&gt;;
+  return (
+    &lt;span className={className ?? &quot;app-icon&quot;} aria-hidden=&quot;true&quot;&gt;
+      &lt;Icon size={size} /&gt;
+    &lt;/span&gt;
+  );
 }
 </pre></section>
-<section class="file" id="file-0067"><h3>.github/app/src/components/ui/button.tsx</h3><p class="meta">Git mode 100644 · c4916cd06b6ee44c788bb3f0ee19351d9131f69f</p><pre>import * as React from &quot;react&quot;;
+<section class="file" id="file-0067"><h3>.github/app/src/components/ui/button.tsx</h3><p class="meta">Git mode 100644 · bfd3bfb847d7ce571796ec2a2dd16dd926ae24c8</p><pre>import * as React from &quot;react&quot;;
 import { Slot } from &quot;@radix-ui/react-slot&quot;;
 import { cva, type VariantProps } from &quot;class-variance-authority&quot;;
 import { clsx } from &quot;clsx&quot;;
 import { twMerge } from &quot;tailwind-merge&quot;;
 
 const variants = cva(&quot;canvas-button&quot;, {
-  variants: { variant: { default: &quot;canvas-button-primary&quot;, ghost: &quot;canvas-button-ghost&quot;, subtle: &quot;canvas-button-subtle&quot; },
-    size: { default: &quot;canvas-button-md&quot;, icon: &quot;canvas-button-icon&quot; } },
+  variants: {
+    variant: {
+      default: &quot;canvas-button-primary&quot;,
+      ghost: &quot;canvas-button-ghost&quot;,
+      subtle: &quot;canvas-button-subtle&quot;,
+    },
+    size: { default: &quot;canvas-button-md&quot;, icon: &quot;canvas-button-icon&quot; },
+  },
   defaultVariants: { variant: &quot;ghost&quot;, size: &quot;default&quot; },
 });
-type Props = React.ButtonHTMLAttributes&lt;HTMLButtonElement&gt; &amp; VariantProps&lt;typeof variants&gt; &amp; { asChild?: boolean };
+type Props = React.ButtonHTMLAttributes&lt;HTMLButtonElement&gt; &amp;
+  VariantProps&lt;typeof variants&gt; &amp; { asChild?: boolean };
 export function Button({ className, variant, size, asChild = false, ...props }: Props) {
   const Component = asChild ? Slot : &quot;button&quot;;
   return &lt;Component className={twMerge(clsx(variants({ variant, size }), className))} {...props} /&gt;;
 }
 </pre></section>
-<section class="file" id="file-0068"><h3>.github/app/src/main.tsx</h3><p class="meta">Git mode 100644 · 5980da09933162f4e2d8bf178674107be6acaccd</p><pre>import React from &quot;react&quot;;
+<section class="file" id="file-0068"><h3>.github/app/src/main.tsx</h3><p class="meta">Git mode 100644 · a4c3dc309c8efb9062ec1f5cb344bf3b621f36e3</p><pre>import React from &quot;react&quot;;
 import { createRoot } from &quot;react-dom/client&quot;;
 import { Router } from &quot;wouter&quot;;
 import { useHashLocation } from &quot;wouter/use-hash-location&quot;;
@@ -2227,215 +2711,1064 @@ import &quot;dockview-react/dist/styles/dockview.css&quot;;
 const root = document.getElementById(&quot;root&quot;);
 if (!root) throw new Error(&quot;Canvas root is missing&quot;);
 createRoot(root).render(
-  &lt;React.StrictMode&gt;&lt;Router hook={useHashLocation}&gt;&lt;App /&gt;&lt;/Router&gt;&lt;/React.StrictMode&gt;
+  &lt;React.StrictMode&gt;
+    &lt;Router hook={useHashLocation}&gt;
+      &lt;App /&gt;
+    &lt;/Router&gt;
+  &lt;/React.StrictMode&gt;,
 );
 </pre></section>
-<section class="file" id="file-0069"><h3>.github/app/src/styles.css</h3><p class="meta">Git mode 100644 · 685798fd912ca86a9d0106e72cda05bf094b10eb</p><pre>@import &quot;tailwindcss&quot;;
+<section class="file" id="file-0069"><h3>.github/app/src/styles.css</h3><p class="meta">Git mode 100644 · 3c43e44e9d2ea67c707b23081872bf58ee717a28</p><pre>@import &quot;tailwindcss&quot;;
 @source &quot;.&quot;;
-:root{
-  color-scheme:dark;
-  font-family:Inter,ui-sans-serif,system-ui,-apple-system,&quot;Segoe UI&quot;,sans-serif;
-  --app-font-size:14px;--app-icon-size:18px;
-  --bg:#0b0b0d;--surface:#141416;--raised:#1a1a1d;--border:#2b2b30;
-  --text:#ececef;--muted:#929299;--subtle:#6c6c76;--accent:#f4f4f5;
-  --accent-foreground:#111113;--hover:rgba(255,255,255,.055);
-  background:var(--bg);color:var(--text);
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif;
+  --app-font-size: 14px;
+  --app-icon-size: 18px;
+  --bg: #0b0b0d;
+  --surface: #141416;
+  --raised: #1a1a1d;
+  --border: #2b2b30;
+  --text: #ececef;
+  --muted: #929299;
+  --subtle: #6c6c76;
+  --accent: #f4f4f5;
+  --accent-foreground: #111113;
+  --hover: rgba(255, 255, 255, 0.055);
+  background: var(--bg);
+  color: var(--text);
 }
-:root[data-accent=blue]{--accent:#81adf1;--accent-foreground:#101c30}
-:root[data-accent=sage]{--accent:#a3c3ac;--accent-foreground:#14241a}
-:root[data-accent=violet]{--accent:#b5a4ec;--accent-foreground:#241932}
-:root[data-theme=light]{
-  color-scheme:light;--bg:#f9f9fa;--surface:#fff;--raised:#f2f2f4;--border:#dfdfe4;
-  --text:#17171a;--muted:#60616a;--subtle:#777781;--accent:#222226;
-  --accent-foreground:#fff;--hover:rgba(0,0,0,.04);
+:root[data-accent=&quot;blue&quot;] {
+  --accent: #81adf1;
+  --accent-foreground: #101c30;
 }
-:root[data-theme=light][data-accent=blue]{--accent:#225db7;--accent-foreground:#fff}
-:root[data-theme=light][data-accent=sage]{--accent:#31654b;--accent-foreground:#fff}
-:root[data-theme=light][data-accent=violet]{--accent:#6a46b2;--accent-foreground:#fff}
-*{box-sizing:border-box}
-html,body,#root{margin:0;width:100%;height:100%;min-height:0}
-body{font-size:var(--app-font-size);overflow:hidden}
-button,input{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}
-button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.app-root{display:flex;flex-direction:column;width:100%;height:100%;height:100dvh;min-height:300px;background:var(--bg)}
-.app-icon,.app-icon svg{display:inline-flex;align-items:center;justify-content:center;flex:none;vertical-align:middle}
-.window-titlebar{
-  display:grid;grid-template-columns:minmax(130px,1fr) minmax(0,550px) minmax(48px,1fr);
-  align-items:center;height:34px;min-height:34px;border-bottom:1px solid var(--border);
-  padding:0 12px;gap:8px;background:var(--bg);position:relative;z-index:20;font-size:12px;
+:root[data-accent=&quot;sage&quot;] {
+  --accent: #a3c3ac;
+  --accent-foreground: #14241a;
 }
-.title-left{display:flex;gap:10px;align-items:center;min-width:0;white-space:nowrap}
-.title-left strong{font-weight:650}.title-product{color:var(--muted);overflow:hidden;text-overflow:ellipsis}
-.title-separator{color:var(--subtle)}.app-symbol{display:inline-flex;align-items:center}
-.omnibar-area{min-width:0;width:100%}.omnibar-trigger{
-  min-width:0;width:100%;height:25px;display:flex;gap:8px;align-items:center;
-  padding:0 10px;border:1px solid var(--border);border-radius:6px;background:var(--raised);
-  color:var(--muted);text-align:left;font-size:11px;
+:root[data-accent=&quot;violet&quot;] {
+  --accent: #b5a4ec;
+  --accent-foreground: #241932;
 }
-.omnibar-trigger:hover{border-color:var(--muted)}
-.omnibar-trigger strong{font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis}
-.omnibar-trigger .crumb{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-kbd{font:inherit;color:var(--subtle);font-size:10px;border:1px solid var(--border);border-radius:4px;padding:1px 5px;white-space:nowrap}
-.omnibar-trigger kbd{margin-left:auto}.title-settings{justify-self:end}.mobile-toggle{display:none!important}
-.window-main{display:flex;flex:1;min-height:0;min-width:0;position:relative}
-.sidebar{
-  flex:0 0 228px;display:flex;flex-direction:column;width:228px;min-width:0;
-  height:100%;min-height:0;border-right:1px solid var(--border);background:var(--bg);
-  transition:width .17s ease,flex-basis .17s ease;z-index:10;
+:root[data-theme=&quot;light&quot;] {
+  color-scheme: light;
+  --bg: #f9f9fa;
+  --surface: #fff;
+  --raised: #f2f2f4;
+  --border: #dfdfe4;
+  --text: #17171a;
+  --muted: #60616a;
+  --subtle: #777781;
+  --accent: #222226;
+  --accent-foreground: #fff;
+  --hover: rgba(0, 0, 0, 0.04);
 }
-.sidebar.collapsed{width:58px;flex-basis:58px}
-.sidebar-top{height:62px;min-height:62px;padding:14px;display:flex;align-items:center;justify-content:flex-end}
-.sidebar.collapsed .sidebar-top{justify-content:center;padding:10px}
-.sidebar-navigation{min-height:0;flex:1;overflow-y:auto;padding:0 9px;scrollbar-width:thin}
-.nav-group+.nav-group{margin-top:20px;padding-top:14px;border-top:1px solid var(--border)}
-.nav-group-label{font-size:10px;color:var(--subtle);padding:8px 11px;font-weight:600;letter-spacing:.035em}
-.nav-link{display:flex;align-items:center;gap:12px;min-height:39px;padding:0 12px;border-radius:6px;
-  color:var(--muted);white-space:nowrap;position:relative;margin:2px 0;font-size:calc(var(--app-font-size) - 1px)}
-.nav-link .app-icon{width:var(--app-icon-size)}
-.nav-link:hover{background:var(--hover);color:var(--text)}
-.nav-link.active{background:var(--raised);color:var(--text);font-weight:550}
-.nav-link.active::before{content:&quot;&quot;;position:absolute;left:0;top:10px;bottom:10px;width:2px;background:var(--accent);border-radius:2px}
-.sidebar.collapsed .sidebar-navigation{padding:0 6px}
-.sidebar.collapsed .nav-link{justify-content:center;padding:0}
-.sidebar.collapsed .nav-group+.nav-group{margin-top:18px}
-.sidebar-footer{font-size:11px;color:var(--subtle);border-top:1px solid var(--border);padding:13px 16px;min-height:44px}
-.sidebar.collapsed .sidebar-footer{padding:11px 5px}
-.main-column{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
-.project-header{height:66px;min-height:66px;border-bottom:1px solid var(--border);padding:0 35px;
-  display:flex;align-items:center;justify-content:space-between;gap:14px}
-.selector-group{display:flex;align-items:center;gap:14px;min-width:0;color:var(--muted)}
-.context-selector{background:none;border:0;display:grid;grid-template-columns:minmax(0,auto) 16px;
- grid-template-rows:auto auto;gap:2px 14px;text-align:left;min-width:150px;color:var(--text);padding:4px}
-.context-selector .eyebrow{grid-column:1/3}.context-selector strong{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.context-selector&gt;span:last-child{color:var(--muted)}
-.menu-content{background:var(--surface);border:1px solid var(--border);padding:6px;border-radius:8px;z-index:80;
-  box-shadow:0 16px 55px #0005;min-width:165px}
-.menu-item{border-radius:5px;padding:9px 11px;font-size:12px;outline:none}
-.menu-item[data-highlighted]{background:var(--hover)}
-.snapshot-reference{font-size:10px;letter-spacing:.04em;color:var(--subtle);white-space:nowrap}
-.page-container{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
-.page,.workbench-page{padding:32px clamp(18px,3.5vw,45px) 60px;max-width:1510px;margin:auto;min-width:0}
-.workbench-page{height:100%;min-height:550px;display:flex;flex-direction:column;padding-bottom:22px}
-.page-intro{margin-bottom:29px}.page-intro h1{font-size:clamp(22px,2vw,29px);font-weight:650;letter-spacing:-.038em;line-height:1.22;margin:6px 0 11px}
-.page-intro .muted{max-width:720px;line-height:1.6;font-size:calc(var(--app-font-size) - 1px)}
-.eyebrow{color:var(--subtle);font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:600}
-.muted{color:var(--muted)}.panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;min-width:0}
-.panel h2{font-size:15px;font-weight:620;letter-spacing:-.015em;line-height:1.4}
-.panel h3{font-size:13px;font-weight:600;margin:30px 0 12px}
-.padded{padding:24px}.overview-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(250px,.7fr);gap:16px;align-items:stretch}
-.stack{display:flex;flex-direction:column;gap:16px;min-width:0}.stack .panel{flex:1}
-.panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 22px 16px}
-.panel-heading h2{margin:5px 0 0}.map-viewport{height:410px;background:var(--bg);border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden}
-.panel-footnote{font-size:11px;color:var(--muted);padding:15px 22px}
-.graph-pane{width:100%;height:100%;position:relative;min-height:250px}
-.react-flow__pane{cursor:grab!important}
-.react-flow__controls{box-shadow:none!important;border:1px solid var(--border)!important;border-radius:6px;overflow:hidden}
-.react-flow__controls button{background:var(--surface)!important;color:var(--text)!important;border:0!important;border-bottom:1px solid var(--border)!important}
-.react-flow__attribution{display:none!important}
-.graph-selected{position:absolute;bottom:16px;left:16px;right:16px;max-width:420px;background:var(--surface);border:1px solid var(--border);
-border-radius:8px;padding:13px 48px 13px 16px;display:grid;gap:5px;box-shadow:0 8px 30px #0004;font-size:12px}
-.graph-selected span{color:var(--muted)}
-.graph-selected button{position:absolute;right:10px;top:8px;padding:2px 9px;border:0;background:transparent;color:var(--muted);font-size:19px}
-.meta-list{margin-top:28px;padding-top:17px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr auto;gap:12px;font-size:11px}
-.meta-list span{color:var(--muted)}.meta-list strong{font-weight:550;text-align:right;font-size:11px}
-.goal-text{margin:16px 0 26px;line-height:1.75;color:var(--muted);font-size:12px}
-.section-header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:32px 0 12px}
-.section-header h2{font-size:15px;font-weight:650}.section-header span{font-size:11px;color:var(--muted)}
-.source-index{width:100%;padding:7px}
-.doc-row{background:transparent;width:100%;border:0;border-bottom:1px solid var(--border);
-padding:13px 14px;display:flex;align-items:center;justify-content:space-between;gap:14px;
-text-align:left;font-size:12px;color:var(--text);min-width:0}
-.doc-row:last-child{border-bottom:0}.doc-row:hover{background:var(--hover);border-radius:5px}
-.doc-row&gt;span{display:flex;align-items:center;gap:10px;min-width:0;overflow-wrap:anywhere}
-.doc-row small{font-size:11px;color:var(--muted);display:flex;align-items:center;white-space:nowrap;gap:7px}
-.project-card{max-width:580px}.project-card&gt;p:not(.eyebrow){line-height:1.75}
-.full-graph{flex:1;min-height:490px;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.workbench-pane{height:calc(100% - 110px);min-height:460px;background:var(--surface);border:1px solid var(--border);border-radius:9px;overflow:hidden}
-.dock-body{padding:22px;height:100%;overflow:auto}.dock-body h2{font-size:17px;margin:8px 0}
-.source-preview{background:var(--raised);border:1px solid var(--border);border-radius:7px;padding:18px;
-line-height:1.6;color:var(--text);font-family:inherit;white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;
-overflow:auto;max-height:70vh}
-.artifact-layout{display:grid;grid-template-columns:minmax(210px,.65fr) minmax(0,1.7fr);gap:14px}
-.artifact-list{align-self:start}.artifact-content{min-width:0}
-.settings-panel{max-width:770px}.setting-row{display:flex;align-items:center;justify-content:space-between;padding:22px 0;
-gap:18px;border-bottom:1px solid var(--border);font-size:12px}
-.setting-row:last-child{border:0}.setting-row strong{font-size:12px;font-weight:550}
-.segmented{display:flex;border:1px solid var(--border);border-radius:7px;padding:3px;gap:2px;flex-wrap:wrap}
-.segmented button{font-size:11px;background:transparent;color:var(--muted);border:0;border-radius:5px;padding:7px 11px;min-width:33px}
-.segmented button.selected{background:var(--raised);color:var(--text);box-shadow:inset 0 0 0 1px var(--border)}
-.settings-note{font-size:11px;margin-top:25px}
-.canvas-button{border:0;display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:6px;white-space:nowrap;transition:background .14s}
-.canvas-button-md{height:30px;padding:0 10px;font-size:12px}.canvas-button-icon{height:29px;width:29px;padding:0}
-.canvas-button-ghost{color:var(--muted);background:transparent}.canvas-button-ghost:hover{background:var(--hover);color:var(--text)}
-.canvas-button-subtle{background:var(--raised);border:1px solid var(--border);color:var(--text)}
-.canvas-button-subtle:hover{background:var(--hover)}
-.canvas-button-primary{background:var(--accent);color:var(--accent-foreground)}
-.window-statusbar{height:23px;min-height:23px;padding:0 12px;border-top:1px solid var(--border);background:var(--surface);
-display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--muted);font-size:10px;position:relative;z-index:30}
-.window-statusbar .version{position:absolute;left:50%;transform:translateX(-50%);white-space:nowrap}
-.window-statusbar span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:34%}
-.palette-cover{position:fixed;inset:0;background:#0007;z-index:100;display:flex;align-items:flex-start;justify-content:center;padding:9vh 14px 30px}
-.palette{max-width:600px;width:100%;max-height:min(680px,78vh);background:var(--surface);border:1px solid var(--border);
-border-radius:12px;box-shadow:0 28px 90px #0009;overflow:hidden;display:flex;flex-direction:column}
-.palette-search{height:55px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:0 17px}
-.palette-search input{flex:1;min-width:0;background:none;border:none;outline:none;color:var(--text);font-size:14px}
-.palette-tree{overflow-y:auto;padding:11px}.palette-root{display:flex;align-items:center;gap:8px;color:var(--muted);padding:9px 12px;font-size:11px}
-.palette-result{display:flex;align-items:center;width:100%;gap:12px;text-align:left;padding:12px;
-border:0;border-radius:7px;background:transparent;color:var(--text);font-size:13px}
-.palette-result.focused,.palette-result:hover{background:var(--raised)}
-.palette-result span:nth-of-type(2){flex:1}.palette-result small{font-size:11px;color:var(--muted);margin-left:auto}
-.palette-footer{padding:11px 16px;border-top:1px solid var(--border);color:var(--muted);font-size:11px}
-.empty-state{color:var(--muted);padding:14px}
-.sidebar-scrim{display:none}
-@media(max-width:1050px){
-  .overview-grid{grid-template-columns:minmax(0,1fr)}
-  .stack{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
-  .snapshot-reference{display:none}
+:root[data-theme=&quot;light&quot;][data-accent=&quot;blue&quot;] {
+  --accent: #225db7;
+  --accent-foreground: #fff;
 }
-@media(max-width:700px){
-  .window-titlebar{grid-template-columns:minmax(80px,auto) minmax(0,1fr) 32px;padding:0 7px;gap:6px}
-  .mobile-toggle{display:inline-flex!important}.app-symbol,.title-separator,.title-product,.omnibar-trigger .crumb,.omnibar-trigger .app-icon:not(:first-child){display:none}
-  .title-left{gap:5px}.omnibar-trigger{gap:6px}.omnibar-trigger kbd{display:none}
-  .sidebar{position:absolute;top:0;bottom:0;left:0;width:min(280px,85vw)!important;flex-basis:auto!important;
-    transform:translateX(-110%);box-shadow:6px 0 30px #0004;transition:transform .19s ease}
-  .sidebar.mobile-open{transform:translateX(0)}.sidebar.collapsed{width:min(280px,85vw)!important}
-  .sidebar.collapsed .nav-link{justify-content:flex-start;padding:0 12px}
-  .sidebar.collapsed .sidebar-navigation{padding:0 9px}
-  .sidebar-scrim{display:block;position:absolute;inset:0;z-index:9;background:#0007;border:0}
-  .main-column{width:100%}
-  .project-header{padding:0 16px;height:58px;min-height:58px}
-  .selector-group{gap:7px;max-width:100%}.context-selector{min-width:0;max-width:42vw;gap:2px 4px}
-  .context-selector strong{font-size:11px}.context-selector .eyebrow{font-size:9px}
-  .page,.workbench-page{padding:23px 16px 45px}
-  .page-intro{margin-bottom:22px}.overview-grid{gap:11px}
-  .map-viewport{height:310px}.stack{grid-template-columns:1fr;gap:11px}
-  .padded{padding:18px}.artifact-layout{grid-template-columns:1fr}.artifact-list{max-height:225px;overflow-y:auto}
-  .full-graph{min-height:370px}
-  .workbench-page{min-height:600px}.workbench-pane{min-height:440px}
-  .window-statusbar&gt;span:last-child{display:none}
-  .window-statusbar .version{position:static;transform:none;margin-left:auto}
-  .setting-row{align-items:flex-start;flex-direction:column;gap:9px}
-  .segmented{width:100%}.segmented button{flex:1}
+:root[data-theme=&quot;light&quot;][data-accent=&quot;sage&quot;] {
+  --accent: #31654b;
+  --accent-foreground: #fff;
 }
-@media(max-width:365px){
-  .title-left strong{display:none}
-  .panel-heading{padding:15px}.panel-heading h2{font-size:13px}
-  .doc-row small{display:none}
-  .project-header{padding:0 10px}
-  .context-selector{max-width:39vw}
+:root[data-theme=&quot;light&quot;][data-accent=&quot;violet&quot;] {
+  --accent: #6a46b2;
+  --accent-foreground: #fff;
 }
-@media(prefers-reduced-motion:reduce){
-  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+body {
+  font-size: var(--app-font-size);
+  overflow: hidden;
+}
+button,
+input {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.app-root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  min-height: 300px;
+  background: var(--bg);
+}
+.app-icon,
+.app-icon svg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  vertical-align: middle;
+}
+.window-titlebar {
+  display: grid;
+  grid-template-columns: minmax(130px, 1fr) minmax(0, 550px) minmax(48px, 1fr);
+  align-items: center;
+  height: 34px;
+  min-height: 34px;
+  border-bottom: 1px solid var(--border);
+  padding: 0 12px;
+  gap: 8px;
+  background: var(--bg);
+  position: relative;
+  z-index: 20;
+  font-size: 12px;
+}
+.title-left {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+  white-space: nowrap;
+}
+.title-left strong {
+  font-weight: 650;
+}
+.title-product {
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.title-separator {
+  color: var(--subtle);
+}
+.app-symbol {
+  display: inline-flex;
+  align-items: center;
+}
+.omnibar-area {
+  min-width: 0;
+  width: 100%;
+}
+.omnibar-trigger {
+  min-width: 0;
+  width: 100%;
+  height: 25px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--raised);
+  color: var(--muted);
+  text-align: left;
+  font-size: 11px;
+}
+.omnibar-trigger:hover {
+  border-color: var(--muted);
+}
+.omnibar-trigger strong {
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.omnibar-trigger .crumb {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+kbd {
+  font: inherit;
+  color: var(--subtle);
+  font-size: 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  white-space: nowrap;
+}
+.omnibar-trigger kbd {
+  margin-left: auto;
+}
+.title-settings {
+  justify-self: end;
+}
+.mobile-toggle {
+  display: none !important;
+}
+.window-main {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  position: relative;
+}
+.sidebar {
+  flex: 0 0 228px;
+  display: flex;
+  flex-direction: column;
+  width: 228px;
+  min-width: 0;
+  height: 100%;
+  min-height: 0;
+  border-right: 1px solid var(--border);
+  background: var(--bg);
+  transition:
+    width 0.17s ease,
+    flex-basis 0.17s ease;
+  z-index: 10;
+}
+.sidebar.collapsed {
+  width: 58px;
+  flex-basis: 58px;
+}
+.sidebar-top {
+  height: 62px;
+  min-height: 62px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.sidebar.collapsed .sidebar-top {
+  justify-content: center;
+  padding: 10px;
+}
+.sidebar-navigation {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 9px;
+  scrollbar-width: thin;
+}
+.nav-group + .nav-group {
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.nav-group-label {
+  font-size: 10px;
+  color: var(--subtle);
+  padding: 8px 11px;
+  font-weight: 600;
+  letter-spacing: 0.035em;
+}
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 39px;
+  padding: 0 12px;
+  border-radius: 6px;
+  color: var(--muted);
+  white-space: nowrap;
+  position: relative;
+  margin: 2px 0;
+  font-size: calc(var(--app-font-size) - 1px);
+}
+.nav-link .app-icon {
+  width: var(--app-icon-size);
+}
+.nav-link:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+.nav-link.active {
+  background: var(--raised);
+  color: var(--text);
+  font-weight: 550;
+}
+.nav-link.active::before {
+  content: &quot;&quot;;
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+.sidebar.collapsed .sidebar-navigation {
+  padding: 0 6px;
+}
+.sidebar.collapsed .nav-link {
+  justify-content: center;
+  padding: 0;
+}
+.sidebar.collapsed .nav-group + .nav-group {
+  margin-top: 18px;
+}
+.sidebar-footer {
+  font-size: 11px;
+  color: var(--subtle);
+  border-top: 1px solid var(--border);
+  padding: 13px 16px;
+  min-height: 44px;
+}
+.sidebar.collapsed .sidebar-footer {
+  padding: 11px 5px;
+}
+.main-column {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.project-header {
+  height: 66px;
+  min-height: 66px;
+  border-bottom: 1px solid var(--border);
+  padding: 0 35px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.selector-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  color: var(--muted);
+}
+.context-selector {
+  background: none;
+  border: 0;
+  display: grid;
+  grid-template-columns: minmax(0, auto) 16px;
+  grid-template-rows: auto auto;
+  gap: 2px 14px;
+  text-align: left;
+  min-width: 150px;
+  color: var(--text);
+  padding: 4px;
+}
+.context-selector .eyebrow {
+  grid-column: 1 / 3;
+}
+.context-selector strong {
+  font-size: 12px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.context-selector &gt; span:last-child {
+  color: var(--muted);
+}
+.menu-content {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 6px;
+  border-radius: 8px;
+  z-index: 80;
+  box-shadow: 0 16px 55px #0005;
+  min-width: 165px;
+}
+.menu-item {
+  border-radius: 5px;
+  padding: 9px 11px;
+  font-size: 12px;
+  outline: none;
+}
+.menu-item[data-highlighted] {
+  background: var(--hover);
+}
+.snapshot-reference {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--subtle);
+  white-space: nowrap;
+}
+.page-container {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+}
+.page,
+.workbench-page {
+  padding: 32px clamp(18px, 3.5vw, 45px) 60px;
+  max-width: 1510px;
+  margin: auto;
+  min-width: 0;
+}
+.workbench-page {
+  height: 100%;
+  min-height: 550px;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 22px;
+}
+.page-intro {
+  margin-bottom: 29px;
+}
+.page-intro h1 {
+  font-size: clamp(22px, 2vw, 29px);
+  font-weight: 650;
+  letter-spacing: -0.038em;
+  line-height: 1.22;
+  margin: 6px 0 11px;
+}
+.page-intro .muted {
+  max-width: 720px;
+  line-height: 1.6;
+  font-size: calc(var(--app-font-size) - 1px);
+}
+.eyebrow {
+  color: var(--subtle);
+  font-size: 10px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.muted {
+  color: var(--muted);
+}
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  min-width: 0;
+}
+.panel h2 {
+  font-size: 15px;
+  font-weight: 620;
+  letter-spacing: -0.015em;
+  line-height: 1.4;
+}
+.panel h3 {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 30px 0 12px;
+}
+.padded {
+  padding: 24px;
+}
+.overview-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(250px, 0.7fr);
+  gap: 16px;
+  align-items: stretch;
+}
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.stack .panel {
+  flex: 1;
+}
+.panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 22px 16px;
+}
+.panel-heading h2 {
+  margin: 5px 0 0;
+}
+.map-viewport {
+  height: 410px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+.panel-footnote {
+  font-size: 11px;
+  color: var(--muted);
+  padding: 15px 22px;
+}
+.graph-pane {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  min-height: 250px;
+}
+.react-flow__pane {
+  cursor: grab !important;
+}
+.react-flow__controls {
+  box-shadow: none !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.react-flow__controls button {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+.react-flow__attribution {
+  display: none !important;
+}
+.graph-selected {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  max-width: 420px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 13px 48px 13px 16px;
+  display: grid;
+  gap: 5px;
+  box-shadow: 0 8px 30px #0004;
+  font-size: 12px;
+}
+.graph-selected span {
+  color: var(--muted);
+}
+.graph-selected button {
+  position: absolute;
+  right: 10px;
+  top: 8px;
+  padding: 2px 9px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 19px;
+}
+.meta-list {
+  margin-top: 28px;
+  padding-top: 17px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  font-size: 11px;
+}
+.meta-list span {
+  color: var(--muted);
+}
+.meta-list strong {
+  font-weight: 550;
+  text-align: right;
+  font-size: 11px;
+}
+.goal-text {
+  margin: 16px 0 26px;
+  line-height: 1.75;
+  color: var(--muted);
+  font-size: 12px;
+}
+.section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 32px 0 12px;
+}
+.section-header h2 {
+  font-size: 15px;
+  font-weight: 650;
+}
+.section-header span {
+  font-size: 11px;
+  color: var(--muted);
+}
+.source-index {
+  width: 100%;
+  padding: 7px;
+}
+.doc-row {
+  background: transparent;
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  padding: 13px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  text-align: left;
+  font-size: 12px;
+  color: var(--text);
+  min-width: 0;
+}
+.doc-row:last-child {
+  border-bottom: 0;
+}
+.doc-row:hover {
+  background: var(--hover);
+  border-radius: 5px;
+}
+.doc-row &gt; span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.doc-row small {
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  gap: 7px;
+}
+.project-card {
+  max-width: 580px;
+}
+.project-card &gt; p:not(.eyebrow) {
+  line-height: 1.75;
+}
+.full-graph {
+  flex: 1;
+  min-height: 490px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.workbench-pane {
+  height: calc(100% - 110px);
+  min-height: 460px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  overflow: hidden;
+}
+.dock-body {
+  padding: 22px;
+  height: 100%;
+  overflow: auto;
+}
+.dock-body h2 {
+  font-size: 17px;
+  margin: 8px 0;
+}
+.source-preview {
+  background: var(--raised);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 18px;
+  line-height: 1.6;
+  color: var(--text);
+  font-family: inherit;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  overflow: auto;
+  max-height: 70vh;
+}
+.artifact-layout {
+  display: grid;
+  grid-template-columns: minmax(210px, 0.65fr) minmax(0, 1.7fr);
+  gap: 14px;
+}
+.artifact-list {
+  align-self: start;
+}
+.artifact-content {
+  min-width: 0;
+}
+.settings-panel {
+  max-width: 770px;
+}
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 0;
+  gap: 18px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.setting-row:last-child {
+  border: 0;
+}
+.setting-row strong {
+  font-size: 12px;
+  font-weight: 550;
+}
+.segmented {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 3px;
+  gap: 2px;
+  flex-wrap: wrap;
+}
+.segmented button {
+  font-size: 11px;
+  background: transparent;
+  color: var(--muted);
+  border: 0;
+  border-radius: 5px;
+  padding: 7px 11px;
+  min-width: 33px;
+}
+.segmented button.selected {
+  background: var(--raised);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+.settings-note {
+  font-size: 11px;
+  margin-top: 25px;
+}
+.canvas-button {
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: background 0.14s;
+}
+.canvas-button-md {
+  height: 30px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+.canvas-button-icon {
+  height: 29px;
+  width: 29px;
+  padding: 0;
+}
+.canvas-button-ghost {
+  color: var(--muted);
+  background: transparent;
+}
+.canvas-button-ghost:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+.canvas-button-subtle {
+  background: var(--raised);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.canvas-button-subtle:hover {
+  background: var(--hover);
+}
+.canvas-button-primary {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+.window-statusbar {
+  height: 23px;
+  min-height: 23px;
+  padding: 0 12px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 10px;
+  position: relative;
+  z-index: 30;
+}
+.window-statusbar .version {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.window-statusbar span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 34%;
+}
+.palette-cover {
+  position: fixed;
+  inset: 0;
+  background: #0007;
+  z-index: 100;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 9vh 14px 30px;
+}
+.palette {
+  max-width: 600px;
+  width: 100%;
+  max-height: min(680px, 78vh);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 28px 90px #0009;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.palette-search {
+  height: 55px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 17px;
+}
+.palette-search input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-size: 14px;
+}
+.palette-tree {
+  overflow-y: auto;
+  padding: 11px;
+}
+.palette-root {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  padding: 9px 12px;
+  font-size: 11px;
+}
+.palette-result {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 12px;
+  text-align: left;
+  padding: 12px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+}
+.palette-result.focused,
+.palette-result:hover {
+  background: var(--raised);
+}
+.palette-result span:nth-of-type(2) {
+  flex: 1;
+}
+.palette-result small {
+  font-size: 11px;
+  color: var(--muted);
+  margin-left: auto;
+}
+.palette-footer {
+  padding: 11px 16px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 11px;
+}
+.empty-state {
+  color: var(--muted);
+  padding: 14px;
+}
+.sidebar-scrim {
+  display: none;
+}
+@media (max-width: 1050px) {
+  .overview-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .stack {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .snapshot-reference {
+    display: none;
+  }
+}
+@media (max-width: 700px) {
+  .window-titlebar {
+    grid-template-columns: minmax(80px, auto) minmax(0, 1fr) 32px;
+    padding: 0 7px;
+    gap: 6px;
+  }
+  .mobile-toggle {
+    display: inline-flex !important;
+  }
+  .app-symbol,
+  .title-separator,
+  .title-product,
+  .omnibar-trigger .crumb,
+  .omnibar-trigger .app-icon:not(:first-child) {
+    display: none;
+  }
+  .title-left {
+    gap: 5px;
+  }
+  .omnibar-trigger {
+    gap: 6px;
+  }
+  .omnibar-trigger kbd {
+    display: none;
+  }
+  .sidebar {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(280px, 85vw) !important;
+    flex-basis: auto !important;
+    transform: translateX(-110%);
+    box-shadow: 6px 0 30px #0004;
+    transition: transform 0.19s ease;
+  }
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+  .sidebar.collapsed {
+    width: min(280px, 85vw) !important;
+  }
+  .sidebar.collapsed .nav-link {
+    justify-content: flex-start;
+    padding: 0 12px;
+  }
+  .sidebar.collapsed .sidebar-navigation {
+    padding: 0 9px;
+  }
+  .sidebar-scrim {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 9;
+    background: #0007;
+    border: 0;
+  }
+  .main-column {
+    width: 100%;
+  }
+  .project-header {
+    padding: 0 16px;
+    height: 58px;
+    min-height: 58px;
+  }
+  .selector-group {
+    gap: 7px;
+    max-width: 100%;
+  }
+  .context-selector {
+    min-width: 0;
+    max-width: 42vw;
+    gap: 2px 4px;
+  }
+  .context-selector strong {
+    font-size: 11px;
+  }
+  .context-selector .eyebrow {
+    font-size: 9px;
+  }
+  .page,
+  .workbench-page {
+    padding: 23px 16px 45px;
+  }
+  .page-intro {
+    margin-bottom: 22px;
+  }
+  .overview-grid {
+    gap: 11px;
+  }
+  .map-viewport {
+    height: 310px;
+  }
+  .stack {
+    grid-template-columns: 1fr;
+    gap: 11px;
+  }
+  .padded {
+    padding: 18px;
+  }
+  .artifact-layout {
+    grid-template-columns: 1fr;
+  }
+  .artifact-list {
+    max-height: 225px;
+    overflow-y: auto;
+  }
+  .full-graph {
+    min-height: 370px;
+  }
+  .workbench-page {
+    min-height: 600px;
+  }
+  .workbench-pane {
+    min-height: 440px;
+  }
+  .window-statusbar &gt; span:last-child {
+    display: none;
+  }
+  .window-statusbar .version {
+    position: static;
+    transform: none;
+    margin-left: auto;
+  }
+  .setting-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 9px;
+  }
+  .segmented {
+    width: 100%;
+  }
+  .segmented button {
+    flex: 1;
+  }
+}
+@media (max-width: 365px) {
+  .title-left strong {
+    display: none;
+  }
+  .panel-heading {
+    padding: 15px;
+  }
+  .panel-heading h2 {
+    font-size: 13px;
+  }
+  .doc-row small {
+    display: none;
+  }
+  .project-header {
+    padding: 0 10px;
+  }
+  .context-selector {
+    max-width: 39vw;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 </pre></section>
-<section class="file" id="file-0070"><h3>.github/app/tsconfig.json</h3><p class="meta">Git mode 100644 · f08ab6a37331b79a22ab4b6ea17fba65805fd270</p><pre>{
+<section class="file" id="file-0070"><h3>.github/app/tsconfig.json</h3><p class="meta">Git mode 100644 · e5facd2ff85a68129ec0d60b7ff7ae93f77376c6</p><pre>{
   &quot;compilerOptions&quot;: {
     &quot;target&quot;: &quot;ES2022&quot;,
-    &quot;lib&quot;: [
-      &quot;ES2022&quot;,
-      &quot;DOM&quot;,
-      &quot;DOM.Iterable&quot;
-    ],
+    &quot;lib&quot;: [&quot;ES2022&quot;, &quot;DOM&quot;, &quot;DOM.Iterable&quot;],
     &quot;module&quot;: &quot;ESNext&quot;,
     &quot;moduleResolution&quot;: &quot;Bundler&quot;,
     &quot;jsx&quot;: &quot;react-jsx&quot;,
@@ -2445,16 +3778,9 @@ border:0;border-radius:7px;background:transparent;color:var(--text);font-size:13
     &quot;resolveJsonModule&quot;: true,
     &quot;noEmit&quot;: true,
     &quot;allowImportingTsExtensions&quot;: true,
-    &quot;types&quot;: [
-      &quot;react&quot;,
-      &quot;react-dom&quot;,
-      &quot;node&quot;
-    ]
+    &quot;types&quot;: [&quot;react&quot;, &quot;react-dom&quot;, &quot;node&quot;]
   },
-  &quot;include&quot;: [
-    &quot;src&quot;,
-    &quot;rsbuild.config.ts&quot;
-  ]
+  &quot;include&quot;: [&quot;src&quot;, &quot;rsbuild.config.ts&quot;]
 }
 </pre></section>
 <section class="file" id="file-0071"><h3>.github/darkfactory-installation.json</h3><p class="meta">Git mode 100644 · a16dabfd7f7fd2608c48fbebbca831cd705d727b</p><pre>{
@@ -3191,7 +4517,7 @@ class VersioningTests(unittest.TestCase):
 if __name__ == &quot;__main__&quot;:
     unittest.main()
 </pre></section>
-<section class="file" id="file-0080"><h3>.github/workflows/canvas-format.yml</h3><p class="meta">Git mode 100644 · 985f212e953c5dda6959d601c7f6683ac8b5a1ba</p><pre>name: Canvas source formatting (feature bootstrap)
+<section class="file" id="file-0080"><h3>.github/workflows/canvas-format.yml</h3><p class="meta">Git mode 100644 · fba09976a79235cdda336dc0f060bab78cd898ac</p><pre>name: Canvas source formatting (feature bootstrap)
 on:
   push:
     branches: [feat/canvas-react-pages]
@@ -3234,9 +4560,10 @@ jobs:
           git config user.name &#x27;github-actions[bot]&#x27;
           git config user.email &#x27;41898282+github-actions[bot]@users.noreply.github.com&#x27;
           git commit -m &#x27;style(canvas): apply Biome formatting&#x27;
+          git pull --rebase origin feat/canvas-react-pages
           git push origin HEAD:feat/canvas-react-pages
 </pre></section>
-<section class="file" id="file-0081"><h3>.github/workflows/canvas-pages.yml</h3><p class="meta">Git mode 100644 · 3a05f67ac8bf5129ed985c45e65f15eecec81517</p><pre>name: Canvas — GitHub Pages
+<section class="file" id="file-0081"><h3>.github/workflows/canvas-pages.yml</h3><p class="meta">Git mode 100644 · 123a1f1ce05058275ff4b33e33bcbc5c1b7cdcb4</p><pre>name: Canvas — GitHub Pages
 on:
   pull_request:
     branches: [development, main]
@@ -3254,8 +4581,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: canvas-pages
-  cancel-in-progress: false
+  group: canvas-pages-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -3289,7 +4616,7 @@ jobs:
           path: .canvas-dist
 
   deploy:
-    if: github.event.repository.private == false &amp;&amp; github.ref == &#x27;refs/heads/main&#x27; &amp;&amp; github.event_name != &#x27;pull_request&#x27;
+    if: github.event.repository.private == false &amp;&amp; (github.ref == &#x27;refs/heads/main&#x27; || github.ref == &#x27;refs/heads/feat/canvas-react-pages&#x27;) &amp;&amp; github.event_name == &#x27;push&#x27;
     needs: build
     runs-on: ubuntu-latest
     environment:
