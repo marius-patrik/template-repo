@@ -37,7 +37,7 @@ export default function App() {
   const [systemDark, setSystemDark] = useState(
     () => window.matchMedia("(prefers-color-scheme: dark)").matches,
   );
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const resizing = useRef(false);
   const resizeOrigin = useRef({ x: 0, width: 228 });
   const currentProfileId = useProfiles((state) => state.currentId);
@@ -234,7 +234,7 @@ export default function App() {
           />
         )}
         <div className={`work-area activity-position-${prefs.activityBarPosition}`}>
-          {prefs.activityBarPosition !== "hidden" && (
+          {prefs.activityBarPosition !== "hidden" && collapsed && !mobileOpen && (
             <ActivityBar
               current={page}
               onNavigate={go}
@@ -243,12 +243,10 @@ export default function App() {
             />
           )}
           <div className={`primary-content sidebar-${prefs.sidebarPosition}`}>
-            {(prefs.navigationPosition === "sidebar" ||
-              prefs.omnibarPosition === "sidebar" ||
-              (page !== null && ["library", "editor"].includes(page))) && (
+            {(!collapsed || mobileOpen) && (
               <>
                 <aside
-                  className={`sidebar ${collapsed ? "collapsed" : ""} ${mobileOpen ? "mobile-open" : ""}`}
+                  className={`sidebar ${mobileOpen ? "mobile-open" : ""}`}
                   aria-label="Main navigation"
                   style={{ "--sidebar-width": `${prefs.sidebarWidth}px` } as CSSProperties}
                 >
@@ -261,6 +259,12 @@ export default function App() {
                           </div>
                         </SurfaceMenu>
                       )}
+                      <div className="sidebar-action-row">
+                        <button type="button" className="sidebar-new-tab" onClick={() => window.dispatchEvent(new Event("canvas:new-tab"))}>
+                          <AnimatedIcon name="plus" size={16} />
+                          <span>{t("New tab")}</span>
+                        </button>
+                      </div>
                       <SidebarContents current={page} onNavigate={go} />
                     </>
                   )}

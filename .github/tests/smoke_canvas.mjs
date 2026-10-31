@@ -138,7 +138,11 @@ try {
 
   await page.getByRole("combobox", { name: "Navigation position" }).click();
   await page.getByRole("option", { name: "Sidebar" }).click();
+  await page.locator(".desktop-toggle").click();
+  await page.locator(".sidebar").waitFor();
   await page.locator(".navigation-tree").waitFor();
+  if (await page.locator(".activity-bar").count())
+    throw new Error("Expanded sidebar must replace the compact activity rail");
   const handle = page.getByRole("separator", { name: "Resize sidebar" });
   await handle.focus();
   await page.keyboard.press("ArrowRight");

@@ -219,3 +219,31 @@
     transition: none;
   }
 }
+
+/* Activity rail becomes the single compact navigation. Expanding it replaces
+   the rail with the full primary sidebar rather than leaving two competing bars. */
+.sidebar-action-row {
+  padding: var(--ui-spacing);
+  border-bottom: 1px solid var(--border);
+  flex: none;
+}
+.sidebar-new-tab {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-spacing);
+  width: 100%;
+  min-height: calc(var(--ui-spacing) * 4.5);
+  padding: calc(var(--ui-spacing) * .7) var(--ui-spacing);
+  border: 1px solid transparent;
+  border-radius: var(--control-radius);
+  background: transparent;
+  color: var(--muted);
+  text-align: left;
+  font: inherit;
+  font-size: calc(var(--app-font-size) * .9);
+}
+.sidebar-new-tab:hover, .sidebar-new-tab:focus-visible {
+  color: var(--accent);
+  background: var(--selection-surface);
+  border-color: var(--border);
+}

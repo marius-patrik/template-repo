@@ -357,7 +357,7 @@ export function SidebarContents({
   const { t } = useTranslation();
   const [filter, setFilter] = useState("");
   const prefs = useCanvasConfig((state) => state.preferences);
-  if (prefs.navigationPosition === "sidebar")
+  if (prefs.navigationPosition === "sidebar" || !current || !["library", "editor"].includes(current))
     return <NavigationTree current={current} onNavigate={onNavigate} />;
   if (!current || !["library", "editor"].includes(current)) return null;
   return (

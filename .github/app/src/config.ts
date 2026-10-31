@@ -254,7 +254,23 @@ export const useCanvasConfig = create<ConfigState>()(
       version: 4,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ preferences: state.preferences }),
-      migrate: (saved) => saved,
+      migrate: (saved, previousVersion) => {
+        if (previousVersion >= 4 || !saved || typeof saved !== "object") return saved;
+        const record = saved as { preferences?: Partial<CanvasPreferences> };
+        const prefs = record.preferences;
+        if (!prefs || prefs.skin !== "graphite") return saved;
+        const priorDefault = JSON.stringify(prefs.darkColors) === JSON.stringify(darkPalette);
+        const previousOled = prefs.darkColors?.bg === "#000000" && prefs.darkColors?.surface === "#000000";
+        if (!priorDefault && !previousOled) return saved;
+        return {
+          ...record,
+          preferences: {
+            ...prefs,
+            skin: "oled",
+            ...(priorDefault ? { darkColors: oledPalette } : {}),
+          },
+        };
+      },
       merge: (saved, current) => {
         const record =
           saved && typeof saved === "object" ? (saved as { preferences?: unknown }) : {};
