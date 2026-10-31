@@ -72,7 +72,7 @@ try {
   // Settings expose all placement and unified scale controls.
   await page.locator(".title-actions").getByRole("button", { name: "Settings" }).click();
   await page.getByTestId("settings-page").waitFor();
-  await page.getByRole("button", { name: "UI scale" }).click();
+  await page.getByRole("combobox", { name: "UI scale" }).click();
   await page.getByRole("option", { name: "Large" }).click();
   if (!(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--ui-spacing").trim().endsWith("11px"))))
     throw new Error("Scale preset did not synchronize spacing");
@@ -80,7 +80,7 @@ try {
   await page.waitForFunction(() => getComputedStyle(document.documentElement).getPropertyValue("--ui-spacing").trim() === "12px");
   await page.getByRole("spinbutton", { name: "Primary sidebar width" }).fill("260");
 
-  await page.getByRole("button", { name: "Navigation position" }).click();
+  await page.getByRole("combobox", { name: "Navigation position" }).click();
   await page.getByRole("option", { name: "Sidebar" }).click();
   await page.locator(".navigation-tree").waitFor();
   const handle = page.getByRole("separator", { name: "Resize sidebar" });
@@ -95,7 +95,7 @@ try {
   await page.mouse.up();
   await page.waitForFunction(() => Number(document.querySelector(".sidebar-resizer")?.getAttribute("aria-valuenow")) >= 310);
 
-  await page.getByRole("button", { name: "Omnibar position" }).click();
+  await page.getByRole("combobox", { name: "Omnibar position" }).click();
   await page.getByRole("option", { name: "Floating" }).click();
   await page.locator(".floating-omnibar").waitFor();
   const floatingHandle = page.getByRole("button", { name: "Drag omnibar" });
