@@ -3076,12 +3076,12 @@ class VersioningTests(unittest.TestCase):
 if __name__ == &quot;__main__&quot;:
     unittest.main()
 </pre></section>
-<section class="file" id="file-0076"><h3>.github/workflows/canvas-pages.yml</h3><p class="meta">Git mode 100644 · 35691dfc993d507aabee6595d565930d289f2a12</p><pre>name: Canvas — GitHub Pages
+<section class="file" id="file-0076"><h3>.github/workflows/canvas-pages.yml</h3><p class="meta">Git mode 100644 · 1046a90f175133ff1eb838fbf16501aa481e2094</p><pre>name: Canvas — GitHub Pages
 on:
   pull_request:
     branches: [development, main]
   push:
-    branches: [main]
+    branches: [main, &#x27;feat/canvas-react-pages&#x27;]
     paths:
       - &#x27;.github/app/**&#x27;
       - &#x27;.github/workflows/canvas-pages.yml&#x27;
