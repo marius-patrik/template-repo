@@ -133,7 +133,7 @@ is remembered separately from its collapsed state (`canvas-sidebar-width-v1`).
 
 Radix Select and Context Menu supply keyboard/focus/portal behavior for language,
 Monaco source files, title-bar navigation, sidebar actions and Dockview tabs.
-A Sonner-based global toast surface provides actionable success and error feedback.
+A Sonner-based global toast surface provides actionable success and error feedback.\nThe Radix notification center preserves up to 40 genuine browser-local UI events\n(with timestamps and unread markers), validates restored entries, and allows clearing\nthe history. It never claims to represent live agent activity.
 Dockview tabs include route icons and allow right-click actions. Icons use
 `lucide-animated` with animation triggered from the full interactive parent;
 Monaco's `</>` badge supplements the animated icon frame because that glyph is
