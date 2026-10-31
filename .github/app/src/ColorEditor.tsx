@@ -116,7 +116,7 @@ export default function ColorEditor({
           ) : (
             <HexColorPicker color={value} onChange={set} />
           )}
-          <div className="color-editor-tabs" aria-label="Color format">
+          <div className="color-editor-tabs">
             {(["hex", "rgb", "hsl"] as const).map((choice) => (
               <button
                 key={choice}
