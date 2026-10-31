@@ -3149,7 +3149,7 @@ class VersioningTests(unittest.TestCase):
 if __name__ == &quot;__main__&quot;:
     unittest.main()
 </pre></section>
-<section class="file" id="file-0078"><h3>.github/workflows/canvas-pages.yml</h3><p class="meta">Git mode 100644 · 1046a90f175133ff1eb838fbf16501aa481e2094</p><pre>name: Canvas — GitHub Pages
+<section class="file" id="file-0078"><h3>.github/workflows/canvas-pages.yml</h3><p class="meta">Git mode 100644 · 3a05f67ac8bf5129ed985c45e65f15eecec81517</p><pre>name: Canvas — GitHub Pages
 on:
   pull_request:
     branches: [development, main]
@@ -3180,6 +3180,7 @@ jobs:
         with:
           fetch-depth: 1
           submodules: false
+      - uses: actions/configure-pages@v5
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: &#x27;1.3.11&#x27;
@@ -3196,7 +3197,7 @@ jobs:
           grep -q &#x27;&lt;/html&gt;&#x27; .canvas-dist/index.html
           cp .canvas-dist/index.html .canvas-dist/canvas.html
           touch .canvas-dist/.nojekyll
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: .canvas-dist
 
