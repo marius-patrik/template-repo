@@ -20,6 +20,25 @@ try {
   await page.getByTestId("empty-workspace").waitFor();
   await page.locator(".dock-empty-tabbar").waitFor();
   await captureReview("WELCOME", page);
+  for (const [label, view, width, height] of [
+    ["CANVAS_DIRECT", "Canvas", 1440, 900],
+    ["SETTINGS_DIRECT", "Settings", 1440, 900],
+    ["MOBILE_WELCOME", null, 390, 844],
+    ["MOBILE_CANVAS", "Canvas", 390, 844],
+  ]) {
+    const review = await browser.newPage({ viewport: { width, height }, reducedMotion: "reduce" });
+    try {
+      await review.goto(url, { waitUntil: "load" });
+      await review.getByTestId("empty-workspace").waitFor();
+      if (view) {
+        await review.locator(".dock-welcome-options").getByRole("button", { name: view, exact: true }).click();
+        await review.locator(`[data-dock-view="${view.toLowerCase()}"]`).waitFor();
+      }
+      await captureReview(label, review);
+    } finally {
+      await review.close();
+    }
+  }
   await page.locator(".window-statusbar .title-navigation").waitFor();
   if (await page.locator(".window-titlebar .title-navigation").count())
     throw new Error("Navigation should default to bottom-left status bar");
