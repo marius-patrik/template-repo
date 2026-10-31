@@ -401,8 +401,7 @@ export default function DockCanvas({
     // Dockview already created this tab; route changes must not duplicate it.
     if (alreadyOpenedRoute.current === route) {
       alreadyOpenedRoute.current = null;
-      if (api?.panels.some((panel) => panelKind(panel.id) === viewFromRoute(route)))
-        return;
+      if (api?.panels.some((panel) => panelKind(panel.id) === viewFromRoute(route))) return;
     } else if (alreadyOpenedRoute.current) {
       alreadyOpenedRoute.current = null;
     }
