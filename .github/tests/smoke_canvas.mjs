@@ -9,6 +9,7 @@ const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 const errors = [];
 page.on("pageerror", (error) => errors.push(error.message));
+page.on("console", (message) => { if (message.text().startsWith("CANVAS_DOCK_ROUTE")) console.log(message.text()); });
 
 try {
   await page.goto(url, { waitUntil: "load" });
