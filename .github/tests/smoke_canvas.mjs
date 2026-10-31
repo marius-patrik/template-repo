@@ -9,7 +9,6 @@ const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 const errors = [];
 page.on("pageerror", (error) => errors.push(error.message));
-page.on("console", (message) => { if (message.text().startsWith("CANVAS_DOCK_ROUTE")) console.log(message.text()); });
 
 try {
   await page.goto(url, { waitUntil: "load" });
@@ -26,27 +25,9 @@ try {
     throw new Error("New tab must list all tools");
   await page.getByTestId("new-tab-welcome").getByRole("button", { name: "Editor" }).click();
   await page.locator('[data-dock-view="editor"]').waitFor();
-  const beforeClose = await page.evaluate(() => ({
-    route: location.hash,
-    panels: [...document.querySelectorAll("[data-dock-view]")].map((el) => el.getAttribute("data-dock-view")),
-    tabCount: document.querySelectorAll(".dv-tab").length,
-    tabs: [...document.querySelectorAll(".dv-tab")].map((tab) => ({
-      text: tab.textContent, id: tab.getAttribute("data-id"), selected: tab.getAttribute("aria-selected"),
-      html: tab.outerHTML.slice(0, 240),
-    })),
-    canvasTabs: [...document.querySelectorAll(".canvas-dock-tab")].map((tab) => tab.getAttribute("data-canvas-tab")),
-  }));
-  console.log("Pre-close snapshot:", JSON.stringify(beforeClose));
   await page.locator('.canvas-dock-tab[data-canvas-tab="editor"] .canvas-tab-close').last().click();
-  await page.waitForTimeout(250);
-  const afterClose = await page.evaluate(() => ({
-    route: location.hash,
-    panels: [...document.querySelectorAll("[data-dock-view]")].map((element) => element.getAttribute("data-dock-view")),
-    tabs: [...document.querySelectorAll(".dv-tab")].map((element) => element.textContent),
-    empty: !!document.querySelector('[data-testid="empty-workspace"]'),
-  }));
-  console.log("Post-new-tab-close snapshot:", JSON.stringify(afterClose));
-  if (!afterClose.empty) throw new Error("Closing replacement editor did not restore empty workspace: " + JSON.stringify(afterClose));
+  await page.getByTestId("empty-workspace").waitFor();
+
   // OLED is the default dark skin, and selection uses the shared accent.
   await page.waitForFunction(() =>
     getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() === "#000000"
@@ -134,7 +115,7 @@ try {
   await page.getByRole("option", { name: "Large" }).click();
   if (!(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--ui-spacing").trim().endsWith("11px"))))
     throw new Error("Scale preset did not synchronize spacing");
-  await page.getByRole("combobox", { name: "Spacing" }).click();
+  await page.getByRole("combobox", { name: "Spacing", exact: true }).click();
   await page.getByRole("option", { name: "Small" }).click();
   await page.waitForFunction(() => getComputedStyle(document.documentElement).getPropertyValue("--ui-spacing").trim() === "6px");
   await page.getByRole("combobox", { name: "Icon size" }).click();
@@ -204,7 +185,7 @@ try {
   await page.reload({ waitUntil: "load" });
   await page.getByTestId("settings-page").waitFor();
   if (await page.locator('select').count()) throw new Error("Native select remains");
-  if (await page.getByRole("combobox", { name: "Spacing" }).textContent() === "")
+  if (await page.getByRole("combobox", { name: "Spacing", exact: true }).textContent() === "")
     throw new Error("Spacing preference control was not restored");
   if (await page.getByRole("spinbutton", { name: "Title bar height" }).inputValue() !== "35")
     throw new Error("Title bar size preference was not retained");
