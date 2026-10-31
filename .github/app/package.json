@@ -8,8 +8,11 @@
     "dev": "bun run context && rsbuild dev",
     "context": "node scripts/generate-context.mjs",
     "build": "bun run context && rsbuild build",
-    "typecheck": "tsc --noEmit",
-    "check": "bun run context && bun run typecheck && bun run build"
+    "typecheck": "bun run context && tsc --noEmit",
+    "check": "bun run context && bun run typecheck && bun run build",
+    "lint": "biome lint .",
+    "format:check": "biome ci .",
+    "format:write": "biome check --write ."
   },
   "dependencies": {
     "@radix-ui/react-dropdown-menu": "^2.1.16",
@@ -36,6 +39,7 @@
     "@types/react-dom": "^19.0.0",
     "postcss": "^8.5.0",
     "tailwindcss": "^4.1.0",
-    "typescript": "^5.9.0"
+    "typescript": "^5.9.0",
+    "@biomejs/biome": "^2.3.0"
   }
 }
