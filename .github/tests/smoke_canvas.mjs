@@ -142,26 +142,10 @@ try {
   if (!dividerBox) throw new Error("Sidebar pointer resize handle is not visible");
   const pointerX = dividerBox.x + dividerBox.width / 2;
   const pointerY = dividerBox.y + dividerBox.height / 2;
-  const pointerHit = await page.evaluate(
-    ({ x, y }) => {
-      const hit = document.elementFromPoint(x, y);
-      return { tag: hit?.tagName, className: hit?.getAttribute("class"), outer: hit?.outerHTML.slice(0, 300) };
-    },
-    { x: pointerX, y: pointerY },
-  );
-  console.log("Sidebar drag target", JSON.stringify({ dividerBox, pointerHit, resizedWidth }));
+  if (dividerBox.height < 50) throw new Error("Sidebar resize handle has no pointer hit area");
   await page.mouse.move(pointerX, pointerY);
   await page.mouse.down();
-  console.log("Sidebar drag down", await page.evaluate(() => ({
-    resizing: document.body.classList.contains("resizing-sidebar"),
-    width: document.querySelector(".sidebar-resizer")?.getAttribute("aria-valuenow"),
-  })));
   await page.mouse.move(pointerX + 62, pointerY, { steps: 6 });
-  console.log("Sidebar drag moved", await page.evaluate(() => ({
-    resizing: document.body.classList.contains("resizing-sidebar"),
-    width: document.querySelector(".sidebar-resizer")?.getAttribute("aria-valuenow"),
-    visual: document.querySelector(".sidebar")?.getBoundingClientRect().width,
-  })));
   await page.mouse.up();
   await page.waitForFunction(
     (previous) => Number(document.querySelector(".sidebar-resizer")?.getAttribute("aria-valuenow")) >= previous + 40,
