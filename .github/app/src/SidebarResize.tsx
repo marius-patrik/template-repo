@@ -61,7 +61,6 @@ export default function SidebarResize() {
   return (
     <hr
       className="cx-resizer sidebar-resizer"
-      role="separator"
       aria-label={t("Resize sidebar")}
       aria-orientation="vertical"
       aria-valuenow={width}
