@@ -2645,7 +2645,7 @@ export default function App() {
   );
 }
 </pre></section>
-<section class="file" id="file-0066"><h3>.github/app/src/DockCanvas.tsx</h3><p class="meta">Git mode 100644 · d1c4f9a27d2b512884c850cd07b8f56046570866</p><pre>import {
+<section class="file" id="file-0066"><h3>.github/app/src/DockCanvas.tsx</h3><p class="meta">Git mode 100644 · 6ec3ff3a08552adb4929bbbd51ea6d94a43c7bcf</p><pre>import {
   createContext,
   useContext,
   useEffect,
@@ -2870,6 +2870,7 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
               type=&quot;button&quot;
               className=&quot;dock-toolbar-button&quot;
               onClick={() =&gt; latest.current.onNavigate(&quot;/graph&quot;)}
+              aria-label=&quot;Open knowledge graph&quot;
               title=&quot;Open knowledge graph&quot;
             &gt;
               &lt;AnimatedIcon name=&quot;graph&quot; size={15} /&gt;
