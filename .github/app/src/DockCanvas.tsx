@@ -140,7 +140,7 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
       try { localStorage.removeItem(LAYOUT_KEY); } catch { /* unavailable */ }
     }
 
-    disposables.current.forEach((listener) => listener.dispose());
+    disposables.current.forEach((listener) => { listener.dispose(); });
     disposables.current = [
       api.onDidActivePanelChange(({ panel, origin }) => {
         if (origin !== "user" || !panel) return;
@@ -240,13 +240,13 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
             </button>
           </div>
         </div>
-        <div className="dock-grid" aria-label="Dockview panels">
+        <section className="dock-grid" aria-label="Dockview panels">
           <DockviewReact
             theme={dark ? themeDark : themeLight}
             components={components}
             onReady={onReady}
           />
-        </div>
+        </section>
       </div>
     </PaneContext.Provider>
   );
