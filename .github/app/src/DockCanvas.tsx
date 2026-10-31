@@ -223,6 +223,7 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
               type="button"
               className="dock-toolbar-button"
               onClick={() => latest.current.onNavigate("/graph")}
+              aria-label="Open knowledge graph"
               title="Open knowledge graph"
             >
               <AnimatedIcon name="graph" size={15} />
