@@ -26,7 +26,15 @@ try {
   await page.getByTestId("new-tab-welcome").getByRole("button", { name: "Editor" }).click();
   await page.locator('[data-dock-view="editor"]').waitFor();
   await page.locator('.canvas-dock-tab[data-canvas-tab="editor"] .canvas-tab-close').last().click();
-  await page.getByTestId("empty-workspace").waitFor();
+  await page.waitForTimeout(250);
+  const afterClose = await page.evaluate(() => ({
+    route: location.hash,
+    panels: [...document.querySelectorAll("[data-dock-view]")].map((element) => element.getAttribute("data-dock-view")),
+    tabs: [...document.querySelectorAll(".dv-tab")].map((element) => element.textContent),
+    empty: !!document.querySelector('[data-testid="empty-workspace"]'),
+  }));
+  console.log("Post-new-tab-close snapshot:", JSON.stringify(afterClose));
+  if (!afterClose.empty) throw new Error("Closing replacement editor did not restore empty workspace: " + JSON.stringify(afterClose));
   // OLED is the default dark skin, and selection uses the shared accent.
   await page.waitForFunction(() =>
     getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() === "#000000"
