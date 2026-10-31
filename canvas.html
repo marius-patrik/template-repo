@@ -2063,7 +2063,7 @@ export function AccentColorPicker({
   );
 }
 </pre></section>
-<section class="file" id="file-0065"><h3>.github/app/src/App.tsx</h3><p class="meta">Git mode 100644 · 7cb1ffcaa178412abfb65432ffb47c5abcddc145</p><pre>import { useEffect, useMemo, useRef, useState } from &quot;react&quot;;
+<section class="file" id="file-0065"><h3>.github/app/src/App.tsx</h3><p class="meta">Git mode 100644 · 1fc024bfc59f459cff07b2549013a8206b36c973</p><pre>import { useEffect, useMemo, useRef, useState } from &quot;react&quot;;
 import { colord, extend } from &quot;colord&quot;;
 import a11yPlugin from &quot;colord/plugins/a11y&quot;;
 import { formatForDisplay, useAppHotkeys, useHotkey } from &quot;@tanstack/react-hotkeys&quot;;
@@ -2159,7 +2159,10 @@ function Overview({ to }: { to: (p: string) =&gt; void }) {
             &lt;Graph /&gt;
           &lt;/div&gt;
           &lt;div className=&quot;panel-footnote&quot;&gt;
-            {context.documents.length} source documents · {context.paths.length} documented records
+            {t(&quot;{{documents}} source documents · {{records}} documented records&quot;, {
+              documents: context.documents.length,
+              records: context.paths.length,
+            })
           &lt;/div&gt;
         &lt;/section&gt;
         &lt;div className=&quot;stack&quot;&gt;
@@ -2167,7 +2170,9 @@ function Overview({ to }: { to: (p: string) =&gt; void }) {
             &lt;p className=&quot;eyebrow&quot;&gt;{t(&quot;Project identity&quot;)}&lt;/p&gt;
             &lt;h2&gt;{context.repository}&lt;/h2&gt;
             &lt;p className=&quot;muted&quot;&gt;
-              Build source: Git-tracked documents. Revision {context.revision}.
+              {t(&quot;Build source: Git-tracked documents. Revision {{revision}}.&quot;, {
+                revision: context.revision,
+              })}
             &lt;/p&gt;
             &lt;div className=&quot;meta-list&quot;&gt;
               &lt;span&gt;{t(&quot;Current branch&quot;)}&lt;/span&gt;
@@ -2213,8 +2218,7 @@ function SimplePage({ id, to }: { id: View; to: (p: string) =&gt; void }) {
             &lt;p className=&quot;eyebrow&quot;&gt;{t(&quot;Layout&quot;)}&lt;/p&gt;
             &lt;h2&gt;{t(&quot;Arrange your workspace&quot;)}&lt;/h2&gt;
             &lt;p className=&quot;muted&quot;&gt;
-              Drag tabs to create groups, split panels, or float windows. Your arrangement is saved
-              locally in this browser.
+              {t(&quot;Drag tabs to create groups, split panels, or float windows. Your arrangement is saved locally in this browser.&quot;)}
             &lt;/p&gt;
             &lt;Button variant=&quot;subtle&quot; onClick={() =&gt; to(&quot;/graph&quot;)}&gt;
               {t(&quot;Open graph&quot;)} &lt;AnimatedIcon name=&quot;right&quot; size={15} /&gt;
@@ -2225,7 +2229,10 @@ function SimplePage({ id, to }: { id: View; to: (p: string) =&gt; void }) {
             &lt;h2&gt;{context.name}&lt;/h2&gt;
             &lt;p className=&quot;muted&quot;&gt;{context.repository}&lt;/p&gt;
             &lt;p className=&quot;muted&quot;&gt;
-              {context.documents.length} authored source documents · revision {context.revision}
+              {t(&quot;{{documents}} authored source documents · revision {{revision}}&quot;, {
+                documents: context.documents.length,
+                revision: context.revision,
+              })}
             &lt;/p&gt;
             &lt;Button variant=&quot;subtle&quot; onClick={() =&gt; to(&quot;/artifacts&quot;)}&gt;
               {t(&quot;Browse artifacts&quot;)} &lt;AnimatedIcon name=&quot;right&quot; size={15} /&gt;
@@ -2273,7 +2280,7 @@ function SimplePage({ id, to }: { id: View; to: (p: string) =&gt; void }) {
           {prd ? (
             &lt;MarkdownSource value={prd.content} /&gt;
           ) : (
-            &lt;p className=&quot;muted&quot;&gt;No generated PRD is available in this snapshot.&lt;/p&gt;
+            &lt;p className=&quot;muted&quot;&gt;{t(&quot;No generated PRD is available in this snapshot.&quot;)}&lt;/p&gt;
           )}
         &lt;/div&gt;
       &lt;/div&gt;
@@ -2290,7 +2297,7 @@ function SimplePage({ id, to }: { id: View; to: (p: string) =&gt; void }) {
           {agents ? (
             &lt;MarkdownSource value={agents.content} /&gt;
           ) : (
-            &lt;p className=&quot;muted&quot;&gt;No agent-rule document is available.&lt;/p&gt;
+            &lt;p className=&quot;muted&quot;&gt;{t(&quot;No agent-rule document is available.&quot;)}&lt;/p&gt;
           )}
         &lt;/div&gt;
       &lt;/div&gt;
@@ -2300,16 +2307,15 @@ function SimplePage({ id, to }: { id: View; to: (p: string) =&gt; void }) {
       &lt;div className=&quot;page&quot;&gt;
         &lt;PageIntro title=&quot;Context&quot; detail=&quot;Context authority and repository-authored Markdown.&quot; /&gt;
         &lt;div className=&quot;panel padded&quot;&gt;
-          &lt;h2&gt;{ctx ? &quot;AGENTS.md&quot; : &quot;Root AGENTS.md is not configured&quot;}&lt;/h2&gt;
+          &lt;h2&gt;{ctx ? &quot;AGENTS.md&quot; : t(&quot;Root AGENTS.md is not configured&quot;)}&lt;/h2&gt;
           {ctx ? (
             &lt;MarkdownSource value={ctx.content} /&gt;
           ) : (
             &lt;p className=&quot;muted&quot;&gt;
-              The template currently generates .agents/AGENTS.md from its agent rules. A separate
-              root context file has not been assumed or fabricated.
+              {t(&quot;The template currently generates .agents/AGENTS.md from its agent rules. A separate root context file has not been assumed or fabricated.&quot;)}
             &lt;/p&gt;
           )}
-          &lt;h3&gt;Available source documents&lt;/h3&gt;
+          &lt;h3&gt;{t(&quot;Available source documents&quot;)}&lt;/h3&gt;
           &lt;SourceIndex onOpen={(p) =&gt; to(&quot;/artifacts?file=&quot; + encodeURIComponent(p))} /&gt;
         &lt;/div&gt;
       &lt;/div&gt;
@@ -2327,8 +2333,7 @@ function SimplePage({ id, to }: { id: View; to: (p: string) =&gt; void }) {
             {t(&quot;Source revision&quot;)} {context.revision}
           &lt;/h2&gt;
           &lt;p className=&quot;muted&quot;&gt;
-            Built from tracked repository documents. No agent activity or task completion is
-            inferred.
+            {t(&quot;Built from tracked repository documents. No agent activity or task completion is inferred.&quot;)}
           &lt;/p&gt;
         &lt;/div&gt;
       &lt;/div&gt;
@@ -2777,7 +2782,7 @@ export default function App() {
                 ))}
                 {!filtered.length &amp;&amp; &lt;p className=&quot;empty-state&quot;&gt;{t(&quot;No matching routes.&quot;)}&lt;/p&gt;}
               &lt;/div&gt;
-              &lt;div className=&quot;palette-footer&quot;&gt;↑ ↓ navigate · ↵ open · Esc dismiss&lt;/div&gt;
+              &lt;div className=&quot;palette-footer&quot;&gt;{t(&quot;↑ ↓ navigate · ↵ open · Esc dismiss&quot;)}&lt;/div&gt;
             &lt;/motion.div&gt;
           &lt;/motion.div&gt;
         )}
