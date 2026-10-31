@@ -41,4 +41,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -m 'style(canvas): apply Biome formatting'
+          git pull --rebase origin feat/canvas-react-pages
           git push origin HEAD:feat/canvas-react-pages
