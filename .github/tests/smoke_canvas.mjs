@@ -47,6 +47,19 @@ try {
   await page.locator(".dock-welcome-options").getByRole("button", { name: "Editor" }).click();
   await page.locator('[data-dock-view="editor"]').waitFor();
   await page.getByTestId("monaco-editor").waitFor();
+  // Selection should be a neutral raised surface with a restrained accent marker,
+  // not a saturated fill or blue labels throughout the shell.
+  const selectedTabColors = await page.locator('.dv-tab[aria-selected="true"]').evaluate((element) => {
+    const sample = document.createElement("span");
+    sample.style.color = "var(--text)";
+    document.body.appendChild(sample);
+    const expected = getComputedStyle(sample).color;
+    sample.remove();
+    const style = getComputedStyle(element);
+    return { label: style.color, expected, marker: style.boxShadow };
+  });
+  if (selectedTabColors.label !== selectedTabColors.expected || !selectedTabColors.marker.includes("inset"))
+    throw new Error("Selected tabs need neutral labels and a minimal accent marker: " + JSON.stringify(selectedTabColors));
   if (!(await page.locator('.canvas-dock-tab[data-canvas-tab="editor"] .app-icon').count()))
     throw new Error("Editor tab icon missing");
 
