@@ -25,6 +25,12 @@ try {
     throw new Error("New tab must list all tools");
   await page.getByTestId("new-tab-welcome").getByRole("button", { name: "Editor" }).click();
   await page.locator('[data-dock-view="editor"]').waitFor();
+  const beforeClose = await page.evaluate(() => ({
+    route: location.hash,
+    panels: [...document.querySelectorAll("[data-dock-view]")].map((el) => el.getAttribute("data-dock-view")),
+    tabCount: document.querySelectorAll(".dv-tab").length,
+  }));
+  console.log("Pre-close snapshot:", JSON.stringify(beforeClose));
   await page.locator('.canvas-dock-tab[data-canvas-tab="editor"] .canvas-tab-close').last().click();
   await page.waitForTimeout(250);
   const afterClose = await page.evaluate(() => ({
