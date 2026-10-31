@@ -8,6 +8,10 @@ const url = pathToFileURL(resolve(process.argv[2] ?? ".canvas-dist/index.html"))
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 const errors = [];
+const captureReview = async (label, page) => {
+  const image = await page.screenshot({ type: "jpeg", quality: 54, animations: "disabled" });
+  console.log(`CANVAS_REVIEW_${label}_B64=${image.toString("base64")}`);
+};
 page.on("pageerror", (error) => errors.push(error.message));
 
 try {
@@ -15,6 +19,7 @@ try {
   await page.locator("#root .app-root").waitFor({ timeout: 15000 });
   await page.getByTestId("empty-workspace").waitFor();
   await page.locator(".dock-empty-tabbar").waitFor();
+  await captureReview("WELCOME", page);
   await page.locator(".window-statusbar .title-navigation").waitFor();
   if (await page.locator(".window-titlebar .title-navigation").count())
     throw new Error("Navigation should default to bottom-left status bar");
@@ -125,10 +130,12 @@ try {
   await page.getByTestId("canvas-source").waitFor();
   await page.locator(".canvas-perspectives").getByRole("button", { name: "Overview" }).click();
   await page.locator(".canvas-inspector").getByText("Project identity").waitFor();
+  await captureReview("CANVAS", page);
 
   // Settings expose all placement and unified scale controls.
   await page.locator(".title-actions").getByRole("button", { name: "Settings" }).click();
   await page.getByTestId("settings-page").waitFor();
+  await captureReview("SETTINGS", page);
   await page.getByRole("combobox", { name: "Modifier key" }).click();
   await page.getByRole("option", { name: "Control", exact: true }).click();
   await page.getByRole("combobox", { name: "Modifier key" }).click();
