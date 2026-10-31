@@ -1761,7 +1761,7 @@ mkdirSync(dirname(dest), { recursive: true });
 writeFileSync(dest, JSON.stringify(snapshot, null, 2) + &quot;\n&quot;, &quot;utf8&quot;);
 console.log(&quot;Generated Canvas source snapshot:&quot;, docs.length, &quot;documents,&quot;, snapshot.paths.length, &quot;source records&quot;);
 </pre></section>
-<section class="file" id="file-0060"><h3>.github/app/src/App.tsx</h3><p class="meta">Git mode 100644 · f1e8611620dab0db54a3cc7946badd53840815b3</p><pre>import { useEffect, useMemo, useRef, useState } from &quot;react&quot;;
+<section class="file" id="file-0060"><h3>.github/app/src/App.tsx</h3><p class="meta">Git mode 100644 · 139fa5dcb0fe625dfa7cbae7c7e4068d6f7b9d06</p><pre>import { useEffect, useMemo, useRef, useState } from &quot;react&quot;;
 import * as DropdownMenu from &quot;@radix-ui/react-dropdown-menu&quot;;
 import { Link, Route, Switch, useLocation } from &quot;wouter&quot;;
 import { motion, AnimatePresence } from &quot;motion/react&quot;;
@@ -1876,7 +1876,7 @@ function Artifacts() {
       {doc ? &lt;MarkdownSource value={doc.content}/&gt; : &lt;p className=&quot;muted&quot;&gt;No source documents available.&lt;/p&gt;}&lt;/article&gt;&lt;/div&gt;&lt;/div&gt;;
 }
 function Settings({prefs,setPrefs}:{prefs:Preferences;setPrefs:(p:Preferences)=&gt;void}) {
-  const options=&lt;T extends string|number&gt;(key:keyof Preferences,values:readonly T[],label:string) =&gt;
+  const options=(key:keyof Preferences,values:readonly (string|number)[],label:string) =&gt;
     &lt;div className=&quot;setting-row&quot;&gt;&lt;div&gt;&lt;strong&gt;{label}&lt;/strong&gt;&lt;/div&gt;
       &lt;div className=&quot;segmented&quot;&gt;{values.map(v=&gt;&lt;button key={String(v)} className={prefs[key]===v?&quot;selected&quot;:&quot;&quot;}
         onClick={()=&gt;setPrefs({...prefs,[key]:v})}&gt;{String(v)}&lt;/button&gt;)}&lt;/div&gt;&lt;/div&gt;;
