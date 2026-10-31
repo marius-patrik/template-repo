@@ -834,7 +834,6 @@
   }
 }
 
-
 /* Share constrained status-bar space without overlapping neighboring groups. */
 .window-statusbar {
   overflow: hidden;
