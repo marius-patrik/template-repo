@@ -1633,7 +1633,7 @@ Describe precisely what changed and why.
 src/generated/
 ../../.canvas-dist/
 </pre></section>
-<section class="file" id="file-0055"><h3>.github/app/README.md</h3><p class="meta">Git mode 100644 · c585e50c1b34512dba9202e1bec104f67461e277</p><pre># Canvas Web — repository application
+<section class="file" id="file-0055"><h3>.github/app/README.md</h3><p class="meta">Git mode 100644 · 472ee7636a8caa23aab87c84ca83d68146f6e9b6</p><pre># Canvas Web — repository application
 
 The first-class Canvas UI is authored in `.github/app`. A deterministic build step reads
 only allowlisted, Git-tracked repository documents and generates `src/generated/context.json`;
@@ -1692,6 +1692,8 @@ repository data. The build remains a static, read-only repository snapshot.
 
 The Dockview compositor uses the official dockview-react panel API and keeps layout
 state as UI-only local data; no authored repository file is modified through drag/drop.
+
+Dockview layout acceptance is checked in Chromium before every Pages publication.
 </pre></section>
 <section class="file" id="file-0056"><h3>.github/app/biome.json</h3><p class="meta">Git mode 100644 · b7e3d5edf47ef879ecb3eabc17772d2817b11c64</p><pre>{
   &quot;$schema&quot;: &quot;https://biomejs.dev/schemas/2.6.4/schema.json&quot;,
