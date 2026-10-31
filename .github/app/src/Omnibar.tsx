@@ -15,7 +15,7 @@ export default function Omnibar({
   dragHandle?: ReactNode;
   fallback?: boolean;
   floating?: { left: number; top: number };
-} {
+}) {
   const { t } = useTranslation();
   const prefs = useCanvasConfig((state) => state.preferences);
   const inputRef = useRef<HTMLInputElement>(null);
