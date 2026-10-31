@@ -5458,7 +5458,7 @@ if __name__ == &quot;__main__&quot;:
         print(f&quot;error: {error}&quot;, file=sys.stderr)
         sys.exit(1)
 </pre></section>
-<section class="file" id="file-0079"><h3>.github/tests/smoke_canvas.mjs</h3><p class="meta">Git mode 100644 · dd7ea6eb598d3d5b6af1d3e6c102ef9910550653</p><pre>import { createRequire } from &quot;node:module&quot;;
+<section class="file" id="file-0079"><h3>.github/tests/smoke_canvas.mjs</h3><p class="meta">Git mode 100644 · 6971506de3d335a895796bddf1e31755dab069de</p><pre>import { createRequire } from &quot;node:module&quot;;
 import { resolve } from &quot;node:path&quot;;
 import { pathToFileURL } from &quot;node:url&quot;;
 
@@ -5479,7 +5479,7 @@ try {
   const addTab = page.locator(&quot;.dock-grid .dv-groupview&quot;).first().getByRole(&quot;button&quot;, { name: &quot;Add tab&quot; });
   await addTab.waitFor();
   await addTab.click();
-  const menu = page.getByRole(&quot;menu&quot;, { name: &quot;Available tabs&quot; });
+  const menu = page.locator(&quot;.dock-add-menu&quot;);
   await menu.waitFor();
   if ((await menu.getByRole(&quot;menuitem&quot;).count()) !== 10)
     throw new Error(&quot;Add-tab dropdown must contain every Canvas view&quot;);
@@ -5487,7 +5487,7 @@ try {
   await page.locator(&#x27;.dock-grid [data-dock-view=&quot;projects&quot;]&#x27;).waitFor();
   await page.waitForFunction(() =&gt; location.hash.includes(&quot;/projects&quot;));
   await page.locator(&quot;.dock-grid .dv-groupview&quot;).first().getByRole(&quot;button&quot;, { name: &quot;Add tab&quot; }).click();
-  await page.getByRole(&quot;menu&quot;, { name: &quot;Available tabs&quot; }).getByRole(&quot;menuitem&quot;, { name: &quot;Overview&quot; }).click();
+  await page.locator(&quot;.dock-add-menu&quot;).getByRole(&quot;menuitem&quot;, { name: &quot;Overview&quot; }).click();
   await page.waitForFunction(() =&gt; location.hash.includes(&quot;/overview&quot;));
   if ((await page.locator(&quot;.dock-grid .dv-groupview&quot;).count()) !== 1)
     throw new Error(&quot;Adding a tab created a separate group instead of reusing the tab bar&quot;);
