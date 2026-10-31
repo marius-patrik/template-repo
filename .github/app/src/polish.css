@@ -1,0 +1,580 @@
+/* Canvas prototype design pass. Reuse the application palette and scale preferences. */
+:root {
+  --selection-surface: var(--raised);
+  --selection-label: var(--text);
+  --control-radius: calc(var(--ui-radius) * 0.8);
+  --ui-motion: 140ms;
+}
+
+/* A selected Dockview tab has the same surface and foreground as selected sidebar items. */
+.dock-grid .dockview-theme-dark,
+.dock-grid .dockview-theme-light {
+  --dv-activegroup-visiblepanel-tab-background-color: var(--selection-surface);
+  --dv-inactivegroup-visiblepanel-tab-background-color: var(--selection-surface);
+  --dv-activegroup-visiblepanel-tab-color: var(--selection-label);
+  --dv-inactivegroup-visiblepanel-tab-color: var(--selection-label);
+  --dv-activegroup-hiddenpanel-tab-background-color: var(--surface);
+  --dv-inactivegroup-hiddenpanel-tab-background-color: var(--surface);
+}
+.dock-grid .dv-tab {
+  border-radius: var(--control-radius);
+  transition:
+    background-color var(--ui-motion) ease,
+    color var(--ui-motion) ease;
+}
+.dock-grid .dv-tab.dv-active-tab,
+.dock-grid .dv-tab.dv-activegroup-visiblepanel-tab,
+.dock-grid .dv-tab.dv-inactivegroup-visiblepanel-tab {
+  color: var(--selection-label);
+  background: var(--selection-surface);
+}
+.dock-grid
+  .dv-tab:not(.dv-active-tab):not(.dv-activegroup-visiblepanel-tab):not(
+    .dv-inactivegroup-visiblepanel-tab
+  ):hover {
+  background: var(--hover);
+  color: var(--text);
+}
+.dock-grid .dv-tab .canvas-dock-tab > .app-icon,
+.dock-grid .dv-tab .canvas-dock-tab .canvas-tab-close {
+  color: inherit;
+}
+.dock-grid .canvas-tab-close {
+  opacity: 0.62;
+}
+.dock-grid .dv-tab:hover .canvas-tab-close,
+.dock-grid .dv-tab:focus-within .canvas-tab-close {
+  opacity: 1;
+}
+.navigation-tree-item.active,
+.activity-button.active,
+.canvas-perspectives button.active,
+.canvas-source-row.active,
+.canvas-doc-picker button.active,
+.canvas-mode-switch button.active {
+  background: var(--selection-surface);
+  color: var(--selection-label);
+}
+:is(
+  .navigation-tree-item,
+  .activity-button,
+  .canvas-perspectives button,
+  .canvas-source-row,
+  .canvas-doc-picker button,
+  .canvas-mode-switch button
+):not(.active):hover {
+  background: var(--hover);
+  color: var(--text);
+}
+:is(
+  .canvas-perspectives button,
+  .canvas-mode-switch button,
+  .canvas-source-row,
+  .canvas-doc-picker button,
+  .canvas-source-actions button
+):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+:is(
+  .canvas-perspectives button,
+  .canvas-mode-switch button,
+  .canvas-source-row,
+  .canvas-doc-picker button
+) {
+  transition:
+    background-color var(--ui-motion) ease,
+    color var(--ui-motion) ease;
+}
+
+/* Monaco must use the full Dockview panel height, including split arrangements. */
+.dock-route-page:has(.monaco-pane) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+.dock-route-page > .monaco-pane {
+  flex: 1 1 auto;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.monaco-pane {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+}
+.monaco-toolbar {
+  min-height: 0;
+  flex: none;
+}
+.monaco-editor-host {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+.monaco-editor-host > section {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+.monaco-editor-host .monaco-editor {
+  height: 100% !important;
+}
+
+/* Repository perspectives share one Canvas workspace and one source inspector. */
+.dock-route-page:has(.canvas-studio) {
+  overflow: hidden;
+}
+.canvas-studio,
+.canvas-studio * {
+  box-sizing: border-box;
+}
+.canvas-studio {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  min-height: 0;
+  min-width: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-size: var(--app-font-size);
+}
+.canvas-studio-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--ui-spacing) * 2);
+  flex: none;
+  min-height: calc(var(--ui-spacing) * 6);
+  padding: calc(var(--ui-spacing) * 0.75) calc(var(--ui-spacing) * 2);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.canvas-studio-title {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-spacing);
+  min-width: 0;
+}
+.canvas-studio-title > div {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.canvas-studio-title strong {
+  font-size: var(--app-font-size);
+  font-weight: 650;
+}
+.canvas-studio-title span:not(.app-icon) {
+  font-size: calc(var(--app-font-size) * 0.75);
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.canvas-studio-revision {
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: calc(var(--app-font-size) * 0.78);
+}
+.canvas-perspectives {
+  display: flex;
+  align-items: center;
+  flex: none;
+  min-width: 0;
+  overflow-x: auto;
+  gap: calc(var(--ui-spacing) * 0.4);
+  padding: calc(var(--ui-spacing) * 0.6) var(--ui-spacing);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.canvas-perspectives button {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  gap: calc(var(--ui-spacing) * 0.8);
+  padding: calc(var(--ui-spacing) * 0.8) calc(var(--ui-spacing) * 1.1);
+  min-height: calc(var(--ui-spacing) * 4);
+  border: 0;
+  border-radius: var(--control-radius);
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: calc(var(--app-font-size) * 0.88);
+  cursor: pointer;
+}
+.canvas-work-area {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 31%);
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+.canvas-primary {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--bg);
+}
+.canvas-primary-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-spacing);
+  flex: none;
+  min-height: calc(var(--ui-spacing) * 5.5);
+  padding: calc(var(--ui-spacing) * 0.75) calc(var(--ui-spacing) * 1.5);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.canvas-primary-toolbar > div:first-child {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--ui-spacing);
+  min-width: 0;
+}
+.canvas-primary-toolbar strong {
+  font-weight: 620;
+}
+.canvas-primary-toolbar span {
+  color: var(--muted);
+  font-size: calc(var(--app-font-size) * 0.78);
+}
+.canvas-mode-switch {
+  display: inline-flex;
+  align-items: center;
+  padding: calc(var(--ui-spacing) * 0.25);
+  gap: calc(var(--ui-spacing) * 0.25);
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+}
+.canvas-mode-switch button,
+.canvas-source-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(var(--ui-spacing) * 3.5);
+  min-width: calc(var(--ui-spacing) * 3.5);
+  padding: 0;
+  border: 0;
+  border-radius: calc(var(--control-radius) * 0.75);
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+}
+.canvas-flow {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+.canvas-flow .react-flow {
+  height: 100%;
+  width: 100%;
+}
+.canvas-flow .react-flow__node.selected {
+  outline: 1px solid var(--accent);
+  outline-offset: 2px;
+}
+.canvas-sources {
+  overflow-y: auto;
+  flex: 1;
+  padding: var(--ui-spacing);
+  min-height: 0;
+}
+.canvas-source-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: var(--ui-spacing);
+  min-height: calc(var(--ui-spacing) * 5);
+  padding: var(--ui-spacing);
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  border-radius: var(--control-radius);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.canvas-source-row > span:nth-child(2) {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.canvas-inspector {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+}
+.canvas-inspector-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--ui-spacing);
+  min-height: calc(var(--ui-spacing) * 5.5);
+  padding: var(--ui-spacing) calc(var(--ui-spacing) * 1.5);
+  border-bottom: 1px solid var(--border);
+}
+.canvas-inspector-heading strong {
+  font-weight: 640;
+}
+.canvas-inspector-heading small {
+  color: var(--muted);
+  font-size: calc(var(--app-font-size) * 0.75);
+}
+.canvas-inspector-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: calc(var(--ui-spacing) * 1.6);
+  scrollbar-width: thin;
+}
+.canvas-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-spacing);
+  padding: calc(var(--ui-spacing) * 1.5) 0;
+  border-bottom: 1px solid var(--border);
+}
+.canvas-detail:first-child {
+  padding-top: 0;
+}
+.canvas-detail:last-child {
+  border-bottom: 0;
+}
+.canvas-detail small {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+.canvas-detail strong {
+  font-size: calc(var(--app-font-size) * 1.02);
+  overflow-wrap: anywhere;
+}
+.canvas-detail span {
+  color: var(--muted);
+  font-size: calc(var(--app-font-size) * 0.85);
+  overflow-wrap: anywhere;
+}
+.canvas-detail p {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+  font-size: calc(var(--app-font-size) * 0.9);
+}
+.canvas-detail dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--ui-spacing);
+  margin: 0;
+  font-size: calc(var(--app-font-size) * 0.83);
+}
+.canvas-detail dt {
+  color: var(--muted);
+}
+.canvas-detail dd {
+  margin: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.canvas-search {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-spacing);
+  margin: var(--ui-spacing) 0;
+  padding: calc(var(--ui-spacing) * 0.75) var(--ui-spacing);
+  border-radius: var(--control-radius);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--muted);
+}
+.canvas-search:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.canvas-search input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  outline: none;
+  border: 0;
+  color: var(--text);
+  background: transparent;
+  font: inherit;
+}
+.canvas-doc-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--ui-spacing) * 0.5);
+  padding: var(--ui-spacing) 0;
+}
+.canvas-doc-picker button {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--ui-spacing) * 0.5);
+  padding: calc(var(--ui-spacing) * 0.7) var(--ui-spacing);
+  min-width: 0;
+  border-radius: var(--control-radius);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--muted);
+  font: inherit;
+  font-size: calc(var(--app-font-size) * 0.8);
+  cursor: pointer;
+}
+.canvas-doc-picker button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.canvas-source {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  gap: var(--ui-spacing);
+}
+.canvas-source-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-spacing);
+  min-height: calc(var(--ui-spacing) * 4.5);
+  border-bottom: 1px solid var(--border);
+}
+.canvas-source-heading > span {
+  color: var(--muted);
+  font-size: calc(var(--app-font-size) * 0.76);
+  overflow-wrap: anywhere;
+}
+.canvas-source-actions {
+  display: inline-flex;
+  flex: none;
+  gap: calc(var(--ui-spacing) * 0.25);
+}
+.canvas-source-text {
+  margin: 0;
+  padding-bottom: calc(var(--ui-spacing) * 2);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: calc(var(--app-font-size) * 0.82);
+}
+.canvas-empty-message {
+  margin: var(--ui-spacing);
+  color: var(--muted);
+}
+/* Other first-class surfaces obey the same flat selection and control treatments. */
+.library-list {
+  background: transparent;
+  gap: calc(var(--ui-spacing) * 0.35);
+}
+.library-list button {
+  min-height: calc(var(--ui-spacing) * 5);
+  background: var(--surface);
+  border: 1px solid transparent;
+  border-radius: var(--control-radius);
+  color: var(--muted);
+}
+.library-list button:hover {
+  background: var(--hover);
+  color: var(--text);
+  border-color: var(--border);
+}
+.library-search,
+.settings-number {
+  border-color: var(--border);
+  border-radius: var(--control-radius);
+  color: var(--text);
+}
+.menu-content,
+.accent-popover {
+  border-color: var(--border);
+  border-radius: var(--ui-radius);
+}
+.menu-item[data-highlighted],
+.menu-item[data-state="checked"] {
+  background: var(--selection-surface);
+  color: var(--text);
+}
+.canvas-select-trigger {
+  border-radius: var(--control-radius);
+}
+.canvas-select-trigger[data-state="open"] {
+  background: var(--selection-surface);
+}
+.dock-welcome-options button {
+  border-radius: var(--control-radius);
+}
+.dock-welcome-options button:hover {
+  background: var(--hover);
+  border-color: var(--border);
+}
+:is(.dock-welcome-options button, .library-search, .settings-number):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (max-width: 950px) {
+  .canvas-work-area {
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 38%);
+  }
+  .canvas-studio-revision {
+    display: none;
+  }
+}
+@media (max-width: 680px) {
+  .canvas-work-area {
+    display: flex;
+    flex-direction: column;
+  }
+  .canvas-primary {
+    flex: 1 1 54%;
+    min-height: 195px;
+  }
+  .canvas-inspector {
+    flex: 1 1 46%;
+    min-height: 150px;
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+  .canvas-perspectives button {
+    min-height: calc(var(--ui-spacing) * 4.2);
+  }
+  .canvas-primary-toolbar > div:first-child span {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dock-grid .dv-tab,
+  :is(
+    .canvas-perspectives button,
+    .canvas-mode-switch button,
+    .canvas-source-row,
+    .canvas-doc-picker button
+  ) {
+    transition: none;
+  }
+}

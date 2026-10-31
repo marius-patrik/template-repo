@@ -1,22 +1,21 @@
 ---
 name: repository-canvas
-description: Load, inspect, update and verify a repository-backed read-only HTML Canvas using Git-tracked records as the sole source of truth.
+description: Inspect and verify the single repository-backed React Canvas prototype built and published by GitHub Pages.
 ---
-# Repository Canvas agent skill
+# React Canvas repository skill
 
-## Source and interaction contract
+## Source and publication contract
 
-1. On session orientation, read root `canvas.html`, run `python3 .agents/tools/canvas.py snapshot`, and inspect `repo.dfconfig`, `.agents/GOAL.md` and active work. Treat the Canvas as a generated projection, **never** as an authority over its underlying Git-tracked records.
-2. All persisted data must originate from the repository. New user instructions or external facts must first be recorded as attributed, confidence-labeled source records under the project's canonical paths, then rendered; do not invent or silently blend external state into the Canvas.
-3. Agents may interact through their authorized repository tools: read source, change tracked source, regenerate documentation and Canvas, run checks, create a branch/PR and report evidence. Humans view the output; the HTML itself does not provide edit controls.
-4. To show requested additional views, author/review appropriate source records and extend the **generic template/generator** (or a project-specific renderer extension) rather than adding a disconnected UI, embedded remote API or hardcoded fake data.
-5. Use `python3 .agents/tools/canvas.py snapshot` to print a compact, current project snapshot at the end of a turn, and link to root `canvas.html`. The host must invoke this skill each turn for repeat behavior. A repository manifest cannot register universal ChatGPT turn hooks.
-6. Read/search/list/put/render/check are documented in `.agents/plugin.json`. `put` is limited to existing, safe tracked source files; new files require an ordinary Git-tracked edit and regeneration. Never directly edit generated `canvas.html` or canonical generated Markdown.
-7. Verify with `python3 .agents/tools/canvas.py check`, `python3 .github/scripts/generate_documents.py --check`, and all repository tests before reporting completion. Respect PR and human review policy.
+1. Inspect the active branch, PR and actual source under `.github/app/`, along with `repo.dfconfig`, `.agents/GOAL.md` and canonical records. The UI code and compiled output are not sources of authority for project facts.
+2. Use only the React/TypeScript app under `.github/app/`. Its build-time `scripts/generate-context.mjs` emits `src/generated/context.json` from allowlisted Git-tracked documents. Rsbuild emits the sole site entrypoint `.canvas-dist/index.html`.
+3. Agents with appropriate host permissions may edit tracked records or UI source, regenerate the four Markdown projections, run tests, and submit a reviewed PR. The public Pages app is read-only; local preference state affects appearance and layout only.
+4. Never create a root HTML generator, second Canvas app or local DarkFactory submodule. Do not embed unapproved repository files or private information in a public build.
+5. Execute `python3 .github/scripts/generate_documents.py --write` when changing canonical records, then `--check`. For frontend verification run `cd .github/app && bun run check`, and execute `python3 -m unittest discover -s .github/tests -p 'test_*.py'` from the root.
+6. The GitHub Pages workflow additionally verifies the compiled entrypoint and executes the Chromium smoke suite. Verify actual CI and deployment revision separately rather than assuming a build means the public page was updated.
+7. The manifest and hooks are optional host conventions, never automatic ChatGPT capabilities. Maintain the **open prototyping phase** until the user expressly approves its completion.
 
-## Lifecycle
+## Optional local lifecycle
 
-- Bootstrap/switch repository: `bash .agents/hooks/session-start.sh`
-- After source changes: `bash .agents/hooks/after-change.sh`
-- Opt-in local Git hook: `git config core.hooksPath .agents/hooks`; be aware this replaces any existing configured hooks directory.
-- No reliance on a browser, network feed, runtime JS or unpublished chat state for Canvas values.
+- Orientation: `bash .agents/hooks/session-start.sh`
+- After editing source records: `bash .agents/hooks/after-change.sh`
+- Opt-in Git hook: `git config core.hooksPath .agents/hooks` (replaces another configured hooks directory).

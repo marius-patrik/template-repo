@@ -1,17 +1,12 @@
 ---
 status: published
 ---
-# Single repository Canvas
+# Single published React Canvas
 
-Root `canvas.html` is the complete, deterministic and static human-readable view of Git-tracked repository content. It embeds readable tracked source files; binary files are represented with checksums, symlinks as targets, and the pinned DarkFactory submodule by commit identifier. The Canvas excludes itself from its input list to avoid recursion. No external API calls or independent browser state are used.
+The **sole Canvas application** is the React/TypeScript workspace in `.github/app/`. Rsbuild compiles its code, styles, and allowlisted Git-tracked repository documentation into `.canvas-dist/index.html`. GitHub Pages publishes that artifact. There is no separately maintained root HTML renderer, Python Canvas CLI, or competing generated application.
 
-Agent-side interaction lives in the repo-local `.agents/plugin.json`, `.agents/skills/repository-canvas/SKILL.md`, `.agents/tools/canvas.py` and optional `.agents/hooks/`. Agents read and modify source files with authorized tools; after any change they regenerate `canvas.html` and verify it. The interface remains read-only for human visitors.
+The build-time `.github/app/scripts/generate-context.mjs` produces the untracked `src/generated/context.json`; only explicitly allowlisted source documents and structural paths are embedded. The published UI is a read-only repository snapshot, not an agent backend or a live repository editor. Browser-local theme, locale, keyboard and Dockview layout settings are UI preferences, never authoritative project state.
 
-```bash
-python3 .agents/tools/canvas.py snapshot
-python3 .agents/tools/canvas.py render
-python3 .agents/tools/canvas.py check
-bash .agents/hooks/session-start.sh
-```
+Authorized agents operate on tracked source via the repository host and follow the existing review policy. Canonical Markdown projections are updated with `python3 .github/scripts/generate_documents.py --write`. To build and verify Canvas, use `bun run check` within `.github/app/`; GitHub Actions additionally runs Chromium smoke coverage.
 
-The hook manifest is a portable repo convention rather than an automatically installed ChatGPT plugin. Native Git hooks require explicit local opt-in. Private repository information embedded in the Canvas must not be deployed publicly without a privacy audit.
+The repository-local `.agents/plugin.json`, skill and optional hooks describe supported build-time interaction conventions. They do not register universal ChatGPT hooks or silently grant write authority. **Prototype design remains open until explicitly approved.**

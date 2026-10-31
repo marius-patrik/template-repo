@@ -7,40 +7,43 @@
 
 ### Purpose
 
-Provide a technology-neutral GitHub repository template with first-class guidance for human contributors and coding agents. The template is infrastructure, not an application.
+Provide a reusable, technology-neutral GitHub repository template with first-class guidance for humans and coding agents. The template also hosts **one** React Canvas application for viewing repository context; the app remains a prototype rather than an autonomous runtime.
 
 ### Repository layout
 
-- Keep real, independent root `.agents/` and `.github/` directories; neither may be a symbolic link. Do not duplicate their contents elsewhere.
-- Keep `.agents/{GOAL,PLAN,TODO,SCRATCHPAD}.md` at its root and generate `.agents/{README,PRD,ARCHITECTURE,AGENTS}.md` from `.agents/notes/`, `.agents/requests/`, `.agents/decisions/` and `.agents/rules/` respectively.
-- Keep portable agent role descriptions in `.agents/agents/` and procedure-based skills in `.agents/skills/<name>/SKILL.md`.
-- Keep GitHub workflows, scripts, the PR template and **the complete repository test suite** under `.github/`. All tests, including fixtures, mocks, snapshots, integration and E2E tests, belong exclusively in `.github/tests/`; never in application directories or the submodule.
-- Keep root `README.md` and `CONTRIBUTING.md` as Git symlinks to `.agents/README.md` and `.agents/AGENTS.md` respectively.
-- Install the upstream `marius-patrik/DarkFactory` project as a **pinned root Git submodule** at `.darkfactory`, with its source and commit declared in `.gitmodules`. Do not mirror `.agents`, `.github`, or tests into the upstream submodule.
+- Keep independent, physical root `.agents/` and `.github/` directories; neither may be a symlink or duplicated as an alternative source.
+- Keep `.agents/{GOAL,PLAN,TODO,SCRATCHPAD}.md` at its root; derive `.agents/{README,PRD,ARCHITECTURE,AGENTS}.md` exclusively from the status-gated records in `.agents/{notes,requests,decisions,rules}/`.
+- Keep portable agent role profiles in `.agents/agents/` and reusable skills in `.agents/skills/<name>/SKILL.md`.
+- Keep workflows, scripts, PR template, and the **entire repository test suite** under `.github/`; tests, fixtures, mocks, snapshots and E2E assets live exclusively in `.github/tests/`.
+- Keep root `README.md` and `CONTRIBUTING.md` as Git symlinks to `.agents/README.md` and `.agents/AGENTS.md`.
+- Do **not** install or require a root `.darkfactory` Git submodule or `.gitmodules`. External DarkFactory workflows and pinned released artifacts may remain available through explicit configuration.
+- Keep the Bun/React frontend toolchain scoped to `.github/app/`; do not impose it on downstream projects that do not use Canvas.
 
 ### Versioning and releases
 
-- The default release strategy is **tags only**: the `VERSION` file is absent; the next SemVer patch is derived from existing `v<major>.<minor>.<patch>` Git tags at release time and a GitHub Release is published for the merged `main` commit.
-- Support the optional `file` strategy, configured by `repo.versioning.mode` in `repo.dfconfig`: a checked-in `VERSION` file is maintained automatically on same-repository pull requests and becomes the release tag authority. File mode must not silently drift from published tags.
-- Do not auto-bump the version or require a file when the mode is `tags`. Never retag another commit or publish a release for unmerged code.
+- Default to `tags`: no tracked `VERSION` file; derive the next `vMAJOR.MINOR.PATCH` on a `main` release from existing tags, then publish an immutable GitHub Release.
+- Support optional `file` mode via `repo.versioning.mode` in `repo.dfconfig`, with a strict version file and automatic patch bump on same-repository PRs. Reject tag/version divergence.
+- Do not auto-bump versions in `tags` mode, move existing tags or release unmerged changes.
 
 ### Delivery and governance
 
-- Use `development` for integration and `main` for releases. A PR into `main` may originate only from the same repository's `development` branch.
-- Keep generated Markdown deterministic and ensure actual GitHub Actions CI uses physical files under `.github/workflows/`.
-- Document required branch protection but do not claim it is active until GitHub confirms the settings.
-- Use GPL-3.0 and avoid adding an application-specific toolchain to the template.
+- Use `development` for integration and `main` for releases. Only a same-repository PR from `development` may target `main`.
+- Maintain deterministic generated Markdown and native GitHub Actions workflows under `.github/workflows/`.
+- Verify live branch protection rather than assuming configuration alone enforces it.
+- Use GPL-3.0. Keep Canvas prototyping distinct from approving a production release.
 
 _Source: [0001-repository-template.md](requests/0001-repository-template.md)_
 
 
 ## Repository Canvas and interactive agent interface
 
-- Generate a root `canvas.html` static, non-editable view from all Git-tracked repository source entries. Do not add remote data feeds, hand-written Canvas facts or browser-side persistent state.
-- Embed full UTF-8 text for ordinary tracked files; represent symlinks as paths, gitlinks by pinned commit and nontext files by length and content checksum. Exclude `canvas.html` from itself.
-- Provide a readable project overview, file navigation, source listing and structured vehicle facts only if such data is present in the repository.
-- Provide repository-local agent plugin instructions, a documented read/write/render/check command-line tool and opt-in hooks under `.agents/`. Agent changes must update canonical repository sources and regenerate the Canvas.
-- Provide a compact snapshot command intended for agent turn summaries; repeat invocation requires host integration and may not be claimed automatic in ChatGPT.
-- Verify deterministic output and security boundaries with tests strictly under `.github/tests/` and normal repository CI. Maintain existing generated-document ownership and PR review rules.
+- Maintain **one** Canvas app in `.github/app/` using React/TypeScript and Rsbuild. Its compiled `.canvas-dist/index.html` is the GitHub Pages artifact. Do not maintain a root `canvas.html`, Python HTML renderer, second frontend or duplicate publishing pipeline.
+- Produce a deterministic build-time `src/generated/context.json` from allowlisted, Git-tracked repository documents and structural paths. Do not expose arbitrary files, binary archives, credentials, private data or unverified third-party facts in public Pages output.
+- Represent repository identity, available documents, authoring relationships and source-backed views without inventing agent telemetry, task completion, external repositories or project-specific facts.
+- Browser-local appearance, language, hotkeys and Dockview layouts are allowed as **presentation state**, never an independent source of project truth.
+- Preserve the agent-side interaction boundary: authorized agents edit canonical source with review/approval, regenerate Markdown projections, and rebuild the React app. The public compiled UI stays read-only until an explicit approved design changes that contract.
+- Retain optional repository-local agent conventions and hooks only where they invoke real supported build/documentation commands. Do not claim automatic ChatGPT hooks or a remote agent backend.
+- Keep tests under `.github/tests/` and require build/typecheck/Biome plus Chromium interaction acceptance for Pages publication.
+- Keep the application in the **user-controlled prototyping phase** until its completion is expressly approved. A passing deployment does not close the phase.
 
 _Source: [0002-repository-canvas.md](requests/0002-repository-canvas.md)_

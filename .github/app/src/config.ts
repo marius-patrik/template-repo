@@ -1,0 +1,365 @@
+import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
+import { z } from "zod";
+
+export const POSITIONS = {
+  navigation: ["sidebar", "titlebar", "omnibar", "statusbar", "hidden"],
+  omnibar: ["titlebar", "sidebar", "statusbar", "floating", "hidden"],
+  settings: ["titlebar", "activitybar", "statusbar", "tabbar", "hidden"],
+  activity: ["left", "right", "top", "bottom", "hidden"],
+  sidebar: ["left", "right"],
+} as const;
+
+export const SCALES = {
+  small: { fontSize: 12, iconSize: 15, radius: 4, spacing: 6 },
+  normal: { fontSize: 14, iconSize: 18, radius: 8, spacing: 8 },
+  large: { fontSize: 16, iconSize: 21, radius: 12, spacing: 11 },
+} as const;
+export type Scale = keyof typeof SCALES;
+const color = z.string().regex(/^#[0-9a-f]{6}$/i);
+export const COLOR_KEYS = [
+  "bg",
+  "surface",
+  "raised",
+  "border",
+  "text",
+  "muted",
+  "subtle",
+  "accent",
+  "accentForeground",
+  "hover",
+  "shadow",
+  "scrim",
+  "danger",
+] as const;
+export type ColorKey = (typeof COLOR_KEYS)[number];
+const palette = z.object(
+  Object.fromEntries(COLOR_KEYS.map((key) => [key, color])) as Record<ColorKey, typeof color>,
+);
+export const darkPalette = {
+  bg: "#0b0b0d",
+  surface: "#141416",
+  raised: "#1a1a1d",
+  border: "#2b2b30",
+  text: "#ececef",
+  muted: "#929299",
+  subtle: "#6c6c76",
+  accent: "#f4f4f5",
+  accentForeground: "#111113",
+  hover: "#232326",
+  shadow: "#000000",
+  scrim: "#000000",
+  danger: "#eb8f85",
+};
+/** True-black default palette matched to the approved OLED reference. */
+export const oledPalette = {
+  bg: "#000000",
+  surface: "#000000",
+  raised: "#1a1a1d",
+  border: "#373739",
+  text: "#ececef",
+  muted: "#929299",
+  subtle: "#6c6c76",
+  accent: "#0086ff",
+  accentForeground: "#000000",
+  hover: "#0f0f11",
+  shadow: "#0c0b0b",
+  scrim: "#ffffff",
+  danger: "#ff1900",
+};
+export const lightPalette = {
+  bg: "#f9f9fa",
+  surface: "#ffffff",
+  raised: "#f2f2f4",
+  border: "#dfdfe4",
+  text: "#17171a",
+  muted: "#60616a",
+  subtle: "#777781",
+  accent: "#222226",
+  accentForeground: "#ffffff",
+  hover: "#eeeeef",
+  shadow: "#454550",
+  scrim: "#17171a",
+  danger: "#b32432",
+};
+/** Skin presets update the same editable tokens; no second palette authority. */
+const skinPalette = {
+  oled: { dark: oledPalette, light: lightPalette },
+  graphite: { dark: darkPalette, light: lightPalette },
+  slate: {
+    dark: {
+      ...darkPalette,
+      bg: "#0b111b",
+      surface: "#141e2d",
+      raised: "#1b2939",
+      border: "#324257",
+      text: "#e6eff9",
+      muted: "#a3b4c8",
+      subtle: "#8498b0",
+      hover: "#203149",
+    },
+    light: {
+      ...lightPalette,
+      bg: "#f2f6fa",
+      surface: "#ffffff",
+      raised: "#e7eef6",
+      border: "#c5d3e3",
+      text: "#192c43",
+      muted: "#4c647e",
+      subtle: "#657d95",
+      hover: "#e0ebf6",
+    },
+  },
+  contrast: {
+    dark: {
+      ...darkPalette,
+      bg: "#070707",
+      surface: "#111111",
+      raised: "#202020",
+      border: "#858585",
+      text: "#ffffff",
+      muted: "#e0e0e0",
+      subtle: "#bdbdbd",
+      hover: "#303030",
+    },
+    light: {
+      ...lightPalette,
+      bg: "#ffffff",
+      surface: "#ffffff",
+      raised: "#f0f0f0",
+      border: "#5b5b5b",
+      text: "#111111",
+      muted: "#333333",
+      subtle: "#454545",
+      hover: "#e6e6e6",
+    },
+  },
+} as const;
+export const COMPONENTS = [
+  "titlebar",
+  "statusbar",
+  "sidebar",
+  "activitybar",
+  "tabs",
+  "omnibar",
+  "canvas",
+  "editor",
+  "library",
+  "settings",
+  "menus",
+] as const;
+export type ComponentName = (typeof COMPONENTS)[number];
+export const STATUS_PARTS = [
+  "snapshot",
+  "navigation",
+  "omnibar",
+  "settings",
+  "version",
+  "revision",
+] as const;
+export type StatusPart = (typeof STATUS_PARTS)[number];
+const sizeChoice = z.enum(["inherit", "small", "normal", "large"]);
+const componentTheme = z.object({
+  surface: z.union([z.literal("inherit"), z.enum(COLOR_KEYS)]),
+  text: z.union([z.literal("inherit"), z.enum(COLOR_KEYS)]),
+  border: z.union([z.literal("inherit"), z.enum(COLOR_KEYS)]),
+  accent: z.union([z.literal("inherit"), z.enum(COLOR_KEYS)]),
+  font: sizeChoice,
+  icon: sizeChoice,
+  spacing: sizeChoice,
+});
+export type ComponentTheme = z.infer<typeof componentTheme>;
+export const defaultComponentTheme: ComponentTheme = {
+  surface: "inherit",
+  text: "inherit",
+  border: "inherit",
+  accent: "inherit",
+  font: "inherit",
+  icon: "inherit",
+  spacing: "inherit",
+};
+export const defaultComponentThemes = Object.fromEntries(
+  COMPONENTS.map((component) => [component, { ...defaultComponentTheme }]),
+) as Record<ComponentName, ComponentTheme>;
+const componentThemesSchema = z.object(
+  Object.fromEntries(COMPONENTS.map((component) => [component, componentTheme])) as Record<
+    ComponentName,
+    typeof componentTheme
+  >,
+);
+const statusAlign = z.enum(["left", "center", "right"]);
+const statusAlignmentSchema = z.object(
+  Object.fromEntries(STATUS_PARTS.map((part) => [part, statusAlign])) as Record<
+    StatusPart,
+    typeof statusAlign
+  >,
+);
+export const defaultStatusAlignment: Record<StatusPart, "left" | "center" | "right"> = {
+  snapshot: "left",
+  navigation: "left",
+  omnibar: "center",
+  settings: "right",
+  version: "right",
+  revision: "right",
+};
+
+const schema = z.object({
+  theme: z.enum(["dark", "light", "system"]),
+  skin: z.enum(["oled", "graphite", "slate", "contrast"]),
+  density: z.enum(["comfortable", "compact"]),
+  accent: z.string(),
+  uiScale: z.enum(["small", "normal", "large"]),
+  fontSize: z.number().int().min(10).max(26),
+  iconSize: z.number().int().min(12).max(32),
+  radius: z.number().int().min(0).max(24),
+  spacing: z.number().int().min(2).max(20),
+  sidebarWidth: z.number().int().min(180).max(480),
+  titleBarHeight: z.number().int().min(22).max(80),
+  statusBarHeight: z.number().int().min(22).max(80),
+  sidebarPosition: z.enum(POSITIONS.sidebar),
+  activityBarPosition: z.enum(POSITIONS.activity),
+  activityBarDensity: z.enum(["compact", "comfortable"]),
+  navigationPosition: z.enum(POSITIONS.navigation),
+  omnibarPosition: z.enum(POSITIONS.omnibar),
+  settingsPosition: z.enum(POSITIONS.settings),
+  floatingX: z.number().finite().min(0).max(10000),
+  floatingY: z.number().finite().min(0).max(10000),
+  commandPlacement: z.enum(["auto", "down", "up"]),
+  commandBackdropBlur: z.boolean(),
+  statusAlignment: statusAlignmentSchema,
+  componentThemes: componentThemesSchema,
+  darkColors: palette,
+  lightColors: palette,
+});
+export type CanvasPreferences = z.infer<typeof schema>;
+export const defaults: CanvasPreferences = {
+  theme: "dark",
+  skin: "oled",
+  density: "comfortable",
+  accent: "neutral",
+  uiScale: "normal",
+  ...SCALES.normal,
+  sidebarWidth: 228,
+  titleBarHeight: 24,
+  statusBarHeight: 24,
+  sidebarPosition: "left",
+  activityBarPosition: "left",
+  activityBarDensity: "comfortable",
+  navigationPosition: "titlebar",
+  omnibarPosition: "titlebar",
+  settingsPosition: "titlebar",
+  floatingX: 280,
+  floatingY: 110,
+  commandPlacement: "auto",
+  commandBackdropBlur: true,
+  statusAlignment: defaultStatusAlignment,
+  componentThemes: defaultComponentThemes,
+  darkColors: oledPalette,
+  lightColors: lightPalette,
+};
+function validate(source: unknown): CanvasPreferences {
+  const record = source && typeof source === "object" ? (source as Partial<CanvasPreferences>) : {};
+  const legacyWidth = (() => {
+    try {
+      const n = Number(localStorage.getItem("canvas-sidebar-width-v1"));
+      return n >= 180 && n <= 480 ? n : defaults.sidebarWidth;
+    } catch {
+      return defaults.sidebarWidth;
+    }
+  })();
+  const data = {
+    ...defaults,
+    sidebarWidth: legacyWidth,
+    ...record,
+    darkColors: {
+      ...oledPalette,
+      ...(record.darkColors && typeof record.darkColors === "object" ? record.darkColors : {}),
+    },
+    lightColors: {
+      ...lightPalette,
+      ...(record.lightColors && typeof record.lightColors === "object" ? record.lightColors : {}),
+    },
+    statusAlignment: { ...defaultStatusAlignment, ...(record.statusAlignment ?? {}) },
+    componentThemes: Object.fromEntries(
+      COMPONENTS.map((key) => [
+        key,
+        { ...defaultComponentTheme, ...(record.componentThemes?.[key] ?? {}) },
+      ]),
+    ),
+  };
+  const result = schema.safeParse(data);
+  return result.success ? result.data : defaults;
+}
+function legacySettings() {
+  try {
+    return validate(JSON.parse(localStorage.getItem("canvas-preferences") ?? "{}"));
+  } catch {
+    return defaults;
+  }
+}
+type ConfigState = {
+  preferences: CanvasPreferences;
+  setPreferences: (patch: Partial<CanvasPreferences>) => void;
+  setScale: (scale: Scale) => void;
+  setColor: (key: ColorKey, value: string, isDark: boolean) => void;
+  resetPreferences: () => void;
+};
+export const useCanvasConfig = create<ConfigState>()(
+  persist(
+    (set, get) => ({
+      preferences: legacySettings(),
+      setPreferences: (patch) => {
+        const prefs = get().preferences;
+        const switchingSkin = patch.skin && patch.skin !== prefs.skin;
+        const preset = switchingSkin ? skinPalette[patch.skin as keyof typeof skinPalette] : null;
+        set({
+          preferences: validate({
+            ...prefs,
+            ...patch,
+            ...(preset ? { darkColors: preset.dark, lightColors: preset.light } : {}),
+          }),
+        });
+      },
+      setScale: (uiScale) =>
+        set({ preferences: validate({ ...get().preferences, uiScale, ...SCALES[uiScale] }) }),
+      setColor: (key, value, isDark) => {
+        if (!color.safeParse(value).success) return;
+        const property = isDark ? "darkColors" : "lightColors";
+        const prefs = get().preferences;
+        set({
+          preferences: validate({ ...prefs, [property]: { ...prefs[property], [key]: value } }),
+        });
+      },
+      resetPreferences: () => set({ preferences: defaults }),
+    }),
+    {
+      name: "canvas-config",
+      version: 5,
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ preferences: state.preferences }),
+      migrate: (saved, previousVersion) => {
+        if (previousVersion >= 4 || !saved || typeof saved !== "object") return saved;
+        const record = saved as { preferences?: Partial<CanvasPreferences> };
+        const prefs = record.preferences;
+        if (!prefs || prefs.skin !== "graphite") return saved;
+        const priorDefault = JSON.stringify(prefs.darkColors) === JSON.stringify(darkPalette);
+        const previousOled =
+          prefs.darkColors?.bg === "#000000" && prefs.darkColors?.surface === "#000000";
+        if (!priorDefault && !previousOled) return saved;
+        return {
+          ...record,
+          preferences: {
+            ...prefs,
+            skin: "oled",
+            ...(priorDefault ? { darkColors: oledPalette } : {}),
+          },
+        };
+      },
+      merge: (saved, current) => {
+        const record =
+          saved && typeof saved === "object" ? (saved as { preferences?: unknown }) : {};
+        return { ...current, preferences: validate(record.preferences ?? saved) };
+      },
+    },
+  ),
+);
