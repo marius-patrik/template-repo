@@ -112,12 +112,12 @@ export function NotificationCenter() {
         <button
           type="button"
           className="canvas-button canvas-button-icon canvas-button-ghost notification-trigger"
-          aria-label={t("Notifications")}
+          aria-label={unread > 0 ? t("Unread notifications: {{count}}", { count: unread }) : t("Notifications")}
           title={t("Notifications")}
           data-testid="notification-trigger"
         >
           <AnimatedIcon name="bell" size={17} />
-          {unread > 0 && <span className="notification-unread" aria-label={t("Unread notifications: {{count}}", { count: unread })}>{unread > 9 ? "9+" : unread}</span>}
+          {unread > 0 && <span className="notification-unread" aria-hidden="true">{unread > 9 ? "9+" : unread}</span>}
         </button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
