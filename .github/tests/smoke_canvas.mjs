@@ -10,10 +10,6 @@ const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 page.setDefaultTimeout(9000);
 const watchdog = setTimeout(() => { console.error("Canvas smoke exceeded hard timeout"); process.exit(1); }, 150000);
 const errors = [];
-async function review(label, surface) {
-  const bytes = await surface.screenshot({ type: "jpeg", quality: 55, animations: "disabled" });
-  console.log(`CANVAS_REVIEW_${label}_B64=${bytes.toString("base64")}`);
-}
 page.on("pageerror", (error) => errors.push(error.message));
 
 try {
@@ -21,14 +17,15 @@ try {
   await page.locator("#root .app-root").waitFor({ timeout: 15000 });
   await page.getByTestId("empty-workspace").waitFor();
   await page.locator(".dock-empty-tabbar").waitFor();
-  await review("WELCOME", page);
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await mobile.goto(url, { waitUntil: "load" });
   await mobile.getByTestId("empty-workspace").waitFor();
-  await review("MOBILE_WELCOME", mobile);
   await mobile.locator(".dock-welcome-options button").first().click();
   await mobile.locator(".cx-overview-scroll").waitFor();
-  await review("MOBILE_CANVAS", mobile);
+  const mobileModes = await mobile.locator(".cx-viewbar-modes button .app-icon").count();
+  if (mobileModes !== 3) throw new Error("Mobile Canvas modes must expose three icons");
+  if (await mobile.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2))
+    throw new Error("Mobile Canvas overflows the viewport horizontally");
   await mobile.close();
 
   await page.locator(".window-statusbar .title-navigation").waitFor();
@@ -133,16 +130,13 @@ try {
   await page.getByRole("option", { name: "Canvas" }).click();
   await page.getByTestId("canvas-studio").waitFor();
   await page.locator(".cx-overview-scroll").waitFor();
-  await review("OVERVIEW", page);
   await page.getByRole("button", { name: "Knowledge graph" }).last().click();
   await page.getByTestId("canvas-graph").waitFor();
-  await review("GRAPH", page);
   await page.locator(".canvas-perspectives").getByRole("button", { name: "Overview" }).click();
   await page.locator(".canvas-perspectives").getByRole("button", { name: "Agents" }).click();
   await page.locator(".canvas-inspector").getByText("AGENTS.md").first().waitFor();
   await page.locator(".canvas-perspectives").getByRole("button", { name: "Artifacts" }).click();
   await page.getByTestId("canvas-source").waitFor();
-  await review("DOCUMENTS", page);
   await page.locator(".canvas-perspectives").getByRole("button", { name: "Roadmap" }).click();
   await page.getByTestId("canvas-source").waitFor();
   await page.locator(".canvas-perspectives").getByRole("button", { name: "Overview" }).click();
@@ -152,7 +146,6 @@ try {
   // Settings expose all placement and unified scale controls.
   await page.locator(".title-actions").getByRole("button", { name: "Settings" }).click();
   await page.getByTestId("settings-page").waitFor();
-  await review("SETTINGS", page);
 
   await page.getByRole("combobox", { name: "Modifier key" }).click();
   await page.getByRole("option", { name: "Control", exact: true }).click();
