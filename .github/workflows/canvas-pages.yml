@@ -49,6 +49,11 @@ jobs:
           grep -q '</html>' .canvas-dist/index.html
           cp .canvas-dist/index.html .canvas-dist/canvas.html
           touch .canvas-dist/.nojekyll
+      - name: Smoke test compiled HTML in Chromium
+        working-directory: .github/app
+        run: |
+          bunx playwright install --with-deps chromium
+          node ../tests/smoke_canvas.mjs ../../.canvas-dist/index.html
       - uses: actions/upload-pages-artifact@v4
         with:
           path: .canvas-dist
