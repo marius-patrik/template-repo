@@ -1858,7 +1858,6 @@ kbd {
   opacity: 0.4;
   pointer-events: none;
 }
-.menu-content,
 .canvas-context-menu {
   background: var(--surface);
   color: var(--text);
@@ -1875,9 +1874,6 @@ kbd {
   pointer-events: none;
 }
 .nav-context-row {
-  width: 100%;
-}
-.nav-context-row .nav-link {
   width: 100%;
 }
 .sidebar {
@@ -2092,4 +2088,29 @@ a:hover .code-icon-glyph,
 }
 .canvas-dock-tab .app-icon {
   pointer-events: none;
+}
+
+.sidebar-resizer {
+  margin-top: 0;
+  margin-bottom: 0;
+  border: 0;
+}
+.canvas-tab-close {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  width: 22px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  margin-right: 3px;
+}
+.canvas-tab-close:hover,
+.canvas-tab-close:focus-visible {
+  background: var(--hover);
+  color: var(--text);
+  outline: none;
 }

@@ -712,7 +712,7 @@ export default function App() {
             ))}
           </nav>
         </aside>
-        <div
+        <hr
           className={`sidebar-resizer ${collapsed ? "disabled" : ""}`}
           role="separator"
           aria-label={t("Resize sidebar")}

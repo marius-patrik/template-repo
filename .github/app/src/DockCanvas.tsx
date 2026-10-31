@@ -62,9 +62,22 @@ function CanvasTab(props: IDockviewPanelHeaderProps) {
         { icon: "reset", label: t("Reset layout"), action: () => workspace?.resetLayout() },
       ]}
     >
-      <div className="canvas-dock-tab" data-canvas-tab={view}>
+      <div className="canvas-dock-tab" data-canvas-tab={view} data-animated-icon-trigger>
         <AnimatedIcon name={view} size={14} />
-        <DockviewDefaultTab {...props} />
+        <DockviewDefaultTab {...props} hideClose />
+        <button
+          type="button"
+          className="canvas-tab-close"
+          aria-label={t("Close tab")}
+          title={t("Close tab")}
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => {
+            event.stopPropagation();
+            props.api.close();
+          }}
+        >
+          <AnimatedIcon name="close" size={14} />
+        </button>
       </div>
     </CanvasContextMenu>
   );

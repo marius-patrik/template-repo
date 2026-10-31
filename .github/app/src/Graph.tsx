@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { AnimatedIcon } from "./components/AnimatedIcon";
 import { useCanvasConfig } from "./config";
 import { ReactFlow, Background, Controls, type Node, type Edge } from "@xyflow/react";
 import dagre from "dagre";
@@ -100,7 +101,7 @@ export default function Graph() {
           <strong>{displayLabel(selected)}</strong>
           <span>{selected}</span>
           <button type="button" aria-label={t("Close selection")} onClick={() => setSelected(null)}>
-            ×
+            <AnimatedIcon name="close" size={14} />
           </button>
         </div>
       )}
