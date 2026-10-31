@@ -79,12 +79,12 @@ const relevant = (perspective: Perspective) => {
 
 function MarkdownPreview({ content }: { content: string }) {
   const blocks = useMemo(() => {
-    const chunks: { kind: "heading" | "body" | "list" | "code"; value: string; level?: number }[] = [];
+    const chunks: { id: string; kind: "heading" | "body" | "list" | "code"; value: string; level?: number }[] = [];
     let kind: "body" | "list" | "code" = "body";
     let pending: string[] = [];
     let fence = false;
     const flush = () => {
-      if (pending.length) chunks.push({ kind, value: pending.join(kind === "code" ? "\n" : " ") });
+      if (pending.length) chunks.push({ id: `block-${chunks.length}`, kind, value: pending.join(kind === "code" ? "\n" : " ") });
       pending = [];
     };
     for (const line of content.split("\n")) {
@@ -92,7 +92,7 @@ function MarkdownPreview({ content }: { content: string }) {
       if (/^\s*```/.test(raw)) { flush(); fence = !fence; kind = fence ? "code" : "body"; continue; }
       if (fence) { pending.push(raw); continue; }
       const heading = raw.match(/^(#{1,4})\s+(.+)/);
-      if (heading) { flush(); chunks.push({ kind: "heading", value: human(heading[2]), level: heading[1].length }); continue; }
+      if (heading) { flush(); chunks.push({ id: `block-${chunks.length}`, kind: "heading", value: human(heading[2]), level: heading[1].length }); continue; }
       if (!raw.trim()) { flush(); kind = "body"; continue; }
       if (/^\s*(?:[-*+]\s+|\d+\.\s+)/.test(raw)) {
         if (kind !== "list") flush();
@@ -108,14 +108,14 @@ function MarkdownPreview({ content }: { content: string }) {
     return chunks;
   }, [content]);
   return <div className="cx-readable-markdown">
-    {blocks.map((block, index) => {
+    {blocks.map((block) => {
       if (block.kind === "heading") {
-        if (block.level === 1) return <h2 key={index}>{block.value}</h2>;
-        return <h3 key={index}>{block.value}</h3>;
+        if (block.level === 1) return <h2 key={block.id}>{block.value}</h2>;
+        return <h3 key={block.id}>{block.value}</h3>;
       }
-      if (block.kind === "code") return <pre key={index}>{block.value}</pre>;
-      if (block.kind === "list") return <p className="cx-md-list" key={index}>{block.value}</p>;
-      return <p key={index}>{block.value}</p>;
+      if (block.kind === "code") return <pre key={block.id}>{block.value}</pre>;
+      if (block.kind === "list") return <p className="cx-md-list" key={block.id}>{block.value}</p>;
+      return <p key={block.id}>{block.value}</p>;
     })}
   </div>;
 }
@@ -228,11 +228,11 @@ export default function Canvas() {
               <span className="cx-overline">{mode === "graph" ? "RELATIONSHIPS" : mode === "documents" ? "SOURCE EXPLORER" : "REPOSITORY OVERVIEW"}</span>
               <strong>{mode === "graph" ? t("Knowledge graph") : mode === "documents" ? t("Source documents") : context.name}</strong>
             </div>
-            <div className="canvas-mode-switch cx-viewbar-modes" role="group" aria-label={t("Display mode")}>
+            <fieldset className="canvas-mode-switch cx-viewbar-modes" aria-label={t("Display mode")}>
               <button type="button" className={mode === "overview" ? "active" : ""} aria-label={t("Overview")} aria-pressed={mode === "overview"} onClick={() => setMode("overview")}><AnimatedIcon name="overview" size={15} /><span>{t("Overview")}</span></button>
               <button type="button" className={mode === "documents" ? "active" : ""} aria-label={t("Source documents")} aria-pressed={mode === "documents"} onClick={() => setMode("documents")}><AnimatedIcon name="library" size={15} /><span>{t("Files")}</span></button>
               <button type="button" className={mode === "graph" ? "active" : ""} aria-label={t("Knowledge graph")} aria-pressed={mode === "graph"} onClick={() => setMode("graph")}><AnimatedIcon name="canvas" size={15} /><span>{t("Graph")}</span></button>
-            </div>
+            </fieldset>
           </div>
           {mode === "overview" && (
             <div className="cx-overview-scroll">
