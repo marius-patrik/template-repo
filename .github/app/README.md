@@ -63,3 +63,5 @@ Dockview layout acceptance is checked in Chromium before every Pages publication
 ### Dockview tab creation
 
 Every Dockview group header has a `+` action with a Radix dropdown listing all ten route views, grouped as Workspace and System. Selecting an option creates a new tab in that group, including when the same view is already open in another tab. Wouter follows the new active tab. Keyboard and touch access use Radix's built-in menu behavior.
+
+The browser smoke test selects the Radix dropdown portal via its stable `.dock-add-menu` class rather than relying on an implementation-specific ARIA wrapper; it still verifies all ten accessible menu items.
