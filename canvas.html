@@ -2473,7 +2473,7 @@ export default function App() {
   );
 }
 </pre></section>
-<section class="file" id="file-0064"><h3>.github/app/src/Graph.tsx</h3><p class="meta">Git mode 100644 · a42e28a91b6c0c468401cb8bb690d056440d3aff</p><pre>import { useMemo, useState } from &quot;react&quot;;
+<section class="file" id="file-0064"><h3>.github/app/src/Graph.tsx</h3><p class="meta">Git mode 100644 · 623059cbb1f4c46d89a42a6f8cae7f55a194f510</p><pre>import { useMemo, useState } from &quot;react&quot;;
 import { ReactFlow, Background, Controls, type Node, type Edge } from &quot;@xyflow/react&quot;;
 import dagre from &quot;dagre&quot;;
 import context from &quot;./generated/context.json&quot;;
@@ -2538,7 +2538,7 @@ export default function Graph() {
     return { nodes, edges };
   }, []);
   return (
-    &lt;div className=&quot;graph-pane&quot; role=&quot;region&quot; aria-label=&quot;Repository document relationships&quot;&gt;
+    &lt;section className=&quot;graph-pane&quot; aria-label=&quot;Repository document relationships&quot;&gt;
       &lt;ReactFlow
         nodes={nodes}
         edges={edges}
@@ -2562,7 +2562,7 @@ export default function Graph() {
           &lt;/button&gt;
         &lt;/div&gt;
       )}
-    &lt;/div&gt;
+    &lt;/section&gt;
   );
 }
 </pre></section>
@@ -2729,7 +2729,7 @@ createRoot(root).render(
   &lt;/React.StrictMode&gt;,
 );
 </pre></section>
-<section class="file" id="file-0069"><h3>.github/app/src/styles.css</h3><p class="meta">Git mode 100644 · 3c43e44e9d2ea67c707b23081872bf58ee717a28</p><pre>@import &quot;tailwindcss&quot;;
+<section class="file" id="file-0069"><h3>.github/app/src/styles.css</h3><p class="meta">Git mode 100644 · 8a48a938eddbc7156bd24dec687272c81013585b</p><pre>@import &quot;tailwindcss&quot;;
 @source &quot;.&quot;;
 :root {
   color-scheme: dark;
@@ -2822,7 +2822,6 @@ input:focus-visible {
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100%;
   height: 100dvh;
   min-height: 300px;
   background: var(--bg);
