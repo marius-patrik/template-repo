@@ -1,0 +1,44 @@
+name: Canvas source formatting (feature bootstrap)
+on:
+  push:
+    branches: [feat/canvas-react-pages]
+    paths:
+      - '.github/app/**'
+      - '.github/workflows/canvas-format.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: canvas-format-bootstrap
+  cancel-in-progress: false
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/canvas-react-pages
+          persist-credentials: true
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.3.11'
+      - name: Format committed Canvas source
+        working-directory: .github/app
+        run: |
+          bun install --frozen-lockfile
+          bunx biome format --write .
+      - name: Commit formatted changes (tracked source only)
+        run: |
+          set -euo pipefail
+          git add -u -- .github/app
+          if git diff --cached --quiet; then
+            echo "Canvas formatting already clean"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'style(canvas): apply Biome formatting'
+          git push origin HEAD:feat/canvas-react-pages
