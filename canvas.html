@@ -3000,7 +3000,7 @@ createRoot(root).render(
   &lt;/React.StrictMode&gt;,
 );
 </pre></section>
-<section class="file" id="file-0073"><h3>.github/app/src/styles.css</h3><p class="meta">Git mode 100644 · 8a48a938eddbc7156bd24dec687272c81013585b</p><pre>@import &quot;tailwindcss&quot;;
+<section class="file" id="file-0073"><h3>.github/app/src/styles.css</h3><p class="meta">Git mode 100644 · 82a5642bfbbf3a03bd71c21d8759c10bec9038d6</p><pre>@import &quot;tailwindcss&quot;;
 @source &quot;.&quot;;
 :root {
   color-scheme: dark;
@@ -4043,6 +4043,247 @@ kbd {
     scroll-behavior: auto !important;
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* Canvas chrome: all route selection lives in the titlebar omnibar. */
+.desktop-toggle {
+  display: inline-flex;
+  flex: none;
+}
+.sidebar-navigation {
+  padding-top: 8px;
+}
+.settings-panel + .keyboard-settings {
+  margin-top: 16px;
+}
+.accent-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+.accent-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.accent-swatch {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+  outline: 1px solid var(--border);
+  display: inline-grid;
+  place-items: center;
+  transition: outline-color 0.16s, transform 0.16s;
+}
+.accent-swatch:hover {
+  transform: translateY(-1px);
+}
+.accent-swatch.selected {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+.swatch-mark {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #111;
+  box-shadow: 0 0 0 1px #fff8;
+}
+.accent-custom-trigger {
+  min-height: 34px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  background: var(--raised);
+  color: var(--text);
+  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+.accent-custom-trigger.selected {
+  border-color: var(--accent);
+}
+.accent-custom-swatch {
+  width: 17px;
+  height: 17px;
+  flex: none;
+  border-radius: 5px;
+  border: 1px solid #7775;
+}
+.accent-popover {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 10px;
+  box-shadow: 0 20px 50px #0006;
+  z-index: 150;
+  padding: 16px;
+  width: min(275px, calc(100vw - 24px));
+}
+.color-popover-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  gap: 8px;
+}
+.color-popover-heading strong {
+  font-size: 12px;
+}
+.color-popover-heading span,
+.accent-hex-label,
+.accent-note {
+  color: var(--muted);
+  font-size: 11px;
+}
+.accent-popover .react-colorful {
+  width: 100%;
+  height: 194px;
+}
+.accent-popover .react-colorful__saturation {
+  border-radius: 6px 6px 0 0;
+}
+.accent-popover .react-colorful__hue {
+  height: 15px;
+  border-radius: 0 0 6px 6px;
+}
+.accent-hex-label {
+  display: block;
+  margin: 16px 0 6px;
+}
+.accent-hex-input,
+.keybind-search {
+  width: 100%;
+  height: 37px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--raised);
+  padding: 0 12px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px;
+}
+.accent-note {
+  line-height: 1.5;
+  margin: 12px 0 0;
+}
+.keybind-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 18px;
+}
+.keybind-heading h2 {
+  margin: 0 0 7px;
+}
+.keybind-heading p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.55;
+}
+.keybind-reset-all,
+.keybind-edit,
+.keybind-reset {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--raised);
+  color: var(--text);
+  font-size: 11px;
+  min-height: 28px;
+  padding: 5px 10px;
+}
+.keybind-edit.recording {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.keybind-reset,
+.keybind-reset-all {
+  background: transparent;
+  color: var(--muted);
+}
+.keybind-search-label {
+  display: block;
+  margin: 0 0 7px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.keybind-list {
+  margin-top: 13px;
+  border-top: 1px solid var(--border);
+}
+.keybind-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--border);
+}
+.keybind-description {
+  min-width: 160px;
+  flex: 1;
+  display: grid;
+  gap: 4px;
+}
+.keybind-description strong {
+  font-size: 12px;
+  font-weight: 600;
+}
+.keybind-description small {
+  font-size: 10px;
+  color: var(--subtle);
+  overflow-wrap: anywhere;
+}
+.keybind-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.keybind-controls kbd {
+  color: var(--text);
+  font-size: 11px;
+  margin-right: 7px;
+  border: none;
+  background: var(--raised);
+  padding: 5px 8px;
+}
+.keybind-error {
+  color: #eb8f85;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.keybind-hint {
+  color: var(--muted);
+  margin: 16px 0 0;
+  font-size: 11px;
+  line-height: 1.5;
+}
+@media (max-width: 700px) {
+  .desktop-toggle {
+    display: none;
+  }
+  .accent-setting {
+    align-items: stretch;
+  }
+  .accent-controls {
+    justify-content: flex-start;
+  }
+  .keybind-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .keybind-controls {
+    justify-content: flex-start;
   }
 }
 </pre></section>
