@@ -525,80 +525,90 @@ export default function App() {
                     </>
                   )}
                 </aside>
-                <CanvasContextMenu actions={[
-                  { label: t("Move sidebar left"), icon: "move", action: () => updatePreferences({ sidebarPosition: "left" }) },
-                  { label: t("Move sidebar right"), icon: "move", action: () => updatePreferences({ sidebarPosition: "right" }) },
-                ]}>
-                <hr
-                  className={`sidebar-resizer ${collapsed ? "disabled" : ""}`}
-                  aria-label={t("Resize sidebar")}
-                  aria-orientation="vertical"
-                  aria-valuenow={prefs.sidebarWidth}
-                  aria-valuemin={180}
-                  aria-valuemax={480}
-                  tabIndex={collapsed ? -1 : 0}
-                  onPointerDown={(event) => {
-                    if (collapsed || event.button !== 0) return;
-                    event.preventDefault();
-                    resizing.current = true;
-                    event.currentTarget.setPointerCapture(event.pointerId);
-                    document.body.classList.add("resizing-sidebar");
-                  }}
-                  onPointerMove={(event) => {
-                    if (resizing.current)
-                      updatePreferences({
-                        sidebarWidth: Math.min(
-                          480,
-                          Math.max(
-                            180,
-                            Math.round(
-                              prefs.sidebarPosition === "left"
-                                ? event.clientX
-                                : window.innerWidth - event.clientX,
+                <CanvasContextMenu
+                  actions={[
+                    {
+                      label: t("Move sidebar left"),
+                      icon: "move",
+                      action: () => updatePreferences({ sidebarPosition: "left" }),
+                    },
+                    {
+                      label: t("Move sidebar right"),
+                      icon: "move",
+                      action: () => updatePreferences({ sidebarPosition: "right" }),
+                    },
+                  ]}
+                >
+                  <hr
+                    className={`sidebar-resizer ${collapsed ? "disabled" : ""}`}
+                    aria-label={t("Resize sidebar")}
+                    aria-orientation="vertical"
+                    aria-valuenow={prefs.sidebarWidth}
+                    aria-valuemin={180}
+                    aria-valuemax={480}
+                    tabIndex={collapsed ? -1 : 0}
+                    onPointerDown={(event) => {
+                      if (collapsed || event.button !== 0) return;
+                      event.preventDefault();
+                      resizing.current = true;
+                      event.currentTarget.setPointerCapture(event.pointerId);
+                      document.body.classList.add("resizing-sidebar");
+                    }}
+                    onPointerMove={(event) => {
+                      if (resizing.current)
+                        updatePreferences({
+                          sidebarWidth: Math.min(
+                            480,
+                            Math.max(
+                              180,
+                              Math.round(
+                                prefs.sidebarPosition === "left"
+                                  ? event.clientX
+                                  : window.innerWidth - event.clientX,
+                              ),
                             ),
                           ),
-                        ),
-                      });
-                  }}
-                  onLostPointerCapture={() => {
-                    resizing.current = false;
-                    document.body.classList.remove("resizing-sidebar");
-                  }}
-                  onPointerUp={(event) => {
-                    if (event.currentTarget.hasPointerCapture(event.pointerId))
-                      event.currentTarget.releasePointerCapture(event.pointerId);
-                  }}
-                  onPointerCancel={(event) => {
-                    if (event.currentTarget.hasPointerCapture(event.pointerId))
-                      event.currentTarget.releasePointerCapture(event.pointerId);
-                  }}
-                  onDoubleClick={() => updatePreferences({ sidebarWidth: 228 })}
-                  onKeyDown={(event) => {
-                    const direction =
-                      event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
-                    if (direction) {
-                      event.preventDefault();
-                      updatePreferences({
-                        sidebarWidth: Math.min(
-                          480,
-                          Math.max(
-                            180,
-                            prefs.sidebarWidth +
-                              direction * (prefs.sidebarPosition === "right" ? -16 : 16),
+                        });
+                    }}
+                    onLostPointerCapture={() => {
+                      resizing.current = false;
+                      document.body.classList.remove("resizing-sidebar");
+                    }}
+                    onPointerUp={(event) => {
+                      if (event.currentTarget.hasPointerCapture(event.pointerId))
+                        event.currentTarget.releasePointerCapture(event.pointerId);
+                    }}
+                    onPointerCancel={(event) => {
+                      if (event.currentTarget.hasPointerCapture(event.pointerId))
+                        event.currentTarget.releasePointerCapture(event.pointerId);
+                    }}
+                    onDoubleClick={() => updatePreferences({ sidebarWidth: 228 })}
+                    onKeyDown={(event) => {
+                      const direction =
+                        event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
+                      if (direction) {
+                        event.preventDefault();
+                        updatePreferences({
+                          sidebarWidth: Math.min(
+                            480,
+                            Math.max(
+                              180,
+                              prefs.sidebarWidth +
+                                direction * (prefs.sidebarPosition === "right" ? -16 : 16),
+                            ),
                           ),
-                        ),
-                      });
-                    }
-                    if (event.key === "Home") {
-                      event.preventDefault();
-                      updatePreferences({ sidebarWidth: 180 });
-                    }
-                    if (event.key === "End") {
-                      event.preventDefault();
-                      updatePreferences({ sidebarWidth: 480 });
-                    }
-                  }}
-                />
+                        });
+                      }
+                      if (event.key === "Home") {
+                        event.preventDefault();
+                        updatePreferences({ sidebarWidth: 180 });
+                      }
+                      if (event.key === "End") {
+                        event.preventDefault();
+                        updatePreferences({ sidebarWidth: 480 });
+                      }
+                    }}
+                  />
                 </CanvasContextMenu>
               </>
             )}

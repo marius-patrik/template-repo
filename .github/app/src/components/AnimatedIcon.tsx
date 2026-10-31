@@ -85,7 +85,7 @@ export function AnimatedIcon({
   className?: string;
 }) {
   const scaledIconSize = useCanvasConfig((state) => state.preferences.iconSize);
-  const actualSize = Math.max(10, Math.round(size * scaledIconSize / 18));
+  const actualSize = Math.max(10, Math.round((size * scaledIconSize) / 18));
   const node = useRef<HTMLSpanElement>(null);
   const animation = useRef<IconHandle>(null);
   const Icon = (registry[name as keyof typeof registry] ??
