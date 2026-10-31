@@ -4,7 +4,7 @@ import {
   FileTextIcon, HistoryIcon, SettingsIcon, SearchIcon, PlusIcon,
   ChevronRightIcon, ChevronDownIcon, PanelLeftCloseIcon, PanelLeftOpenIcon,
   SunIcon, MoonIcon, CircleCheckIcon, CircleHelpIcon, ArrowRightIcon,
-  PanelRightOpenIcon, RotateCcwIcon, CodeIcon, BellIcon, MoreHorizontalIcon,
+  PanelRightOpenIcon, RotateCcwIcon, BellIcon, GripHorizontalIcon,
   CopyIcon, XIcon,
 } from "lucide-animated";
 
@@ -34,10 +34,10 @@ const registry = {
   arrow: ArrowRightIcon,
   split: PanelRightOpenIcon,
   reset: RotateCcwIcon,
-  code: CodeXmlIcon,
-  monaco: CodeXmlIcon,
+  code: FileTextIcon,
+  monaco: FileTextIcon,
   bell: BellIcon,
-  more: EllipsisIcon,
+  more: GripHorizontalIcon,
   copy: CopyIcon,
   close: XIcon,
 } satisfies Record<string, ComponentType<{ size?: number }>>;
@@ -69,8 +69,14 @@ export function AnimatedIcon({
     };
   }, []);
   return (
-    <span ref={node} className={className ?? "app-icon"} aria-hidden="true">
+    <span
+      ref={node}
+      className={className ?? "app-icon"}
+      aria-hidden="true"
+      data-code-icon={name === "monaco" || name === "code" ? "true" : undefined}
+    >
       <Icon ref={animation} size={size} animateOnHover={false} />
+      {(name === "monaco" || name === "code") && <span className="code-icon-glyph">&lt;/&gt;</span>}
     </span>
   );
 }

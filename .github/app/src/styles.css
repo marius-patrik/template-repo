@@ -1848,3 +1848,18 @@ body.resizing-sidebar .sidebar { transition: none; }
 @media (prefers-reduced-motion: reduce) {
   .sidebar, .canvas-select-trigger { transition: none !important; }
 }
+
+/* Monaco uses the animated FileText frame from lucide-animated with an
+   explicit </> code mark because this pinned icon package lacks Code/CodeXml. */
+.app-icon[data-code-icon="true"] { position: relative; min-width: 18px; min-height: 18px; }
+.app-icon[data-code-icon="true"] svg { opacity: .32; }
+.code-icon-glyph {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font: 700 9px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+  letter-spacing: -.1em; transform: translateY(1px);
+  pointer-events: none; transition: transform .16s ease;
+}
+button:hover .code-icon-glyph, a:hover .code-icon-glyph,
+.canvas-dock-tab:hover .code-icon-glyph { transform: translateY(1px) scale(1.08); }
+.canvas-dock-tab { cursor: default; }
+.canvas-dock-tab .app-icon { pointer-events: none; }
