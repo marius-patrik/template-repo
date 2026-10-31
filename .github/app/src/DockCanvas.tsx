@@ -45,6 +45,10 @@ type PaneContextValue = {
 };
 const PaneContext = createContext<PaneContextValue | null>(null);
 
+function panelKind(id: string): string {
+  return id.split(":")[1] ?? "";
+}
+
 function viewFromId(id: string): CanvasView {
   const candidate = id.split(":")[1] ?? "";
   return isCanvasView(candidate) ? candidate : "canvas";
@@ -57,7 +61,7 @@ function CanvasTab(props: IDockviewPanelHeaderProps) {
   const shell = useContext(PaneContext);
   const { t } = useTranslation();
   const view = viewFromId(props.api.id);
-  const isNew = props.api.getParameters().view === "new";
+  const isNew = panelKind(props.api.id) === "new";
   const pinned = !isNew && (shell?.pinned.includes(view) ?? false);
   return (
     <CanvasContextMenu
@@ -337,7 +341,7 @@ export default function DockCanvas({
     // selected tab must not resurrect a panel that the user explicitly closed.
     const remaining = api.panels.filter((item) => item.id !== panelId);
     const selected = remaining.find((item) => item.api.isActive) ?? remaining.at(-1);
-    const view = selected?.api.getParameters().view;
+    const view = selected ? panelKind(selected.id) : undefined;
     const nextRoute = typeof view === "string" && isCanvasView(view) ? `/${view}` : "/";
     if (latest.current.route !== nextRoute) suppressedRoute.current = latest.current.route;
     latest.current.route = nextRoute;
@@ -394,19 +398,10 @@ export default function DockCanvas({
   useEffect(() => {
     if (!ready) return;
     const api = apiRef.current;
-    console.info(
-      "CANVAS_DOCK_ROUTE",
-      JSON.stringify({
-        route,
-        alreadyOpened: alreadyOpenedRoute.current,
-        suppressed: suppressedRoute.current,
-        panels: api?.panels.map((panel) => ({ id: panel.id, params: panel.api.getParameters() })),
-      }),
-    );
     // Dockview already created this tab; route changes must not duplicate it.
     if (alreadyOpenedRoute.current === route) {
       alreadyOpenedRoute.current = null;
-      if (api?.panels.some((panel) => panel.api.getParameters().view === viewFromRoute(route)))
+      if (api?.panels.some((panel) => panelKind(panel.id) === viewFromRoute(route)))
         return;
     } else if (alreadyOpenedRoute.current) {
       alreadyOpenedRoute.current = null;
@@ -419,7 +414,7 @@ export default function DockCanvas({
     if (latest.current.route !== route) return;
     const view = viewFromRoute(route);
     if (!api || !view) return;
-    const existing = api.panels.find((panel) => panel.api.getParameters().view === view);
+    const existing = api.panels.find((panel) => panelKind(panel.id) === view);
     if (existing) {
       existing.api.setActive();
       return;
@@ -436,7 +431,7 @@ export default function DockCanvas({
     const api = apiRef.current;
     if (!api) return;
     for (const panel of api.panels) {
-      const view = panel.api.getParameters().view;
+      const view = panelKind(panel.id);
       if (typeof view === "string" && isCanvasView(view)) panel.api.setTitle(t(viewLabel(view)));
     }
   }, [t]);
@@ -480,7 +475,7 @@ export default function DockCanvas({
     let migrateCanvas = false;
     let migrateEditor = false;
     for (const panel of [...api.panels]) {
-      const oldView: unknown = panel.api.getParameters().view;
+      const oldView: unknown = panelKind(panel.id);
       if (oldView === "monaco" || oldView === "notepad") {
         migrateEditor = true;
         panel.api.close();
@@ -494,7 +489,7 @@ export default function DockCanvas({
     for (const view of ["canvas", "editor"] as const) {
       if (
         (view === "canvas" ? migrateCanvas : migrateEditor) &&
-        !api.panels.some((panel) => panel.api.getParameters().view === view)
+        !api.panels.some((panel) => panelKind(panel.id) === view)
       ) {
         api.addPanel({
           id: `migrated:${view}:${++sequence}`,
@@ -510,7 +505,7 @@ export default function DockCanvas({
       api.onDidActivePanelChange(({ panel, origin }) => {
         if (origin !== "user") return;
         if (!panel && api.panels.length === 0) latest.current.onNavigate("/");
-        const view: unknown = panel?.api.getParameters().view;
+        const view: unknown = panel ? panelKind(panel.id) : undefined;
         if (
           typeof view === "string" &&
           isCanvasView(view) &&
