@@ -328,11 +328,12 @@ export default function DockCanvas({
     if (!api || !panel) return;
     // Invalidate the old route before closing; a pending effect for the previously
     // selected tab must not resurrect a panel that the user explicitly closed.
-    latest.current.route = "/";
-    panel.api.close();
-    const next = api.activePanel?.api.getParameters().view;
-    const nextRoute = typeof next === "string" && isCanvasView(next) ? `/${next}` : "/";
+    const remaining = api.panels.filter((item) => item.id !== panelId);
+    const selected = remaining.find((item) => item.api.isActive) ?? remaining.at(-1);
+    const view = selected?.api.getParameters().view;
+    const nextRoute = typeof view === "string" && isCanvasView(view) ? `/${view}` : "/";
     latest.current.route = nextRoute;
+    panel.api.close();
     latest.current.onNavigate(nextRoute);
   }, []);
   const closeActive = useCallback(() => {
