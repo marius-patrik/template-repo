@@ -1633,7 +1633,7 @@ Describe precisely what changed and why.
 src/generated/
 ../../.canvas-dist/
 </pre></section>
-<section class="file" id="file-0055"><h3>.github/app/README.md</h3><p class="meta">Git mode 100644 · 4c92dcc6e27aa2afe94067c3c358b03f50f355b3</p><pre># Canvas Web — repository application
+<section class="file" id="file-0055"><h3>.github/app/README.md</h3><p class="meta">Git mode 100644 · df284cb3f342884d6f95cf5e761fd6a36aff1c82</p><pre># Canvas Web — repository application
 
 The first-class Canvas UI is authored in `.github/app`. A deterministic build step reads
 only allowlisted, Git-tracked repository documents and generates `src/generated/context.json`;
@@ -1682,8 +1682,9 @@ Pages builds on the feature branch deploy through the `canvas-preview` environme
 
 Dockview now renders every route within one application-level compositor, replacing the
 old nested Workbench instance and fixed page-switching layout. The title bar, omnibar,
-navigation and status bar remain global. The workspace toolbar supports tab navigation,
-splitting the active view, opening the graph and resetting the layout. Drag-and-drop
+navigation and status bar remain global. The Dockview tab strip provides a `+` dropdown and a three-dot menu. The latter
+splits the clicked group to the right or resets the complete layout. The redundant
+secondary workspace toolbar has been removed. Drag-and-drop
 rearrangement, group splitting and panel closing are native Dockview interactions.
 
 Wouter hash routes and Dockview tab selection are synchronized. Local layout preferences
@@ -1700,6 +1701,8 @@ Dockview layout acceptance is checked in Chromium before every Pages publication
 Every Dockview group header has a `+` action with a Radix dropdown listing all ten route views, grouped as Workspace and System. Selecting an option creates a new tab in that group, including when the same view is already open in another tab. Wouter follows the new active tab. Keyboard and touch access use Radix&#x27;s built-in menu behavior.
 
 The browser smoke test selects the Radix dropdown portal via its stable `.dock-add-menu` class rather than relying on an implementation-specific ARIA wrapper; it still verifies all ten accessible menu items.
+
+In the per-group three-dot menu, **Split right** duplicates that group&#x27;s visible tab in a new group; **Reset layout** clears the saved local Dockview layout and returns to Overview. The global title bar and status bar remain outside Dockview.
 </pre></section>
 <section class="file" id="file-0056"><h3>.github/app/biome.json</h3><p class="meta">Git mode 100644 · b7e3d5edf47ef879ecb3eabc17772d2817b11c64</p><pre>{
   &quot;$schema&quot;: &quot;https://biomejs.dev/schemas/2.6.4/schema.json&quot;,
