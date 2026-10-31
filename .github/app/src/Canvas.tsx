@@ -201,7 +201,7 @@ export default function Canvas() {
                 {context.paths.length} {t("Source documents").toLowerCase()}
               </span>
             </div>
-            <div className="canvas-mode-switch" role="group" aria-label={t("View")}>
+            <div className="canvas-mode-switch">
               <button
                 type="button"
                 className={mode === "graph" ? "active" : ""}
