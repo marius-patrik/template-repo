@@ -27,6 +27,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          # Preview the exact feature-branch head, not a synthetic PR merge commit.
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 1
           submodules: false
       - uses: actions/configure-pages@v5
@@ -58,7 +60,22 @@ jobs:
           path: .canvas-dist
 
   deploy:
-    if: github.event.repository.private == false && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/canvas-react-pages') && github.event_name == 'push'
+    # Only trusted same-repository Canvas PRs may publish unmerged previews.
+    # Pull-request builds previously passed while deployment was always skipped.
+    if: >-
+      github.event.repository.private == false &&
+      (
+        (
+          github.event_name == 'push' &&
+          (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/canvas-react-pages')
+        ) ||
+        (
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository &&
+          github.event.pull_request.head.ref == 'feat/canvas-react-pages' &&
+          github.event.pull_request.base.ref == 'development'
+        )
+      )
     needs: build
     runs-on: ubuntu-latest
     environment:
