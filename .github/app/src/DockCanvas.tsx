@@ -18,6 +18,8 @@ import {
   type IDockviewHeaderActionsProps,
 } from "dockview-react";
 import { AnimatedIcon } from "./components/AnimatedIcon";
+import { useTranslation } from "react-i18next";
+import i18n from "./i18n";
 
 const LAYOUT_KEY = "canvas-dockview-layout-v1";
 const ROUTES = [
@@ -53,6 +55,7 @@ const TITLES: Record<CanvasView, string> = {
   settings: "Settings",
 };
 const isView = (name: string): name is CanvasView => ROUTES.some((view) => view === name);
+const localizedTitle = (view: CanvasView) => i18n.t(TITLES[view]);
 const routeToView = (route: string): CanvasView => {
   const name = route.split("?")[0].replace(/^\//, "");
   return isView(name) ? name : "overview";
@@ -81,7 +84,7 @@ function openRoute(api: DockviewApi, view: CanvasView) {
   api.addPanel({
     id: `route:${view}`,
     component: "page",
-    title: TITLES[view],
+    title: localizedTitle(view),
     params: { view },
   });
 }
@@ -106,6 +109,7 @@ let tabSequence = 0;
 
 function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
   const workspace = useContext(PaneContext);
+  const { t } = useTranslation();
 
   const addTab = (view: CanvasView) => {
     // A new tab belongs to the group whose + was pressed, even when the same
@@ -114,7 +118,7 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
     containerApi.addPanel({
       id,
       component: "page",
-      title: TITLES[view],
+      title: localizedTitle(view),
       params: { view },
       position: { referenceGroup: group.id },
     });
@@ -132,7 +136,7 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
     containerApi.addPanel({
       id,
       component: "page",
-      title: TITLES[view],
+      title: localizedTitle(view),
       params: { view },
       position: { referenceGroup: group.id, direction: "right" },
     });
@@ -150,8 +154,8 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
           <button
             type="button"
             className="dock-add-trigger"
-            aria-label="Add tab"
-            title="Add a tab to this group"
+            aria-label={t("Add tab")}
+            title={t("Add tab")}
           >
             <AnimatedIcon name="plus" size={15} />
           </button>
@@ -163,13 +167,13 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
             side="bottom"
             sideOffset={5}
             collisionPadding={10}
-            aria-label="Available tabs"
+            aria-label={t("Available tabs")}
           >
             {TAB_GROUPS.map((section, index) => (
-              <DropdownMenu.Group key={section.label}>
+              <DropdownMenu.Group key={t(section.label)}>
                 {index > 0 && <DropdownMenu.Separator className="dock-add-separator" />}
                 <DropdownMenu.Label className="dock-add-group-label">
-                  {section.label}
+                  {t(section.label)}
                 </DropdownMenu.Label>
                 {section.views.map((view) => (
                   <DropdownMenu.Item
@@ -178,7 +182,7 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
                     onSelect={() => addTab(view)}
                   >
                     <AnimatedIcon name={view} size={16} />
-                    <span>{TITLES[view]}</span>
+                    <span>{t(TITLES[view])}</span>
                   </DropdownMenu.Item>
                 ))}
               </DropdownMenu.Group>
@@ -191,8 +195,8 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
           <button
             type="button"
             className="dock-more-trigger"
-            aria-label="More tab actions"
-            title="More tab actions"
+            aria-label={t("More tab actions")}
+            title={t("More tab actions")}
           >
             <span className="dock-more-glyph" aria-hidden="true">
               ···
@@ -206,11 +210,11 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
             side="bottom"
             sideOffset={5}
             collisionPadding={10}
-            aria-label="Tab layout actions"
+            aria-label={t("More tab actions")}
           >
             <DropdownMenu.Item className="menu-item dock-action-item" onSelect={splitRight}>
               <AnimatedIcon name="workspace" size={16} />
-              <span>Split right</span>
+              <span>{t("Split right")}</span>
             </DropdownMenu.Item>
             <DropdownMenu.Separator className="dock-add-separator" />
             <DropdownMenu.Item
@@ -218,7 +222,7 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
               onSelect={() => workspace?.resetLayout()}
             >
               <AnimatedIcon name="overview" size={16} />
-              <span>Reset layout</span>
+              <span>{t("Reset layout")}</span>
             </DropdownMenu.Item>
           </DropdownMenu.Content>
         </DropdownMenu.Portal>
@@ -243,6 +247,7 @@ type Props = {
 };
 
 export default function DockCanvas({ route, dark, onNavigate, renderView }: Props) {
+  const { i18n: translation } = useTranslation();
   const apiRef = useRef<DockviewApi | null>(null);
   const disposables = useRef<Array<{ dispose: () => void }>>([]);
   const latest = useRef({ route, onNavigate });
@@ -268,6 +273,17 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
     const api = apiRef.current;
     if (api) openRoute(api, routeToView(route));
   }, [route]);
+
+  useEffect(() => {
+    const api = apiRef.current;
+    if (!api) return;
+    for (const panel of api.panels) {
+      const candidate: unknown = panel.api.getParameters().view;
+      if (typeof candidate === "string" && isView(candidate)) {
+        panel.api.setTitle(localizedTitle(candidate));
+      }
+    }
+  }, [translation.resolvedLanguage]);
 
   useEffect(
     () => () => {
@@ -325,7 +341,7 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
       api.addPanel({
         id: "route:overview",
         component: "page",
-        title: "Overview",
+        title: localizedTitle("overview"),
         params: { view: "overview" },
       });
     }
