@@ -30,7 +30,7 @@ try {
   await page.getByRole("button", { name: "Open knowledge graph" }).click();
   await page.locator('.dock-grid [data-dock-view="graph"]').waitFor();
   await page.waitForFunction(() => location.hash.includes("/graph"));
-  await page.locator('.sidebar a[href="/overview"]').click();
+  await page.locator('.sidebar .nav-link[title="Overview"]').click();
   await page.locator('.dock-grid [data-dock-view="overview"]').first().waitFor();
   await page.waitForFunction(() => location.hash.includes("/overview"));
   if (await page.locator(".sidebar-footer").count()) throw new Error("Redundant sidebar snapshot footer remains");
