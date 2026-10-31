@@ -44,8 +44,8 @@
     "monaco-editor": "^0.52.2"
   },
   "devDependencies": {
-    "@rsbuild/core": "^1.6.0",
-    "@rsbuild/plugin-react": "^1.4.0",
+    "@rsbuild/core": "^2.1.0",
+    "@rsbuild/plugin-react": "^2.1.0",
     "@tailwindcss/postcss": "^4.1.0",
     "@types/dagre": "^0.7.54",
     "@types/node": "^22.0.0",

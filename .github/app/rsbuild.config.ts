@@ -11,5 +11,5 @@ export default defineConfig({
     inlineScripts: true,
     inlineStyles: true,
   },
-  performance: { chunkSplit: { strategy: "all-in-one" } },
+  splitChunks: false,
 });
