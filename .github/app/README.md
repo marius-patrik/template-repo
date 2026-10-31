@@ -28,6 +28,10 @@ explicit allowlist and does not publish raw private archives, credentials or all
 repository files. Reusing the app in a private repo must involve a separate security
 review, not automatically opt in to public publishing.
 
-The existing `.agents/tools/canvas.py` CLI is retained temporarily as the historical
+The existing `.agents/tools/canvas.py` CLI is retained as the historical
 source inspector/exporter while CI validates the React replacement. Both are derived
 views; tracked authoring records remain authoritative.
+
+## Prototype delivery
+
+Pages builds on the feature branch deploy through the `canvas-preview` environment; after a reviewed release, main deploys through `github-pages`. Source input is compiled at build time and navigation remains local/read-only. The design/prototyping phase does not end automatically with a successful deployment.
