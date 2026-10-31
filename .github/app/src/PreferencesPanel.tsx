@@ -110,9 +110,21 @@ export default function PreferencesPanel() {
             { id: "tokens", label: t("Component token mapping"), icon: "artifacts" },
             { id: "language", label: t("Language"), icon: "context" },
             { id: "controls", label: t("Controls"), icon: "editor" },
-          ].map((item) => <button key={item.id} type="button" onClick={() =>
-            document.getElementById(`cx-preference-${item.id}`)?.scrollIntoView({ behavior: "smooth", block: "start" })
-          }><AnimatedIcon name={item.icon} size={16} /><span>{item.label}</span><AnimatedIcon name="right" size={13} /></button>)}
+          ].map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() =>
+                document
+                  .getElementById(`cx-preference-${item.id}`)
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" })
+              }
+            >
+              <AnimatedIcon name={item.icon} size={16} />
+              <span>{item.label}</span>
+              <AnimatedIcon name="right" size={13} />
+            </button>
+          ))}
           <p>{t("Changes are stored in this browser only.")}</p>
         </aside>
         <div className="cx-preferences-content">
@@ -121,251 +133,253 @@ export default function PreferencesPanel() {
             <h1>{t("Make Canvas yours")}</h1>
             <p className="muted">{t("Control how the workspace looks, behaves, and responds.")}</p>
           </header>
-      <div className="settings-group" id="cx-preference-appearance">
-        <h2>{t("Appearance")}</h2>
-        <Choice
-          label="Color mode"
-          value={prefs.theme}
-          values={["dark", "light", "system"]}
-          onChange={(value) => patch("theme", value as CanvasPreferences["theme"])}
-        />
-        <Choice
-          label="Theme"
-          value={prefs.skin}
-          values={["oled", "graphite", "slate", "contrast"]}
-          onChange={(value) => patch("skin", value as CanvasPreferences["skin"])}
-        />
-        <Choice
-          label="Visual density"
-          value={prefs.density}
-          values={["comfortable", "compact"]}
-          onChange={(value) => patch("density", value as CanvasPreferences["density"])}
-        />
-        <Choice
-          label="UI scale"
-          value={prefs.uiScale}
-          values={Object.keys(SCALES)}
-          onChange={(value) => setScale(value as keyof typeof SCALES)}
-        />
-        <fieldset className="settings-subgrid" aria-label={t("Individual scale values")}>
-          {(["fontSize", "iconSize", "spacing"] as const).map((dimension) => (
+          <div className="settings-group" id="cx-preference-appearance">
+            <h2>{t("Appearance")}</h2>
             <Choice
-              key={dimension}
-              label={
-                dimension === "fontSize"
-                  ? "Text size"
-                  : dimension === "iconSize"
-                    ? "Icon size"
-                    : "Spacing"
-              }
-              value={dimensionScale(prefs[dimension], dimension)}
-              values={["small", "normal", "large"]}
-              onChange={(value) =>
-                patch(dimension, SCALES[value as keyof typeof SCALES][dimension])
-              }
+              label="Color mode"
+              value={prefs.theme}
+              values={["dark", "light", "system"]}
+              onChange={(value) => patch("theme", value as CanvasPreferences["theme"])}
             />
-          ))}
-          <NumberPreference
-            label="Border radius"
-            value={prefs.radius}
-            min={0}
-            max={24}
-            set={(value) => patch("radius", value)}
-          />
-        </fieldset>
-        <h3>
-          {t("Color tokens")} · {t(dark ? "Dark" : "Light")}
-        </h3>
-        <p className="muted">
-          {t("Every UI color comes from the editable palette for the selected appearance.")}
-        </p>
-        <div className="token-grid">
-          {COLOR_KEYS.map((key) => (
-            <ColorEditor
-              key={key}
-              name={key}
-              value={colors[key]}
-              onChange={(value) => setColor(key, value, dark)}
+            <Choice
+              label="Theme"
+              value={prefs.skin}
+              values={["oled", "graphite", "slate", "contrast"]}
+              onChange={(value) => patch("skin", value as CanvasPreferences["skin"])}
             />
-          ))}
-        </div>
-      </div>
-      <div className="settings-group" id="cx-preference-workspace">
-        <h2>{t("Preferences")}</h2>
-        <Choice
-          label="Navigation position"
-          value={prefs.navigationPosition}
-          values={POSITIONS.navigation}
-          onChange={(value) =>
-            patch("navigationPosition", value as CanvasPreferences["navigationPosition"])
-          }
-        />
-        {prefs.navigationPosition === "statusbar" && (
-          <Choice
-            label="Navigation alignment"
-            value={prefs.statusAlignment.navigation}
-            values={["left", "center", "right"]}
-            onChange={(value) =>
-              patch("statusAlignment", {
-                ...prefs.statusAlignment,
-                navigation: value as "left" | "center" | "right",
-              })
-            }
-          />
-        )}
-        <Choice
-          label="Omnibar position"
-          value={prefs.omnibarPosition}
-          values={POSITIONS.omnibar}
-          onChange={(value) =>
-            patch("omnibarPosition", value as CanvasPreferences["omnibarPosition"])
-          }
-        />
-        <Choice
-          label="Settings button position"
-          value={prefs.settingsPosition}
-          values={POSITIONS.settings}
-          onChange={(value) =>
-            patch("settingsPosition", value as CanvasPreferences["settingsPosition"])
-          }
-        />
-        <Choice
-          label="Primary sidebar position"
-          value={prefs.sidebarPosition}
-          values={POSITIONS.sidebar}
-          onChange={(value) =>
-            patch("sidebarPosition", value as CanvasPreferences["sidebarPosition"])
-          }
-        />
-        <NumberPreference
-          label="Title bar height"
-          value={prefs.titleBarHeight}
-          min={22}
-          max={80}
-          set={(value) => patch("titleBarHeight", value)}
-        />
-        <NumberPreference
-          label="Status bar height"
-          value={prefs.statusBarHeight}
-          min={22}
-          max={80}
-          set={(value) => patch("statusBarHeight", value)}
-        />
-        <NumberPreference
-          label="Primary sidebar width"
-          value={prefs.sidebarWidth}
-          min={180}
-          max={480}
-          set={(value) => patch("sidebarWidth", value)}
-        />
-        <Choice
-          label="Activity bar position"
-          value={prefs.activityBarPosition}
-          values={POSITIONS.activity}
-          onChange={(value) =>
-            patch("activityBarPosition", value as CanvasPreferences["activityBarPosition"])
-          }
-        />
-        <Choice
-          label="Command results position"
-          value={prefs.commandPlacement}
-          values={["auto", "down", "up"]}
-          onChange={(value) =>
-            patch("commandPlacement", value as CanvasPreferences["commandPlacement"])
-          }
-        />
-        <label className="setting-row settings-choice">
-          <span>{t("Blur background when command centre is open")}</span>
-          <input
-            type="checkbox"
-            checked={prefs.commandBackdropBlur}
-            onChange={(event) => patch("commandBackdropBlur", event.target.checked)}
-          />
-        </label>
-        <h3>{t("Status bar alignment")}</h3>
-        <p className="muted">{t("Items sharing an alignment are grouped with a separator.")}</p>
-        {STATUS_PARTS.filter((part) => part !== "navigation").map((part) => (
-          <Choice
-            key={part}
-            label={readable(part)}
-            value={prefs.statusAlignment[part]}
-            values={["left", "center", "right"]}
-            onChange={(value) =>
-              patch("statusAlignment", {
-                ...prefs.statusAlignment,
-                [part]: value,
-              } as CanvasPreferences["statusAlignment"])
-            }
-          />
-        ))}
-        <Choice
-          label="Activity bar density"
-          value={prefs.activityBarDensity}
-          values={["compact", "comfortable"]}
-          onChange={(value) =>
-            patch("activityBarDensity", value as CanvasPreferences["activityBarDensity"])
-          }
-        />
-      </div>
-      <div className="settings-group" id="cx-preference-tokens">
-        <h2>{t("Component token mapping")}</h2>
-        <p className="muted">
-          {t(
-            "Override a component's color and scale tokens without changing the global palette. Inherit keeps the global setting.",
-          )}
-        </p>
-        <div className="component-token-table">
-          {COMPONENTS.map((component) => (
-            <div className="component-token-row" key={component}>
-              <strong>{t(readable(component))}</strong>
-              {(["surface", "text", "border", "accent", "font", "icon", "spacing"] as const).map(
-                (field) => (
-                  <div key={field} className="component-token-cell">
-                    <span>{t(readable(field))}</span>
-                    <CanvasSelect
-                      label={t(readable(component)) + " · " + t(readable(field))}
-                      value={prefs.componentThemes[component][field]}
-                      options={[
-                        "inherit",
-                        ...(["surface", "text", "border", "accent"].includes(field)
-                          ? COLOR_KEYS
-                          : ["small", "normal", "large"]),
-                      ].map((option) => ({
-                        value: option,
-                        label: t(readable(option)),
-                      }))}
-                      onValueChange={(value) => {
-                        patch("componentThemes", {
-                          ...prefs.componentThemes,
-                          [component]: { ...prefs.componentThemes[component], [field]: value },
-                        } as CanvasPreferences["componentThemes"]);
-                      }}
-                    />
-                  </div>
-                ),
-              )}
+            <Choice
+              label="Visual density"
+              value={prefs.density}
+              values={["comfortable", "compact"]}
+              onChange={(value) => patch("density", value as CanvasPreferences["density"])}
+            />
+            <Choice
+              label="UI scale"
+              value={prefs.uiScale}
+              values={Object.keys(SCALES)}
+              onChange={(value) => setScale(value as keyof typeof SCALES)}
+            />
+            <fieldset className="settings-subgrid" aria-label={t("Individual scale values")}>
+              {(["fontSize", "iconSize", "spacing"] as const).map((dimension) => (
+                <Choice
+                  key={dimension}
+                  label={
+                    dimension === "fontSize"
+                      ? "Text size"
+                      : dimension === "iconSize"
+                        ? "Icon size"
+                        : "Spacing"
+                  }
+                  value={dimensionScale(prefs[dimension], dimension)}
+                  values={["small", "normal", "large"]}
+                  onChange={(value) =>
+                    patch(dimension, SCALES[value as keyof typeof SCALES][dimension])
+                  }
+                />
+              ))}
+              <NumberPreference
+                label="Border radius"
+                value={prefs.radius}
+                min={0}
+                max={24}
+                set={(value) => patch("radius", value)}
+              />
+            </fieldset>
+            <h3>
+              {t("Color tokens")} · {t(dark ? "Dark" : "Light")}
+            </h3>
+            <p className="muted">
+              {t("Every UI color comes from the editable palette for the selected appearance.")}
+            </p>
+            <div className="token-grid">
+              {COLOR_KEYS.map((key) => (
+                <ColorEditor
+                  key={key}
+                  name={key}
+                  value={colors[key]}
+                  onChange={(value) => setColor(key, value, dark)}
+                />
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
-      <div className="settings-group" id="cx-preference-language">
-        <h2>{t("Language")}</h2>
-        <Choice
-          label="Interface language"
-          value={language}
-          values={["en", "cs", "es"]}
-          onChange={(value) => {
-            void i18n.changeLanguage(value);
-          }}
-        />
-      </div>
-      <section id="cx-preference-controls"><KeyboardSettings /></section>
-      <div className="settings-group">
-        <button type="button" className="canvas-button canvas-button-subtle" onClick={reset}>
-          <AnimatedIcon name="reset" size={16} />
-          {t("Reset appearance")}
-        </button>
-      </div>
+          </div>
+          <div className="settings-group" id="cx-preference-workspace">
+            <h2>{t("Preferences")}</h2>
+            <Choice
+              label="Navigation position"
+              value={prefs.navigationPosition}
+              values={POSITIONS.navigation}
+              onChange={(value) =>
+                patch("navigationPosition", value as CanvasPreferences["navigationPosition"])
+              }
+            />
+            {prefs.navigationPosition === "statusbar" && (
+              <Choice
+                label="Navigation alignment"
+                value={prefs.statusAlignment.navigation}
+                values={["left", "center", "right"]}
+                onChange={(value) =>
+                  patch("statusAlignment", {
+                    ...prefs.statusAlignment,
+                    navigation: value as "left" | "center" | "right",
+                  })
+                }
+              />
+            )}
+            <Choice
+              label="Omnibar position"
+              value={prefs.omnibarPosition}
+              values={POSITIONS.omnibar}
+              onChange={(value) =>
+                patch("omnibarPosition", value as CanvasPreferences["omnibarPosition"])
+              }
+            />
+            <Choice
+              label="Settings button position"
+              value={prefs.settingsPosition}
+              values={POSITIONS.settings}
+              onChange={(value) =>
+                patch("settingsPosition", value as CanvasPreferences["settingsPosition"])
+              }
+            />
+            <Choice
+              label="Primary sidebar position"
+              value={prefs.sidebarPosition}
+              values={POSITIONS.sidebar}
+              onChange={(value) =>
+                patch("sidebarPosition", value as CanvasPreferences["sidebarPosition"])
+              }
+            />
+            <NumberPreference
+              label="Title bar height"
+              value={prefs.titleBarHeight}
+              min={22}
+              max={80}
+              set={(value) => patch("titleBarHeight", value)}
+            />
+            <NumberPreference
+              label="Status bar height"
+              value={prefs.statusBarHeight}
+              min={22}
+              max={80}
+              set={(value) => patch("statusBarHeight", value)}
+            />
+            <NumberPreference
+              label="Primary sidebar width"
+              value={prefs.sidebarWidth}
+              min={180}
+              max={480}
+              set={(value) => patch("sidebarWidth", value)}
+            />
+            <Choice
+              label="Activity bar position"
+              value={prefs.activityBarPosition}
+              values={POSITIONS.activity}
+              onChange={(value) =>
+                patch("activityBarPosition", value as CanvasPreferences["activityBarPosition"])
+              }
+            />
+            <Choice
+              label="Command results position"
+              value={prefs.commandPlacement}
+              values={["auto", "down", "up"]}
+              onChange={(value) =>
+                patch("commandPlacement", value as CanvasPreferences["commandPlacement"])
+              }
+            />
+            <label className="setting-row settings-choice">
+              <span>{t("Blur background when command centre is open")}</span>
+              <input
+                type="checkbox"
+                checked={prefs.commandBackdropBlur}
+                onChange={(event) => patch("commandBackdropBlur", event.target.checked)}
+              />
+            </label>
+            <h3>{t("Status bar alignment")}</h3>
+            <p className="muted">{t("Items sharing an alignment are grouped with a separator.")}</p>
+            {STATUS_PARTS.filter((part) => part !== "navigation").map((part) => (
+              <Choice
+                key={part}
+                label={readable(part)}
+                value={prefs.statusAlignment[part]}
+                values={["left", "center", "right"]}
+                onChange={(value) =>
+                  patch("statusAlignment", {
+                    ...prefs.statusAlignment,
+                    [part]: value,
+                  } as CanvasPreferences["statusAlignment"])
+                }
+              />
+            ))}
+            <Choice
+              label="Activity bar density"
+              value={prefs.activityBarDensity}
+              values={["compact", "comfortable"]}
+              onChange={(value) =>
+                patch("activityBarDensity", value as CanvasPreferences["activityBarDensity"])
+              }
+            />
+          </div>
+          <div className="settings-group" id="cx-preference-tokens">
+            <h2>{t("Component token mapping")}</h2>
+            <p className="muted">
+              {t(
+                "Override a component's color and scale tokens without changing the global palette. Inherit keeps the global setting.",
+              )}
+            </p>
+            <div className="component-token-table">
+              {COMPONENTS.map((component) => (
+                <div className="component-token-row" key={component}>
+                  <strong>{t(readable(component))}</strong>
+                  {(
+                    ["surface", "text", "border", "accent", "font", "icon", "spacing"] as const
+                  ).map((field) => (
+                    <div key={field} className="component-token-cell">
+                      <span>{t(readable(field))}</span>
+                      <CanvasSelect
+                        label={t(readable(component)) + " · " + t(readable(field))}
+                        value={prefs.componentThemes[component][field]}
+                        options={[
+                          "inherit",
+                          ...(["surface", "text", "border", "accent"].includes(field)
+                            ? COLOR_KEYS
+                            : ["small", "normal", "large"]),
+                        ].map((option) => ({
+                          value: option,
+                          label: t(readable(option)),
+                        }))}
+                        onValueChange={(value) => {
+                          patch("componentThemes", {
+                            ...prefs.componentThemes,
+                            [component]: { ...prefs.componentThemes[component], [field]: value },
+                          } as CanvasPreferences["componentThemes"]);
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="settings-group" id="cx-preference-language">
+            <h2>{t("Language")}</h2>
+            <Choice
+              label="Interface language"
+              value={language}
+              values={["en", "cs", "es"]}
+              onChange={(value) => {
+                void i18n.changeLanguage(value);
+              }}
+            />
+          </div>
+          <section id="cx-preference-controls">
+            <KeyboardSettings />
+          </section>
+          <div className="settings-group">
+            <button type="button" className="canvas-button canvas-button-subtle" onClick={reset}>
+              <AnimatedIcon name="reset" size={16} />
+              {t("Reset appearance")}
+            </button>
+          </div>
         </div>
       </div>
     </div>
