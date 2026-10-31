@@ -41,6 +41,8 @@ const registry = {
   projects: FolderOpenIcon,
   agents: BotIcon,
   graph: GitForkIcon,
+  canvas: GitForkIcon,
+  editor: SquarePenIcon,
   roadmap: BlocksIcon,
   artifacts: FileTextIcon,
   activity: HistoryIcon,

@@ -147,12 +147,13 @@ export const useProfiles = create<State>()(
                     ? value.route
                     : "/",
                 pinned: Array.isArray(value.pinned)
-                  ? value.pinned
-                      .filter(
-                        (view): view is CanvasView =>
-                          typeof view === "string" && isCanvasView(view),
-                      )
-                      .slice(0, 20)
+                  ? [...new Set(value.pinned.flatMap((view): CanvasView[] => {
+                      if (typeof view !== "string") return [];
+                      if (view === "monaco") return ["editor"];
+                      if (["overview", "projects", "agents", "graph", "roadmap", "artifacts", "context"].includes(view))
+                        return ["canvas"];
+                      return isCanvasView(view) ? [view] : [];
+                    }))].slice(0, 20)
                   : [],
                 note: typeof value.note === "string" ? value.note.slice(0, 100000) : "",
                 selectedDocument:

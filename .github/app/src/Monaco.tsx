@@ -59,8 +59,8 @@ export default function Monaco() {
     <div className="monaco-pane">
       <div className="monaco-toolbar">
         <div className="monaco-source-select">
-          <AnimatedIcon name="code" size={18} />
-          <strong>Monaco</strong>
+          <AnimatedIcon name="editor" size={18} />
+          <strong>{t("Editor")}</strong>
           <CanvasSelect
             label={t("Source document")}
             value={path}
@@ -112,6 +112,8 @@ export default function Monaco() {
       {docs.length ? (
         <div className="monaco-editor-host" data-testid="monaco-editor">
           <Editor
+            height="100%"
+            width="100%"
             path={path}
             language={languageFor(path)}
             value={value}

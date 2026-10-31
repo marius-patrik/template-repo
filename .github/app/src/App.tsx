@@ -20,286 +20,13 @@ import {
   Library,
   SurfaceMenu,
 } from "./ShellComponents";
-import { NotificationCenter, Notifications, notify } from "./notifications";
-import { VIEWS as nav, type CanvasView as View, viewFromRoute } from "./views";
+import { NotificationCenter, Notifications } from "./notifications";
+import { VIEWS as nav, viewFromRoute } from "./views";
 import { version as appVersion } from "../package.json";
-import Graph from "./Graph";
+import Canvas from "./Canvas";
 import DockCanvas from "./DockCanvas";
 import context from "./generated/context.json";
 
-function MarkdownSource({ value }: { value: string }) {
-  return <pre className="source-preview">{value}</pre>;
-}
-function PageIntro({ title, detail }: { title: string; detail: string }) {
-  const { t } = useTranslation();
-  return (
-    <header className="page-intro">
-      <p className="eyebrow">{t("Repository / {{name}}", { name: context.name })}</p>
-      <h1>{t(title)}</h1>
-      <p className="muted">{t(detail)}</p>
-    </header>
-  );
-}
-function SourceIndex({ onOpen }: { onOpen: (id: string) => void }) {
-  const { t } = useTranslation();
-  return (
-    <div className="source-index">
-      {context.documents.map((d) => (
-        <CanvasContextMenu
-          key={d.path}
-          actions={[
-            { icon: "artifacts", label: t("Open document"), action: () => onOpen(d.path) },
-            {
-              icon: "copy",
-              label: t("Copy source path"),
-              action: () => {
-                void navigator.clipboard.writeText(d.path).then(
-                  () => notify.success(t("Copied to clipboard")),
-                  () => notify.error(t("Clipboard unavailable")),
-                );
-              },
-            },
-            {
-              icon: "copy",
-              label: t("Copy source content"),
-              action: () => {
-                void navigator.clipboard.writeText(d.content).then(
-                  () => notify.success(t("Copied to clipboard")),
-                  () => notify.error(t("Clipboard unavailable")),
-                );
-              },
-            },
-          ]}
-        >
-          <div className="source-context-row">
-            <button type="button" className="doc-row" onClick={() => onOpen(d.path)}>
-              <span>
-                <AnimatedIcon name="artifacts" />
-                {d.path}
-              </span>
-              <small>
-                {t("Open document")} <AnimatedIcon name="right" size={13} />
-              </small>
-            </button>
-          </div>
-        </CanvasContextMenu>
-      ))}
-    </div>
-  );
-}
-function Overview({ to }: { to: (p: string) => void }) {
-  const { t } = useTranslation();
-  return (
-    <div className="page">
-      <PageIntro
-        title={context.name}
-        detail="A repository-authored workspace. This view is generated from tracked source at build time, not a live service."
-      />
-      <div className="overview-grid">
-        <section className="panel overview-primary">
-          <div className="panel-heading">
-            <div>
-              <p className="eyebrow">{t("Workspace map")}</p>
-              <h2>{t("Documentation relationships")}</h2>
-            </div>
-            <Button onClick={() => to("/graph")} variant="subtle">
-              {t("Expand")} <AnimatedIcon name="arrow" size={15} />
-            </Button>
-          </div>
-          <div className="map-viewport">
-            <Graph />
-          </div>
-          <div className="panel-footnote">
-            {t("{{documents}} source documents · {{records}} documented records", {
-              documents: context.documents.length,
-              records: context.paths.length,
-            })}
-          </div>
-        </section>
-        <div className="stack">
-          <section className="panel padded">
-            <p className="eyebrow">{t("Project identity")}</p>
-            <h2>{context.repository}</h2>
-            <p className="muted">
-              {t("Build source: Git-tracked documents. Revision {{revision}}.", {
-                revision: context.revision,
-              })}
-            </p>
-            <div className="meta-list">
-              <span>{t("Current branch")}</span>
-              <strong>{context.branch}</strong>
-              <span>{t("Publication")}</span>
-              <strong>{t("Static · read-only")}</strong>
-            </div>
-          </section>
-          <section className="panel padded">
-            <p className="eyebrow">{t("Authoritative goal")}</p>
-            <p className="goal-text">{context.goal.replace(/^#.*\n/, "").trim()}</p>
-            <Button variant="subtle" onClick={() => to("/context")}>
-              {t("View original source")} <AnimatedIcon name="right" size={15} />
-            </Button>
-          </section>
-        </div>
-      </div>
-      <div className="section-header">
-        <h2>{t("Repository source")}</h2>
-        <span>{t("Generated from tracked records")}</span>
-      </div>
-      <div className="panel">
-        <SourceIndex onOpen={(id) => to("/artifacts?file=" + encodeURIComponent(id))} />
-      </div>
-    </div>
-  );
-}
-function SimplePage({ id, to }: { id: View; to: (p: string) => void }) {
-  const { t } = useTranslation();
-  const docs = context.documents;
-  const prd = docs.find((x) => x.path === ".agents/PRD.md");
-  const agents = docs.find((x) => x.path === ".agents/AGENTS.md");
-  const ctx = docs.find((x) => x.path === "AGENTS.md");
-  if (id === "graph")
-    return (
-      <div className="workbench-page">
-        <PageIntro
-          title="Knowledge graph"
-          detail="Document links derived from the repository's existing authoring structure."
-        />
-        <div className="full-graph">
-          <Graph />
-        </div>
-      </div>
-    );
-  if (id === "projects")
-    return (
-      <div className="page">
-        <PageIntro title="Projects" detail="Repositories available in this compiled snapshot." />
-        <div className="panel padded project-card">
-          <p className="eyebrow">{t("Source repository")}</p>
-          <h2>{context.name}</h2>
-          <p className="muted">{context.repository}</p>
-          <p>{context.goal.replace(/^#.*\n/, "").trim()}</p>
-          <Button variant="subtle" onClick={() => to("/overview")}>
-            {t("Open workspace")} <AnimatedIcon name="right" size={15} />
-          </Button>
-        </div>
-      </div>
-    );
-  if (id === "roadmap")
-    return (
-      <div className="page">
-        <PageIntro
-          title="Roadmap"
-          detail="Requirements and plans are sourced from the repository rather than simulated task statuses."
-        />
-        <div className="panel padded">
-          <h2>{t("Requirements source")}</h2>
-          {prd ? (
-            <MarkdownSource value={prd.content} />
-          ) : (
-            <p className="muted">{t("No generated PRD is available in this snapshot.")}</p>
-          )}
-        </div>
-      </div>
-    );
-  if (id === "agents")
-    return (
-      <div className="page">
-        <PageIntro
-          title="Agents"
-          detail="Agent rules are sourced from the generated repository guidance."
-        />
-        <div className="panel padded">
-          <h2>{t("Current agent guidance")}</h2>
-          {agents ? (
-            <MarkdownSource value={agents.content} />
-          ) : (
-            <p className="muted">{t("No agent-rule document is available.")}</p>
-          )}
-        </div>
-      </div>
-    );
-  if (id === "context")
-    return (
-      <div className="page">
-        <PageIntro title="Context" detail="Context authority and repository-authored Markdown." />
-        <div className="panel padded">
-          <h2>{ctx ? "AGENTS.md" : t("Root AGENTS.md is not configured")}</h2>
-          {ctx ? (
-            <MarkdownSource value={ctx.content} />
-          ) : (
-            <p className="muted">
-              {t(
-                "The template currently generates .agents/AGENTS.md from its agent rules. A separate root context file has not been assumed or fabricated.",
-              )}
-            </p>
-          )}
-          <h3>{t("Available source documents")}</h3>
-          <SourceIndex onOpen={(p) => to("/artifacts?file=" + encodeURIComponent(p))} />
-        </div>
-      </div>
-    );
-  if (id === "activity")
-    return (
-      <div className="page">
-        <PageIntro
-          title="Activity"
-          detail="The published snapshot does not represent live execution telemetry."
-        />
-        <div className="panel padded">
-          <p className="eyebrow">{t("Build provenance")}</p>
-          <h2>
-            {t("Source revision")} {context.revision}
-          </h2>
-          <p className="muted">
-            {t(
-              "Built from tracked repository documents. No agent activity or task completion is inferred.",
-            )}
-          </p>
-        </div>
-      </div>
-    );
-  if (id === "artifacts") return <Artifacts />;
-  if (id === "monaco") return <Monaco />;
-  if (id === "notepad") return <Notepad />;
-  if (id === "library") return <Library onNavigate={to} />;
-  return (
-    <div className="page">
-      <PageIntro title="Page" detail="Source-backed view." />
-    </div>
-  );
-}
-function Artifacts() {
-  const { t } = useTranslation();
-  const requested = decodeURIComponent(
-    new URLSearchParams(window.location.hash.split("?")[1] || "").get("file") || "",
-  );
-  const [active, setActive] = useState(requested);
-  useEffect(() => {
-    setActive(requested);
-  }, [requested]);
-  const doc = context.documents.find((d) => d.path === active) ?? context.documents[0];
-  return (
-    <div className="page">
-      <PageIntro
-        title="Artifacts"
-        detail="Source documents embedded during the GitHub Actions build."
-      />
-      <div className="artifact-layout">
-        <div className="panel artifact-list">
-          <SourceIndex onOpen={setActive} />
-        </div>
-        <article className="panel padded artifact-content">
-          <h2>{doc?.path ?? t("No documents")}</h2>
-          {doc ? (
-            <MarkdownSource value={doc.content} />
-          ) : (
-            <p className="muted">{t("No source documents available.")}</p>
-          )}
-        </article>
-      </div>
-    </div>
-  );
-}
 export default function App() {
   const [path, navigate] = useLocation();
   const hotkeys = useAppHotkeys();
@@ -334,6 +61,14 @@ export default function App() {
   const [selection, setSelection] = useState(0);
   const input = useRef<HTMLInputElement>(null);
   const page = viewFromRoute(path);
+  // Legacy deep links resolve to the consolidated views instead of recreating removed tabs.
+  useEffect(() => {
+    const old = path.split("?")[0].replace(/^\//, "");
+    if (old === "monaco") navigate("/editor", { replace: true });
+    else if (["overview", "projects", "agents", "graph", "roadmap", "artifacts", "context"].includes(old))
+      navigate("/canvas" + (path.includes("?") ? "?" + path.split("?").slice(1).join("?") : ""), { replace: true });
+    else if (old === "activity" || old === "workspace") navigate("/", { replace: true });
+  }, [path, navigate]);
 
   const didRestoreRoute = useRef(false);
   useEffect(() => {
@@ -418,10 +153,8 @@ export default function App() {
     ignoreInputs: false,
   });
   useHotkey(hotkeys["canvas.settings.open"], () => go("/settings"));
-  useHotkey(hotkeys["canvas.overview.open"], () => go("/overview"));
-  useHotkey(hotkeys["canvas.workspace.open"], () => go("/"));
-  useHotkey(hotkeys["canvas.projects.open"], () => go("/projects"));
-  useHotkey(hotkeys["canvas.graph.open"], () => go("/graph"));
+  useHotkey(hotkeys["canvas.canvas.open"], () => go("/canvas"));
+  useHotkey(hotkeys["canvas.editor.open"], () => go("/editor"));
   const icon = (name: string, size = prefs.iconSize) => <AnimatedIcon name={name} size={size} />;
   return (
     <div className="app-root">
@@ -505,10 +238,7 @@ export default function App() {
           <div className={`primary-content sidebar-${prefs.sidebarPosition}`}>
             {(prefs.navigationPosition === "sidebar" ||
               prefs.omnibarPosition === "sidebar" ||
-              (page !== null &&
-                ["library", "monaco", "artifacts", "context", "agents", "roadmap"].includes(
-                  page,
-                ))) && (
+              (page !== null && ["library", "editor"].includes(page))) && (
               <>
                 <aside
                   className={`sidebar ${collapsed ? "collapsed" : ""} ${mobileOpen ? "mobile-open" : ""}`}
@@ -623,9 +353,12 @@ export default function App() {
                   onPin={togglePin}
                   showSettings={prefs.settingsPosition === "tabbar"}
                   renderView={(view) => {
-                    if (view === "overview") return <Overview to={go} />;
+                    if (view === "canvas") return <Canvas />;
+                    if (view === "editor") return <Monaco />;
+                    if (view === "notepad") return <Notepad />;
+                    if (view === "library") return <Library onNavigate={go} />;
                     if (view === "settings") return <PreferencesPanel />;
-                    return <SimplePage id={view} to={go} />;
+                    return null;
                   }}
                 />
               </main>

@@ -9,6 +9,10 @@ export const LANGUAGES = [
 ] as const;
 
 const english = [
+  "Canvas",
+  "Editor",
+  "Open Canvas",
+  "Open Editor",
   "Overview",
   "Workspace",
   "Projects",
@@ -264,6 +268,10 @@ const english = [
 const en = Object.fromEntries(english.map((value) => [value, value]));
 
 const cs: Record<string, string> = {
+  Canvas: "Canvas",
+  Editor: "Editor",
+  "Open Canvas": "Otevřít Canvas",
+  "Open Editor": "Otevřít editor",
   Profiles: "Profily",
   Profile: "Profil",
   "New profile": "Nový profil",
@@ -535,6 +543,10 @@ const cs: Record<string, string> = {
   "Density selection": "Výběr hustoty",
 };
 const es: Record<string, string> = {
+  Canvas: "Canvas",
+  Editor: "Editor",
+  "Open Canvas": "Abrir Canvas",
+  "Open Editor": "Abrir editor",
   Profiles: "Perfiles",
   Profile: "Perfil",
   "New profile": "Nuevo perfil",

@@ -10,6 +10,7 @@ import App from "./App";
 import "./styles.css";
 import "@xyflow/react/dist/style.css";
 import "dockview-react/dist/styles/dockview.css";
+import "./polish.css";
 
 const root = document.getElementById("root");
 if (!root) throw new Error("Canvas root is missing");

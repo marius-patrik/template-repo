@@ -16,7 +16,7 @@ try {
   await page.getByTestId("empty-workspace").waitFor();
   await page.locator(".dock-empty-tabbar").waitFor();
   const choices = page.locator(".dock-welcome-options button");
-  if (await choices.count() !== 12) throw new Error("Empty welcome must list every editor and view");
+  if (await choices.count() !== 5) throw new Error("Empty welcome must list every editor and view");
 
   // Profile-first navigation, with independent layouts and notes.
   const profiles = page.getByTestId("profile-select");
@@ -44,7 +44,7 @@ try {
   await page.locator(".dock-welcome-options").getByRole("button", { name: "Library" }).click();
   await page.getByTestId("library-view").waitFor();
   await page.locator(".library-list button").first().click();
-  await page.locator('[data-dock-view="artifacts"]').waitFor();
+  await page.locator('[data-dock-view="canvas"]').waitFor();
   await profiles.click();
   await page.getByRole("menuitem", { name: "Global" }).click();
   await page.locator('[data-dock-view="notepad"]').waitFor();
@@ -65,9 +65,31 @@ try {
 
   // Monaco uses bundled workers, source-backed contents and a real editor.
   await page.getByTestId("breadcrumb-view").click();
-  await page.getByRole("option", { name: "Monaco" }).click();
+  await page.getByRole("option", { name: "Editor" }).click();
   await page.locator('[data-testid="monaco-editor"] .monaco-editor').waitFor({ timeout: 20000 });
-  await page.locator('.canvas-dock-tab[data-canvas-tab="monaco"] > .app-icon').first().waitFor();
+  await page.locator('.canvas-dock-tab[data-canvas-tab="editor"] > .app-icon').first().waitFor();
+
+  // Full-height editor regression: Dockview content fills the available panel.
+  const editorHost = await page.locator(".monaco-editor-host").boundingBox();
+  const editorPanel = await page.locator('[data-dock-view="editor"]').boundingBox();
+  if (!editorHost || !editorPanel || editorHost.height < editorPanel.height * 0.72)
+    throw new Error("Editor viewport does not fill the Dockview panel");
+  if (await page.locator(".dock-welcome-options").count())
+    throw new Error("Welcome should be hidden once tools are open");
+
+  // Canvas now owns repository perspectives and the document inspector.
+  await page.getByTestId("breadcrumb-view").click();
+  await page.getByRole("option", { name: "Canvas" }).click();
+  await page.getByTestId("canvas-studio").waitFor();
+  await page.getByTestId("canvas-graph").waitFor();
+  await page.locator(".canvas-perspectives").getByRole("button", { name: "Agents" }).click();
+  await page.locator(".canvas-inspector").getByText("AGENTS.md").first().waitFor();
+  await page.locator(".canvas-perspectives").getByRole("button", { name: "Artifacts" }).click();
+  await page.getByTestId("canvas-source").waitFor();
+  await page.locator(".canvas-perspectives").getByRole("button", { name: "Roadmap" }).click();
+  await page.getByTestId("canvas-source").waitFor();
+  await page.locator(".canvas-perspectives").getByRole("button", { name: "Overview" }).click();
+  await page.locator(".canvas-inspector").getByText("Project identity").waitFor();
 
   // Settings expose all placement and unified scale controls.
   await page.locator(".title-actions").getByRole("button", { name: "Settings" }).click();

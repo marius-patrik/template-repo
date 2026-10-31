@@ -279,18 +279,7 @@ export function ActivityBar({
     (state) => state.profiles.find((p) => p.id === state.currentId)?.pinned ?? [],
   );
   const togglePin = useProfiles((state) => state.togglePin);
-  const shortcuts: CanvasView[] = [
-    "overview",
-    "projects",
-    "agents",
-    "graph",
-    "roadmap",
-    "artifacts",
-    "activity",
-    "context",
-    "notepad",
-    "library",
-  ];
+  const shortcuts: CanvasView[] = ["canvas", "editor", "notepad", "library"];
   const entries = [...new Set([...shortcuts, ...pinned])];
   return (
     <div
@@ -360,7 +349,7 @@ export function SidebarContents({
     return <NavigationTree current={current} onNavigate={onNavigate} />;
   if (
     !current ||
-    !["library", "monaco", "artifacts", "context", "agents", "roadmap"].includes(current)
+    !["library", "editor"].includes(current)
   )
     return null;
   return (
@@ -383,7 +372,7 @@ export function SidebarContents({
             className="source-tree-item"
             type="button"
             title={doc.path}
-            onClick={() => onNavigate("/artifacts?file=" + encodeURIComponent(doc.path))}
+            onClick={() => onNavigate("/canvas?file=" + encodeURIComponent(doc.path))}
           >
             <AnimatedIcon name="artifacts" size={15} />
             <span>{doc.path.split("/").at(-1)}</span>
@@ -438,7 +427,7 @@ export function Library({ onNavigate }: { onNavigate: (path: string) => void }) 
           <button
             type="button"
             key={doc.path}
-            onClick={() => onNavigate("/artifacts?file=" + encodeURIComponent(doc.path))}
+            onClick={() => onNavigate("/canvas?file=" + encodeURIComponent(doc.path))}
           >
             <AnimatedIcon name="artifacts" size={17} />
             <span>{doc.path}</span>

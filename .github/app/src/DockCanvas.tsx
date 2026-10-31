@@ -43,7 +43,7 @@ const PaneContext = createContext<PaneContextValue | null>(null);
 
 function viewFromId(id: string): CanvasView {
   const candidate = id.split(":")[1] ?? "";
-  return isCanvasView(candidate) ? candidate : "overview";
+  return isCanvasView(candidate) ? candidate : "canvas";
 }
 function title(view: CanvasView) {
   return i18n.t(viewLabel(view));
@@ -90,8 +90,8 @@ function CanvasTab(props: IDockviewPanelHeaderProps) {
 }
 function Panel({ params }: IDockviewPanelProps) {
   const shell = useContext(PaneContext);
-  const requested = (params as { view?: string }).view ?? "overview";
-  const view = isCanvasView(requested) ? requested : "overview";
+  const requested = (params as { view?: string }).view ?? "canvas";
+  const view = isCanvasView(requested) ? requested : "canvas";
   return (
     <div className="dock-route-page" data-dock-view={view}>
       {shell?.render(view)}
@@ -142,7 +142,7 @@ function HeaderActions({ containerApi, group }: IDockviewHeaderActionsProps) {
   const active =
     containerApi.panels.find((p) => p.group.id === group.id && p.api.isVisible) ??
     containerApi.panels.find((p) => p.group.id === group.id);
-  const current = active ? viewFromId(active.id) : "overview";
+  const current = active ? viewFromId(active.id) : "canvas";
   return (
     <div className="dock-header-actions" onPointerDown={(event) => event.stopPropagation()}>
       <TabPicker label={t("Add tab")} add={(view) => shell?.add(view, group.id)} />
@@ -336,6 +336,34 @@ export default function DockCanvas({
         localStorage.removeItem(keyFor(profileId));
       } catch {
         /* no-op */
+      }
+    }
+    // Normalize older saved panels while retaining active editor, notes, library and split groups.
+    const legacyRepositoryViews = new Set(["overview", "projects", "agents", "graph", "roadmap", "artifacts", "context"]);
+    let migrateCanvas = false;
+    let migrateEditor = false;
+    for (const panel of [...api.panels]) {
+      const oldView: unknown = panel.api.getParameters().view;
+      if (oldView === "monaco") {
+        migrateEditor = true;
+        panel.api.close();
+      } else if (typeof oldView === "string" && legacyRepositoryViews.has(oldView)) {
+        migrateCanvas = true;
+        panel.api.close();
+      } else if (oldView === "activity" || oldView === "workspace") {
+        panel.api.close();
+      }
+    }
+    for (const view of (["canvas", "editor"] as const)) {
+      if ((view === "canvas" ? migrateCanvas : migrateEditor) &&
+          !api.panels.some((panel) => panel.api.getParameters().view === view)) {
+        api.addPanel({
+          id: `migrated:${view}:${++sequence}`,
+          component: "page",
+          tabComponent: "canvas",
+          title: title(view),
+          params: { view },
+        });
       }
     }
     for (const listener of disposables.current) listener.dispose();
