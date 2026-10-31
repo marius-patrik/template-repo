@@ -297,7 +297,8 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
       </div>
       <div className="segmented">
         {values.map((v) => (
-          <button type="button"
+          <button
+            type="button"
             key={String(v)}
             className={prefs[key] === v ? "selected" : ""}
             onClick={() => setPrefs({ ...prefs, [key]: v })}
@@ -407,7 +408,8 @@ export default function App() {
           <span className="title-product">{context.name}</span>
         </div>
         <div className="omnibar-area">
-          <button type="button"
+          <button
+            type="button"
             className="omnibar-trigger"
             aria-label="Open navigation tree"
             onClick={() => setPaletteOpen(true)}
@@ -434,7 +436,8 @@ export default function App() {
 
       <div className="window-main">
         {mobileOpen && (
-          <button type="button"
+          <button
+            type="button"
             aria-label="Close navigation"
             className="sidebar-scrim"
             onClick={() => setMobileOpen(false)}
@@ -597,7 +600,8 @@ export default function App() {
                   Personal workspace {icon("right", 13)} {context.name}
                 </div>
                 {filtered.map((n, i) => (
-                  <button type="button"
+                  <button
+                    type="button"
                     key={n.id}
                     className={"palette-result " + (i === selection ? "focused" : "")}
                     onMouseEnter={() => setSelection(i)}

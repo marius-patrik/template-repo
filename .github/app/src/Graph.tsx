@@ -26,8 +26,12 @@ export default function Graph() {
       [".agents/AGENTS.md", ".agents/README.md"],
       ["AGENTS.md", ".agents/GOAL.md"],
     ].filter(([a, b]) => present.includes(a) && present.includes(b));
-    present.forEach((id) => { g.setNode(id, { width: 170, height: 58 }); });
-    links.forEach(([a, b]) => { g.setEdge(a, b); });
+    present.forEach((id) => {
+      g.setNode(id, { width: 170, height: 58 });
+    });
+    links.forEach(([a, b]) => {
+      g.setEdge(a, b);
+    });
     dagre.layout(g);
     const nodes: Node[] = present.map((id) => {
       const pos = g.node(id);
