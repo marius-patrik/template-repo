@@ -21,5 +21,10 @@
         "organizeImports": "off"
       }
     }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
   }
 }
