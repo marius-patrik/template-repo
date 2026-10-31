@@ -68,3 +68,49 @@ Every Dockview group header has a `+` action with a Radix dropdown listing all t
 The browser smoke test selects the Radix dropdown portal via its stable `.dock-add-menu` class rather than relying on an implementation-specific ARIA wrapper; it still verifies all ten accessible menu items.
 
 In the per-group three-dot menu, **Split right** duplicates that group's visible tab in a new group; **Reset layout** clears the saved local Dockview layout and returns to Overview. The global title bar and status bar remain outside Dockview.
+
+## Skinning and localization (prototype v0.9)
+
+The appearance implementation deliberately uses the existing Tailwind CSS v4 token
+contract rather than adding a second CSS-in-JS framework. `@theme inline` provides
+the Tailwind-facing semantic token names and plain CSS variables remain the runtime
+bridge to native Dockview group/tab styling and shadcn-style UI primitives.
+`data-theme`, `data-skin` and `data-density` control orthogonal visual properties:
+
+- Mode: dark, light, or system preference (reacts to OS changes).
+- Skin: Graphite (existing), Slate (cool neutral), and Contrast (stronger boundaries).
+- Density: comfortable or compact spacing, including Dockview tab strip height.
+- Accent: previous presets or validated custom HEX colors; text contrast checked with colord.
+- Typography: existing bounded font/icon size preferences.
+
+`zustand` `persist` stores versioned local configuration. `zod` validates rehydrated
+values, with legacy migration from `canvas-preferences`. No config is sent to a
+remote service, and no state is written to repository records. Reset restores
+defaults without clearing Dockview layout or custom keybindings.
+
+`i18next`, `react-i18next`, and `i18next-browser-languagedetector` provide
+English, Czech, and Spanish UI dictionaries compiled into the standalone HTML.
+The detector prioritizes `canvas-language` in local storage, then the browser
+language, with English as fallback. Switching in Settings updates the HTML
+`lang` attribute, route labels and Dockview tabs without a reload; the setting
+persists across reloads. Repository-authored Markdown remains in its original
+language and is never machine-translated or rewritten.
+
+### Dependency research and architecture decision
+
+- **Tailwind v4 token variables** — selected for runtime styling compatibility,
+  zero second styling system and existing CSS/shadcn integration.
+- **Zustand + Zod** — selected for typed runtime settings, storage versioning,
+  migrations and validation of untrusted browser data.
+- **i18next + react-i18next** — selected for runtime language selection,
+  interpolation, browser language detection, fallbacks and static resources.
+- **next-themes** — evaluated, not adopted. It specializes in system/theme
+  switching, but not the multidimensional skin/density/configuration contract.
+- **Panda CSS / vanilla-extract** — evaluated, not adopted. Both offer typed
+  theming, but would duplicate/replace the existing Tailwind v4 pipeline.
+- **Tolgee** — future translation-management option, not installed; initial
+  prototype remains static/offline and does not need translation servers.
+
+Keep user-facing display strings as i18n keys; retain stable canonical IDs for
+routes, commands and source files. New languages should add a resource dictionary,
+not fork the UI.
