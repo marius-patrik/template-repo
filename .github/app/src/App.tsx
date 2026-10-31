@@ -38,8 +38,11 @@ export default function App() {
     const move = (event: PointerEvent) => {
       if (!resizing.current) return;
       const current = useCanvasConfig.getState().preferences;
-      const delta = (event.clientX - resizeOrigin.current.x) * (current.sidebarPosition === "right" ? -1 : 1);
-      updatePreferences({ sidebarWidth: Math.min(480, Math.max(180, Math.round(resizeOrigin.current.width + delta))) });
+      const delta =
+        (event.clientX - resizeOrigin.current.x) * (current.sidebarPosition === "right" ? -1 : 1);
+      updatePreferences({
+        sidebarWidth: Math.min(480, Math.max(180, Math.round(resizeOrigin.current.width + delta))),
+      });
     };
     const finish = () => {
       resizing.current = false;
