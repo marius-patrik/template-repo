@@ -46,8 +46,7 @@ const TITLES: Record<CanvasView, string> = {
   context: "Context",
   settings: "Settings",
 };
-const isView = (name: string): name is CanvasView =>
-  ROUTES.some((view) => view === name);
+const isView = (name: string): name is CanvasView => ROUTES.some((view) => view === name);
 const routeToView = (route: string): CanvasView => {
   const name = route.split("?")[0].replace(/^\//, "");
   return isView(name) ? name : "overview";
@@ -66,7 +65,8 @@ function DockedPage({ params }: IDockviewPanelProps) {
 const components = { page: DockedPage };
 
 function openRoute(api: DockviewApi, view: CanvasView) {
-  const existing = api.getPanel(`route:${view}`) ??
+  const existing =
+    api.getPanel(`route:${view}`) ??
     api.panels.find((panel) => panel.api.getParameters().view === view);
   if (existing) {
     existing.api.setActive();
@@ -82,10 +82,7 @@ function openRoute(api: DockviewApi, view: CanvasView) {
 
 function saveLayout(api: DockviewApi) {
   try {
-    localStorage.setItem(
-      LAYOUT_KEY,
-      JSON.stringify({ schema: 1, layout: api.toJSON() }),
-    );
+    localStorage.setItem(LAYOUT_KEY, JSON.stringify({ schema: 1, layout: api.toJSON() }));
   } catch {
     // Storage is optional in private browser sessions.
   }
@@ -112,11 +109,14 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
     if (api) openRoute(api, routeToView(route));
   }, [route]);
 
-  useEffect(() => () => {
-    for (const listener of disposables.current) listener.dispose();
-    disposables.current = [];
-    apiRef.current = null;
-  }, []);
+  useEffect(
+    () => () => {
+      for (const listener of disposables.current) listener.dispose();
+      disposables.current = [];
+      apiRef.current = null;
+    },
+    [],
+  );
 
   const onReady = ({ api }: DockviewReadyEvent) => {
     apiRef.current = api;
@@ -137,10 +137,16 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
         }
       }
     } catch {
-      try { localStorage.removeItem(LAYOUT_KEY); } catch { /* unavailable */ }
+      try {
+        localStorage.removeItem(LAYOUT_KEY);
+      } catch {
+        /* unavailable */
+      }
     }
 
-    disposables.current.forEach((listener) => { listener.dispose(); });
+    disposables.current.forEach((listener) => {
+      listener.dispose();
+    });
     disposables.current = [
       api.onDidActivePanelChange(({ panel, origin }) => {
         if (origin !== "user" || !panel) return;
@@ -174,18 +180,15 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
     if (!api) return;
     const active = api.activePanel;
     const candidate: unknown = active?.api.getParameters().view;
-    const view = typeof candidate === "string" && isView(candidate)
-      ? candidate
-      : routeToView(route);
+    const view =
+      typeof candidate === "string" && isView(candidate) ? candidate : routeToView(route);
     const id = `split:${view}:${++serial.current}:${Date.now()}`;
     api.addPanel({
       id,
       component: "page",
       title: TITLES[view],
       params: { view },
-      position: active
-        ? { referencePanel: active.id, direction: "right" }
-        : { direction: "right" },
+      position: active ? { referencePanel: active.id, direction: "right" } : { direction: "right" },
     });
     latest.current.onNavigate(`/${view}`);
   };
@@ -194,7 +197,11 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
     const api = apiRef.current;
     if (!api) return;
     api.clear();
-    try { localStorage.removeItem(LAYOUT_KEY); } catch { /* unavailable */ }
+    try {
+      localStorage.removeItem(LAYOUT_KEY);
+    } catch {
+      /* unavailable */
+    }
     openRoute(api, "overview");
     latest.current.onNavigate("/overview");
   };
@@ -205,7 +212,9 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
         <div className="dock-toolbar">
           <div className="dock-toolbar-title">
             <span className="dock-eyebrow">WORKSPACE</span>
-            <span className="dock-toolbar-divider" aria-hidden="true">/</span>
+            <span className="dock-toolbar-divider" aria-hidden="true">
+              /
+            </span>
             <span>Panels</span>
             <span className="dock-panel-count">{count}</span>
           </div>

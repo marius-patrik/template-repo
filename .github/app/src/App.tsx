@@ -162,8 +162,8 @@ function SimplePage({ id, to }: { id: View; to: (p: string) => void }) {
             <p className="eyebrow">Layout</p>
             <h2>Arrange your workspace</h2>
             <p className="muted">
-              Drag tabs to create groups, split panels, or float windows.
-              Your arrangement is saved locally in this browser.
+              Drag tabs to create groups, split panels, or float windows. Your arrangement is saved
+              locally in this browser.
             </p>
             <Button variant="subtle" onClick={() => to("/graph")}>
               Open graph <AnimatedIcon name="right" size={15} />
