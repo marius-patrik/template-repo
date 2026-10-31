@@ -364,7 +364,19 @@ export default function DockCanvas({
       pinned,
       showSettings,
     }),
-    [renderView, onNavigate, add, split, reset, newTab, closePanel, choose, onPin, pinned, showSettings],
+    [
+      renderView,
+      onNavigate,
+      add,
+      split,
+      reset,
+      newTab,
+      closePanel,
+      choose,
+      onPin,
+      pinned,
+      showSettings,
+    ],
   );
 
   useEffect(() => {
