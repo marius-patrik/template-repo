@@ -2665,9 +2665,10 @@ export default function App() {
   );
 }
 </pre></section>
-<section class="file" id="file-0066"><h3>.github/app/src/DockCanvas.tsx</h3><p class="meta">Git mode 100644 · 3b4406d4c648684b68f9dbcd6500a66fc1dba4d2</p><pre>import * as DropdownMenu from &quot;@radix-ui/react-dropdown-menu&quot;;
+<section class="file" id="file-0066"><h3>.github/app/src/DockCanvas.tsx</h3><p class="meta">Git mode 100644 · 4bff45a984f2b0ca2ffeda86d748e7f8daa39984</p><pre>import * as DropdownMenu from &quot;@radix-ui/react-dropdown-menu&quot;;
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -2915,7 +2916,7 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
   const disposables = useRef&lt;Array&lt;{ dispose: () =&gt; void }&gt;&gt;([]);
   const latest = useRef({ route, onNavigate });
   latest.current = { route, onNavigate };
-  const resetLayout = () =&gt; {
+  const resetLayout = useCallback(() =&gt; {
     const api = apiRef.current;
     if (!api) return;
     api.clear();
@@ -2926,7 +2927,7 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
     }
     openRoute(api, &quot;overview&quot;);
     latest.current.onNavigate(&quot;/overview&quot;);
-  };
+  }, []);
   const panelContext = useMemo(
     () =&gt; ({ render: renderView, onNavigate, resetLayout }),
     [renderView, onNavigate, resetLayout],
