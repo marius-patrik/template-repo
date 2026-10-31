@@ -116,3 +116,5 @@ routes, commands and source files. New languages should add a resource dictionar
 not fork the UI.
 
 Build checks now verify localized Czech/English labels, the locale persisted across reload, and visual density/skin configuration while retaining existing Dockview and keyboard acceptance tests.
+
+Localization acceptance additionally verifies Spanish, Czech and English Settings language transitions, with no translation of source Markdown. Knowledge-graph labels use the same catalog, and graph light/dark mode follows the appearance preference.
