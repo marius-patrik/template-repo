@@ -35,3 +35,10 @@ views; tracked authoring records remain authoritative.
 ## Prototype delivery
 
 Pages builds on the feature branch deploy through the `canvas-preview` environment; after a reviewed release, main deploys through `github-pages`. Source input is compiled at build time and navigation remains local/read-only. The design/prototyping phase does not end automatically with a successful deployment.
+
+## Current prototype controls
+
+- The application title bar owns the global sidebar toggle, omnibar and Settings.
+- The project route tree lives in the omnibar; the redundant secondary header was retired.
+- Shortcuts are registered centrally with TanStack Hotkeys, defaulting to Mod+B (sidebar) and Mod+K (omnibar), and are editable in Settings. Custom bindings persist only in the current browser.
+- Accent color selection uses react-colorful inside a Radix Popover and validates contrast using colord. The theme state remains local and independent of repository authority.
