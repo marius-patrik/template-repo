@@ -625,7 +625,7 @@ export default function App() {
                   >
                     {icon(n.id)}
                     <span>{t(n.label)}</span>
-                    <small>{t(n.group)}</small>
+                    <small>{context.name}</small>
                     {icon("right", 13)}
                   </button>
                 ))}
