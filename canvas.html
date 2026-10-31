@@ -1997,7 +1997,7 @@ export function AccentColorPicker({
   );
 }
 </pre></section>
-<section class="file" id="file-0065"><h3>.github/app/src/App.tsx</h3><p class="meta">Git mode 100644 · fb87324f8730783630ab7200a93923838ca158d4</p><pre>import { useEffect, useMemo, useRef, useState } from &quot;react&quot;;
+<section class="file" id="file-0065"><h3>.github/app/src/App.tsx</h3><p class="meta">Git mode 100644 · 69985786b4291b327bef8240f7b85138a5dd3ac1</p><pre>import { useEffect, useMemo, useRef, useState } from &quot;react&quot;;
 import { colord, extend } from &quot;colord&quot;;
 import a11yPlugin from &quot;colord/plugins/a11y&quot;;
 import { formatForDisplay, useAppHotkeys, useHotkey } from &quot;@tanstack/react-hotkeys&quot;;
@@ -2419,6 +2419,17 @@ export default function App() {
   );
   useEffect(() =&gt; {
     if (paletteOpen) requestAnimationFrame(() =&gt; input.current?.focus());
+  }, [paletteOpen]);
+  useEffect(() =&gt; {
+    if (!paletteOpen) return;
+    const onEscape = (event: KeyboardEvent) =&gt; {
+      if (event.key === &quot;Escape&quot;) {
+        event.preventDefault();
+        setPaletteOpen(false);
+      }
+    };
+    window.addEventListener(&quot;keydown&quot;, onEscape, true);
+    return () =&gt; window.removeEventListener(&quot;keydown&quot;, onEscape, true);
   }, [paletteOpen]);
   const go = (dest: string) =&gt; {
     navigate(dest);
@@ -5264,7 +5275,7 @@ if __name__ == &quot;__main__&quot;:
         print(f&quot;error: {error}&quot;, file=sys.stderr)
         sys.exit(1)
 </pre></section>
-<section class="file" id="file-0079"><h3>.github/tests/smoke_canvas.mjs</h3><p class="meta">Git mode 100644 · 7b40055bfb9aa716db16d2c9ee7bb8a62bde9f6d</p><pre>import { createRequire } from &quot;node:module&quot;;
+<section class="file" id="file-0079"><h3>.github/tests/smoke_canvas.mjs</h3><p class="meta">Git mode 100644 · 162facb69228fe78ac920090ed4d9fbf70fcb80e</p><pre>import { createRequire } from &quot;node:module&quot;;
 import { resolve } from &quot;node:path&quot;;
 import { pathToFileURL } from &quot;node:url&quot;;
 
@@ -5318,6 +5329,7 @@ try {
   await page.getByRole(&quot;button&quot;, { name: &quot;Open navigation tree&quot; }).click();
   await page.getByRole(&quot;dialog&quot;, { name: &quot;Omnibar navigation tree&quot; }).waitFor();
   await page.keyboard.press(&quot;Escape&quot;);
+  await page.locator(&quot;.palette-cover&quot;).waitFor({ state: &quot;hidden&quot; });
 
   await page.getByRole(&quot;button&quot;, { name: &quot;Settings&quot;, exact: true }).first().click();
   await page.getByRole(&quot;heading&quot;, { name: &quot;Settings&quot;, exact: true }).waitFor();
