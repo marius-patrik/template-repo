@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ComponentType, type Ref } from "react";
+import { useCanvasConfig } from "../config";
 import {
   LayoutGridIcon,
   BlocksIcon,
@@ -83,6 +84,8 @@ export function AnimatedIcon({
   size?: number;
   className?: string;
 }) {
+  const scaledIconSize = useCanvasConfig((state) => state.preferences.iconSize);
+  const actualSize = Math.max(10, Math.round(size * scaledIconSize / 18));
   const node = useRef<HTMLSpanElement>(null);
   const animation = useRef<IconHandle>(null);
   const Icon = (registry[name as keyof typeof registry] ??
@@ -113,7 +116,7 @@ export function AnimatedIcon({
       aria-hidden="true"
       data-code-icon={name === "monaco" || name === "code" ? "true" : undefined}
     >
-      <Icon ref={animation} size={size} animateOnHover={false} />
+      <Icon ref={animation} size={actualSize} animateOnHover={false} />
       {(name === "monaco" || name === "code") && <span className="code-icon-glyph">&lt;/&gt;</span>}
     </span>
   );

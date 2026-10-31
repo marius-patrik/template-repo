@@ -525,6 +525,10 @@ export default function App() {
                     </>
                   )}
                 </aside>
+                <CanvasContextMenu actions={[
+                  { label: t("Move sidebar left"), icon: "move", action: () => updatePreferences({ sidebarPosition: "left" }) },
+                  { label: t("Move sidebar right"), icon: "move", action: () => updatePreferences({ sidebarPosition: "right" }) },
+                ]}>
                 <hr
                   className={`sidebar-resizer ${collapsed ? "disabled" : ""}`}
                   aria-label={t("Resize sidebar")}
@@ -594,14 +598,8 @@ export default function App() {
                       updatePreferences({ sidebarWidth: 480 });
                     }
                   }}
-                  onContextMenu={(event) => {
-                    event.preventDefault();
-                    updatePreferences({
-                      sidebarPosition: prefs.sidebarPosition === "left" ? "right" : "left",
-                    });
-                    notify.info(t("Primary sidebar position updated"));
-                  }}
                 />
+                </CanvasContextMenu>
               </>
             )}
             <div className="main-column">

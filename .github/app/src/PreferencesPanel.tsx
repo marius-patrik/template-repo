@@ -161,7 +161,7 @@ export default function PreferencesPanel() {
           values={Object.keys(SCALES)}
           onChange={(value) => setScale(value as keyof typeof SCALES)}
         />
-        <div className="settings-subgrid" role="group" aria-label={t("Individual scale values")}>
+        <fieldset className="settings-subgrid" aria-label={t("Individual scale values")}>
           <NumberPreference
             label="Text size"
             value={prefs.fontSize}
@@ -190,7 +190,7 @@ export default function PreferencesPanel() {
             max={20}
             set={(value) => patch("spacing", value)}
           />
-        </div>
+        </fieldset>
         <h3>
           {t("Color tokens")} · {t(dark ? "Dark" : "Light")}
         </h3>

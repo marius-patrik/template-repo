@@ -66,6 +66,22 @@ export const lightPalette = {
   scrim: "#17171a",
   danger: "#b32432",
 };
+/** Skin presets update the same editable tokens; no second palette authority. */
+const skinPalette = {
+  graphite: { dark: darkPalette, light: lightPalette },
+  slate: {
+    dark: { ...darkPalette, bg: "#0b111b", surface: "#141e2d", raised: "#1b2939",
+      border: "#324257", text: "#e6eff9", muted: "#a3b4c8", subtle: "#8498b0", hover: "#203149" },
+    light: { ...lightPalette, bg: "#f2f6fa", surface: "#ffffff", raised: "#e7eef6",
+      border: "#c5d3e3", text: "#192c43", muted: "#4c647e", subtle: "#657d95", hover: "#e0ebf6" },
+  },
+  contrast: {
+    dark: { ...darkPalette, bg: "#070707", surface: "#111111", raised: "#202020",
+      border: "#858585", text: "#ffffff", muted: "#e0e0e0", subtle: "#bdbdbd", hover: "#303030" },
+    light: { ...lightPalette, bg: "#ffffff", surface: "#ffffff", raised: "#f0f0f0",
+      border: "#5b5b5b", text: "#111111", muted: "#333333", subtle: "#454545", hover: "#e6e6e6" },
+  },
+} as const;
 const schema = z.object({
   theme: z.enum(["dark", "light", "system"]),
   skin: z.enum(["graphite", "slate", "contrast"]),
@@ -152,7 +168,15 @@ export const useCanvasConfig = create<ConfigState>()(
   persist(
     (set, get) => ({
       preferences: legacySettings(),
-      setPreferences: (patch) => set({ preferences: validate({ ...get().preferences, ...patch }) }),
+      setPreferences: (patch) => {
+        const prefs = get().preferences;
+        const switchingSkin = patch.skin && patch.skin !== prefs.skin;
+        const preset = switchingSkin ? skinPalette[patch.skin as keyof typeof skinPalette] : null;
+        set({ preferences: validate({
+          ...prefs, ...patch,
+          ...(preset ? { darkColors: preset.dark, lightColors: preset.light } : {}),
+        }) });
+      },
       setScale: (uiScale) =>
         set({ preferences: validate({ ...get().preferences, uiScale, ...SCALES[uiScale] }) }),
       setColor: (key, value, isDark) => {
