@@ -4735,7 +4735,7 @@ if __name__ == &quot;__main__&quot;:
         print(f&quot;error: {error}&quot;, file=sys.stderr)
         sys.exit(1)
 </pre></section>
-<section class="file" id="file-0079"><h3>.github/tests/smoke_canvas.mjs</h3><p class="meta">Git mode 100644 · d2d9722ba307b89bfe643acbd316a20cf9578876</p><pre>import { createRequire } from &quot;node:module&quot;;
+<section class="file" id="file-0079"><h3>.github/tests/smoke_canvas.mjs</h3><p class="meta">Git mode 100644 · 7fd0e4573c01d7807cbc551f26bf50f8e43961fe</p><pre>import { createRequire } from &quot;node:module&quot;;
 import { resolve } from &quot;node:path&quot;;
 import { pathToFileURL } from &quot;node:url&quot;;
 
@@ -4752,6 +4752,14 @@ try {
   await page.locator(&quot;#root .app-root&quot;).waitFor({ timeout: 15000 });
   await page.locator(&quot;.window-titlebar&quot;).waitFor();
   await page.locator(&quot;.window-statusbar&quot;).waitFor();
+  if (await page.locator(&quot;.project-header&quot;).count()) throw new Error(&quot;Redundant project header remains&quot;);
+  if (await page.locator(&quot;.sidebar-top&quot;).count()) throw new Error(&quot;Sidebar still reserves space for collapse control&quot;);
+  if (await page.locator(&#x27;.sidebar [href=&quot;/settings&quot;]&#x27;).count()) throw new Error(&quot;Settings still appears in sidebar&quot;);
+
+  await page.keyboard.press(&quot;Control+b&quot;);
+  await page.locator(&quot;.sidebar.collapsed&quot;).waitFor();
+  await page.keyboard.press(&quot;Control+b&quot;);
+  await page.locator(&quot;.sidebar:not(.collapsed)&quot;).waitFor();
 
   await page.getByRole(&quot;button&quot;, { name: &quot;Open navigation tree&quot; }).click();
   await page.getByRole(&quot;dialog&quot;, { name: &quot;Omnibar navigation tree&quot; }).waitFor();
@@ -4759,6 +4767,17 @@ try {
 
   await page.getByRole(&quot;button&quot;, { name: &quot;Settings&quot;, exact: true }).first().click();
   await page.getByRole(&quot;heading&quot;, { name: &quot;Settings&quot;, exact: true }).waitFor();
+  await page.getByRole(&quot;heading&quot;, { name: &quot;Keyboard shortcuts&quot; }).waitFor();
+  await page.getByRole(&quot;button&quot;, { name: &quot;Choose custom accent color&quot; }).click();
+  await page.getByRole(&quot;textbox&quot;, { name: &quot;Accent color hex value&quot; }).fill(&quot;#dd66cc&quot;);
+  await page.waitForFunction(() =&gt; getComputedStyle(document.documentElement).getPropertyValue(&quot;--accent&quot;).trim() === &quot;#dd66cc&quot;);
+  await page.keyboard.press(&quot;Escape&quot;);
+
+  const editSidebar = page.getByRole(&quot;button&quot;, { name: &quot;Change shortcut for Toggle sidebar&quot; });
+  await editSidebar.click();
+  await page.keyboard.press(&quot;Control+Shift+b&quot;);
+  await page.waitForFunction(() =&gt; (document.querySelector(&#x27;[data-command=&quot;canvas.sidebar.toggle&quot;] kbd&#x27;)?.textContent ?? &quot;&quot;).includes(&quot;B&quot;));
+  await page.getByRole(&quot;button&quot;, { name: &quot;Reset shortcut for Toggle sidebar&quot; }).click();
 
   await page.setViewportSize({ width: 390, height: 844 });
   const overflow = await page.evaluate(
@@ -4770,7 +4789,7 @@ try {
   await page.locator(&quot;.sidebar.mobile-open&quot;).waitFor();
 
   if (errors.length) throw new Error(`Browser uncaught errors: ${errors.join(&quot;; &quot;)}`);
-  console.log(&quot;Canvas Chromium smoke passed: mount, chrome, navigation, omnibar and mobile.&quot;);
+  console.log(&quot;Canvas Chromium smoke passed: mount, chrome, Ctrl+B, settings, accent picker, keybinding recorder and mobile.&quot;);
 } finally {
   await browser.close();
 }
