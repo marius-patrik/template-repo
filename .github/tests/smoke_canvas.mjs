@@ -19,7 +19,7 @@ try {
   const addTab = page.locator(".dock-grid .dv-groupview").first().getByRole("button", { name: "Add tab" });
   await addTab.waitFor();
   await addTab.click();
-  const menu = page.getByRole("menu", { name: "Available tabs" });
+  const menu = page.locator(".dock-add-menu");
   await menu.waitFor();
   if ((await menu.getByRole("menuitem").count()) !== 10)
     throw new Error("Add-tab dropdown must contain every Canvas view");
@@ -27,7 +27,7 @@ try {
   await page.locator('.dock-grid [data-dock-view="projects"]').waitFor();
   await page.waitForFunction(() => location.hash.includes("/projects"));
   await page.locator(".dock-grid .dv-groupview").first().getByRole("button", { name: "Add tab" }).click();
-  await page.getByRole("menu", { name: "Available tabs" }).getByRole("menuitem", { name: "Overview" }).click();
+  await page.locator(".dock-add-menu").getByRole("menuitem", { name: "Overview" }).click();
   await page.waitForFunction(() => location.hash.includes("/overview"));
   if ((await page.locator(".dock-grid .dv-groupview").count()) !== 1)
     throw new Error("Adding a tab created a separate group instead of reusing the tab bar");
