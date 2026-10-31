@@ -202,7 +202,7 @@ const english = [
 const en = Object.fromEntries(english.map((value) => [value, value]));
 
 const cs: Record<string, string> = {
-  "Notifications": "Oznámení",
+  Notifications: "Oznámení",
   "Unread notifications: {{count}}": "Nepřečtená oznámení: {{count}}",
   "No notifications yet": "Zatím žádná oznámení",
   "Clear notifications": "Vymazat oznámení",
@@ -410,7 +410,7 @@ const cs: Record<string, string> = {
   "Density selection": "Výběr hustoty",
 };
 const es: Record<string, string> = {
-  "Notifications": "Notificaciones",
+  Notifications: "Notificaciones",
   "Unread notifications: {{count}}": "Notificaciones sin leer: {{count}}",
   "No notifications yet": "Aún no hay notificaciones",
   "Clear notifications": "Borrar notificaciones",

@@ -27,15 +27,19 @@ const isLevel = (value: unknown): value is Level =>
 
 function restoreEntries(source: unknown): Notice[] {
   if (!Array.isArray(source)) return [];
-  return source.slice(0, LIMIT).filter((value): value is Notice =>
-    value && typeof value === "object"
-    && typeof value.id === "string"
-    && isLevel(value.level)
-    && typeof value.message === "string"
-    && value.message.length <= 500
-    && Number.isFinite(value.createdAt)
-    && typeof value.read === "boolean",
-  );
+  return source
+    .slice(0, LIMIT)
+    .filter(
+      (value): value is Notice =>
+        value &&
+        typeof value === "object" &&
+        typeof value.id === "string" &&
+        isLevel(value.level) &&
+        typeof value.message === "string" &&
+        value.message.length <= 500 &&
+        Number.isFinite(value.createdAt) &&
+        typeof value.read === "boolean",
+    );
 }
 
 /** Browser-local UI feedback, never fabricated repository or agent activity. */
@@ -66,8 +70,7 @@ export const useNotifications = create<NotificationState>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ entries: state.entries }),
       merge: (saved, current) => {
-        const input = saved && typeof saved === "object" && "entries" in saved
-          ? saved.entries : [];
+        const input = saved && typeof saved === "object" && "entries" in saved ? saved.entries : [];
         return { ...current, entries: restoreEntries(input) };
       },
     },
@@ -107,17 +110,29 @@ export function NotificationCenter() {
     minute: "2-digit",
   });
   return (
-    <DropdownMenu.Root onOpenChange={(open) => { if (open) markRead(); }}>
+    <DropdownMenu.Root
+      onOpenChange={(open) => {
+        if (open) markRead();
+      }}
+    >
       <DropdownMenu.Trigger asChild>
         <button
           type="button"
           className="canvas-button canvas-button-icon canvas-button-ghost notification-trigger"
-          aria-label={unread > 0 ? t("Unread notifications: {{count}}", { count: unread }) : t("Notifications")}
+          aria-label={
+            unread > 0
+              ? t("Unread notifications: {{count}}", { count: unread })
+              : t("Notifications")
+          }
           title={t("Notifications")}
           data-testid="notification-trigger"
         >
           <AnimatedIcon name="bell" size={17} />
-          {unread > 0 && <span className="notification-unread" aria-hidden="true">{unread > 9 ? "9+" : unread}</span>}
+          {unread > 0 && (
+            <span className="notification-unread" aria-hidden="true">
+              {unread > 9 ? "9+" : unread}
+            </span>
+          )}
         </button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
@@ -136,15 +151,17 @@ export function NotificationCenter() {
           <div className="notification-history">
             {entries.length === 0 ? (
               <p className="notification-empty">{t("No notifications yet")}</p>
-            ) : entries.map((entry) => (
-              <div className="notification-entry" key={entry.id}>
-                <AnimatedIcon name={levelIcons[entry.level]} size={16} />
-                <span className="notification-description">
-                  <span>{entry.message}</span>
-                  <small>{formatter.format(entry.createdAt)}</small>
-                </span>
-              </div>
-            ))}
+            ) : (
+              entries.map((entry) => (
+                <div className="notification-entry" key={entry.id}>
+                  <AnimatedIcon name={levelIcons[entry.level]} size={16} />
+                  <span className="notification-description">
+                    <span>{entry.message}</span>
+                    <small>{formatter.format(entry.createdAt)}</small>
+                  </span>
+                </div>
+              ))
+            )}
           </div>
           {entries.length > 0 && (
             <>
