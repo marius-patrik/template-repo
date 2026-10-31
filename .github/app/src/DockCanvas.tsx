@@ -1,3 +1,4 @@
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {
   createContext,
   useContext,
@@ -14,6 +15,7 @@ import {
   type DockviewApi,
   type DockviewReadyEvent,
   type IDockviewPanelProps,
+  type IDockviewHeaderActionsProps,
 } from "dockview-react";
 import { AnimatedIcon } from "./components/AnimatedIcon";
 
@@ -32,7 +34,10 @@ const ROUTES = [
 ] as const;
 
 type CanvasView = (typeof ROUTES)[number];
-type PaneContext = { render: (view: CanvasView) => ReactNode };
+type PaneContext = {
+  render: (view: CanvasView) => ReactNode;
+  onNavigate: (route: string) => void;
+};
 const PaneContext = createContext<PaneContext | null>(null);
 const TITLES: Record<CanvasView, string> = {
   overview: "Overview",
@@ -80,6 +85,74 @@ function openRoute(api: DockviewApi, view: CanvasView) {
   });
 }
 
+const TAB_GROUPS: Array<{ label: string; views: CanvasView[] }> = [
+  { label: "Workspace", views: ["overview", "workspace", "projects", "agents", "graph", "roadmap", "artifacts", "activity"] },
+  { label: "System", views: ["context", "settings"] },
+];
+let tabSequence = 0;
+
+function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
+  const workspace = useContext(PaneContext);
+
+  const addTab = (view: CanvasView) => {
+    // A new tab belongs to the group whose + was pressed, even when the same
+    // view is already open elsewhere. URL navigation is intentionally explicit.
+    const id = `tab:${view}:${Date.now().toString(36)}:${++tabSequence}`;
+    containerApi.addPanel({
+      id,
+      component: "page",
+      title: TITLES[view],
+      params: { view },
+      position: { referenceGroup: group.id },
+    });
+    workspace?.onNavigate(`/${view}`);
+  };
+
+  return (
+    <div className="dock-tab-add" data-dock-group={group.id} onPointerDown={(event) => event.stopPropagation()}>
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger asChild>
+          <button
+            type="button"
+            className="dock-add-trigger"
+            aria-label="Add tab"
+            title="Add a tab to this group"
+          >
+            <AnimatedIcon name="plus" size={15} />
+          </button>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Portal>
+          <DropdownMenu.Content
+            className="menu-content dock-add-menu"
+            align="end"
+            side="bottom"
+            sideOffset={5}
+            collisionPadding={10}
+            aria-label="Available tabs"
+          >
+            {TAB_GROUPS.map((section, index) => (
+              <DropdownMenu.Group key={section.label}>
+                {index > 0 && <DropdownMenu.Separator className="dock-add-separator" />}
+                <DropdownMenu.Label className="dock-add-group-label">{section.label}</DropdownMenu.Label>
+                {section.views.map((view) => (
+                  <DropdownMenu.Item
+                    key={view}
+                    className="menu-item dock-add-item"
+                    onSelect={() => addTab(view)}
+                  >
+                    <AnimatedIcon name={view} size={16} />
+                    <span>{TITLES[view]}</span>
+                  </DropdownMenu.Item>
+                ))}
+              </DropdownMenu.Group>
+            ))}
+          </DropdownMenu.Content>
+        </DropdownMenu.Portal>
+      </DropdownMenu.Root>
+    </div>
+  );
+}
+
 function saveLayout(api: DockviewApi) {
   try {
     localStorage.setItem(LAYOUT_KEY, JSON.stringify({ schema: 1, layout: api.toJSON() }));
@@ -102,7 +175,10 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
   latest.current = { route, onNavigate };
   const serial = useRef(0);
   const [count, setCount] = useState(0);
-  const panelContext = useMemo(() => ({ render: renderView }), [renderView]);
+  const panelContext = useMemo(
+    () => ({ render: renderView, onNavigate }),
+    [renderView, onNavigate],
+  );
 
   useEffect(() => {
     const api = apiRef.current;
@@ -254,6 +330,7 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
           <DockviewReact
             theme={dark ? themeDark : themeLight}
             components={components}
+            rightHeaderActionsComponent={AddTabHeader}
             onReady={onReady}
           />
         </section>

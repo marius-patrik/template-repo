@@ -16,6 +16,21 @@ try {
   await page.locator(".window-titlebar").waitFor();
   await page.locator(".window-statusbar").waitFor();
   await page.locator('.dock-grid [data-dock-view="overview"]').waitFor();
+  const addTab = page.locator(".dock-grid .dv-groupview").first().getByRole("button", { name: "Add tab" });
+  await addTab.waitFor();
+  await addTab.click();
+  const menu = page.getByRole("menu", { name: "Available tabs" });
+  await menu.waitFor();
+  if ((await menu.getByRole("menuitem").count()) !== 10)
+    throw new Error("Add-tab dropdown must contain every Canvas view");
+  await menu.getByRole("menuitem", { name: "Projects" }).click();
+  await page.locator('.dock-grid [data-dock-view="projects"]').waitFor();
+  await page.waitForFunction(() => location.hash.includes("/projects"));
+  await page.locator(".dock-grid .dv-groupview").first().getByRole("button", { name: "Add tab" }).click();
+  await page.getByRole("menu", { name: "Available tabs" }).getByRole("menuitem", { name: "Overview" }).click();
+  await page.waitForFunction(() => location.hash.includes("/overview"));
+  if ((await page.locator(".dock-grid .dv-groupview").count()) !== 1)
+    throw new Error("Adding a tab created a separate group instead of reusing the tab bar");
   if ((await page.locator(".dockview-theme-dark, .dockview-theme-light").count()) !== 1)
     throw new Error("Expected exactly one root Dockview compositor");
   await page.getByRole("button", { name: "Split active panel right" }).click();
