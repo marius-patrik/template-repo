@@ -92,6 +92,9 @@ try {
   await page.getByRole("heading", { name: "Nastavení", exact: true }).waitFor();
   await page.waitForFunction(() => document.documentElement.dataset.skin === "slate");
   await page.waitForFunction(() => document.documentElement.dataset.density === "compact");
+  await page.locator("#canvas-language").selectOption("es");
+  await page.getByRole("heading", { name: "Configuración", exact: true }).waitFor();
+  await page.waitForFunction(() => document.documentElement.lang === "es");
   await page.locator("#canvas-language").selectOption("en");
   await page.getByRole("heading", { name: "Settings", exact: true }).waitFor();
 
@@ -121,7 +124,7 @@ try {
   await page.locator(".sidebar.mobile-open").waitFor();
 
   if (errors.length) throw new Error(`Browser uncaught errors: ${errors.join("; ")}`);
-  console.log("Canvas Chromium smoke passed: Dockview layout, skin and density persistence, Czech/English i18n, commands and mobile.");
+  console.log("Canvas Chromium smoke passed: Dockview layout, skin and density persistence, Czech/Spanish/English i18n, commands and mobile.");
 } finally {
   await browser.close();
 }
