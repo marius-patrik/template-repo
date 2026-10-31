@@ -367,9 +367,6 @@ export default function App() {
     [search],
   );
   useEffect(() => {
-    setSelection(0);
-  }, [search]);
-  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
@@ -580,7 +577,7 @@ export default function App() {
                   value={search}
                   aria-label="Search routes"
                   placeholder="Search pages and commands"
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) => {setSearch(e.target.value);setSelection(0);}}
                   onKeyDown={(e) => {
                     if (e.key === "ArrowDown") {
                       e.preventDefault();
