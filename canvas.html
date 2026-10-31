@@ -1634,7 +1634,7 @@ Describe precisely what changed and why.
 src/generated/
 ../../.canvas-dist/
 </pre></section>
-<section class="file" id="file-0055"><h3>.github/app/README.md</h3><p class="meta">Git mode 100644 · f0861dbe754a5932e6dec0d2862676edd6dd23f8</p><pre># Canvas Web — repository application
+<section class="file" id="file-0055"><h3>.github/app/README.md</h3><p class="meta">Git mode 100644 · a6b595f76665ed7e7d7a61fedd4a75506dc6ec4e</p><pre># Canvas Web — repository application
 
 The first-class Canvas UI is authored in `.github/app`. A deterministic build step reads
 only allowlisted, Git-tracked repository documents and generates `src/generated/context.json`;
@@ -1671,6 +1671,13 @@ views; tracked authoring records remain authoritative.
 ## Prototype delivery
 
 Pages builds on the feature branch deploy through the `canvas-preview` environment; after a reviewed release, main deploys through `github-pages`. Source input is compiled at build time and navigation remains local/read-only. The design/prototyping phase does not end automatically with a successful deployment.
+
+## Current prototype controls
+
+- The application title bar owns the global sidebar toggle, omnibar and Settings.
+- The project route tree lives in the omnibar; the redundant secondary header was retired.
+- Shortcuts are registered centrally with TanStack Hotkeys, defaulting to Mod+B (sidebar) and Mod+K (omnibar), and are editable in Settings. Custom bindings persist only in the current browser.
+- Accent color selection uses react-colorful inside a Radix Popover and validates contrast using colord. The theme state remains local and independent of repository authority.
 </pre></section>
 <section class="file" id="file-0056"><h3>.github/app/biome.json</h3><p class="meta">Git mode 100644 · b7e3d5edf47ef879ecb3eabc17772d2817b11c64</p><pre>{
   &quot;$schema&quot;: &quot;https://biomejs.dev/schemas/2.6.4/schema.json&quot;,
@@ -1732,10 +1739,10 @@ Pages builds on the feature branch deploy through the `canvas-preview` environme
 &lt;meta name=&quot;theme-color&quot; content=&quot;#0b0b0d&quot; /&gt;&lt;meta name=&quot;description&quot; content=&quot;Repository-sourced Canvas workspace&quot; /&gt;
 &lt;/head&gt;&lt;body&gt;&lt;div id=&quot;root&quot;&gt;&lt;/div&gt;&lt;/body&gt;&lt;/html&gt;
 </pre></section>
-<section class="file" id="file-0059"><h3>.github/app/package.json</h3><p class="meta">Git mode 100644 · ced4eb665721172a1e247a1f792423e366e12e5b</p><pre>{
+<section class="file" id="file-0059"><h3>.github/app/package.json</h3><p class="meta">Git mode 100644 · 368b69c2f319df0fb56261cba7447c8a0d2362d0</p><pre>{
   &quot;name&quot;: &quot;@canvas/workspace&quot;,
   &quot;private&quot;: true,
-  &quot;version&quot;: &quot;0.6.0&quot;,
+  &quot;version&quot;: &quot;0.7.0&quot;,
   &quot;type&quot;: &quot;module&quot;,
   &quot;packageManager&quot;: &quot;bun@1.3.11&quot;,
   &quot;scripts&quot;: {
@@ -1974,7 +1981,7 @@ export function AccentColorPicker({
   );
 }
 </pre></section>
-<section class="file" id="file-0065"><h3>.github/app/src/App.tsx</h3><p class="meta">Git mode 100644 · 888a6765557781b18ce3798dc59abb54a6a77d5e</p><pre>import { useEffect, useMemo, useRef, useState } from &quot;react&quot;;
+<section class="file" id="file-0065"><h3>.github/app/src/App.tsx</h3><p class="meta">Git mode 100644 · 9798d0ffc2d5f9d2911c35eba4df612a73c0e6fe</p><pre>import { useEffect, useMemo, useRef, useState } from &quot;react&quot;;
 import { colord, extend } from &quot;colord&quot;;
 import a11yPlugin from &quot;colord/plugins/a11y&quot;;
 import { formatForDisplay, useAppHotkeys, useHotkey } from &quot;@tanstack/react-hotkeys&quot;;
@@ -2308,7 +2315,7 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
       &lt;/section&gt;
       &lt;KeyboardSettings /&gt;
       &lt;p className=&quot;muted settings-note&quot;&gt;
-        Canvas v0.6.0 · Prototype. Local UI settings are not authoritative project data.
+        Canvas v0.7.0 · Prototype. Local UI settings are not authoritative project data.
       &lt;/p&gt;
     &lt;/div&gt;
   );
@@ -2498,7 +2505,7 @@ export default function App() {
       &lt;/div&gt;
       &lt;footer className=&quot;window-statusbar&quot;&gt;
         &lt;span&gt;Canvas · Git snapshot&lt;/span&gt;
-        &lt;span className=&quot;version&quot;&gt;Version: 0.6.0 · Prototype&lt;/span&gt;
+        &lt;span className=&quot;version&quot;&gt;Version: 0.7.0 · Prototype&lt;/span&gt;
         &lt;span&gt;
           {context.repository} / {context.revision}
         &lt;/span&gt;
