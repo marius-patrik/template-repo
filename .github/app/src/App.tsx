@@ -520,24 +520,12 @@ export default function App() {
       /* optional */
     }
   }, [sidebarWidth]);
-  useEffect(() => {
-    const move = (event: PointerEvent) => {
-      if (resizing.current) setSidebarWidth(clampSidebar(event.clientX));
-    };
-    const end = () => {
-      resizing.current = false;
+  useEffect(
+    () => () => {
       document.body.classList.remove("resizing-sidebar");
-    };
-    window.addEventListener("pointermove", move);
-    window.addEventListener("pointerup", end);
-    window.addEventListener("pointercancel", end);
-    return () => {
-      window.removeEventListener("pointermove", move);
-      window.removeEventListener("pointerup", end);
-      window.removeEventListener("pointercancel", end);
-      document.body.classList.remove("resizing-sidebar");
-    };
-  }, []);
+    },
+    [],
+  );
   const [mobileOpen, setMobileOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -754,7 +742,25 @@ export default function App() {
             if (collapsed || event.button !== 0) return;
             event.preventDefault();
             resizing.current = true;
+            event.currentTarget.setPointerCapture(event.pointerId);
             document.body.classList.add("resizing-sidebar");
+          }}
+          onPointerMove={(event) => {
+            if (resizing.current) setSidebarWidth(clampSidebar(event.clientX));
+          }}
+          onPointerUp={(event) => {
+            if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+              event.currentTarget.releasePointerCapture(event.pointerId);
+            }
+          }}
+          onPointerCancel={(event) => {
+            if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+              event.currentTarget.releasePointerCapture(event.pointerId);
+            }
+          }}
+          onLostPointerCapture={() => {
+            resizing.current = false;
+            document.body.classList.remove("resizing-sidebar");
           }}
           onDoubleClick={() => setSidebarWidth(defaultSidebarWidth)}
           onKeyDown={(event) => {
