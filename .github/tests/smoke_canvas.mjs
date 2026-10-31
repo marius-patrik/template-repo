@@ -8,213 +8,127 @@ const url = pathToFileURL(resolve(process.argv[2] ?? ".canvas-dist/index.html"))
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 const errors = [];
+page.on("pageerror", (error) => errors.push(error.message));
 
 try {
-  page.on("pageerror", (error) => errors.push(error.message));
   await page.goto(url, { waitUntil: "load" });
   await page.locator("#root .app-root").waitFor({ timeout: 15000 });
-  await page.locator(".window-titlebar").waitFor();
-  await page.locator(".window-statusbar").waitFor();
-  await page.locator('.dock-grid [data-dock-view="overview"]').waitFor();
-  if (await page.locator(".dock-toolbar").count())
-    throw new Error("Redundant secondary workspace toolbar remains");
-  await page.locator(".dock-grid .dv-groupview").first().getByRole("button", { name: "More tab actions" }).waitFor();
-  const addTab = page.locator(".dock-grid .dv-groupview").first().getByRole("button", { name: "Add tab" });
-  await addTab.waitFor();
-  await addTab.click();
-  const menu = page.locator(".dock-add-menu");
-  await menu.waitFor();
-  if ((await menu.getByRole("menuitem").count()) !== 11)
-    throw new Error("Add-tab dropdown must contain every Canvas view");
-  await menu.getByRole("menuitem", { name: "Projects" }).click();
-  await page.locator('.dock-grid [data-dock-view="projects"]').waitFor();
-  if (!(await page.locator('.dock-grid .canvas-dock-tab[data-canvas-tab="projects"] .app-icon').count()))
-    throw new Error(
-      "A Dockview tab is missing its animated route icon. Tab DOM: " +
-      (await page.locator(".dock-grid .dv-tabs-and-actions-container").first().evaluate(
-        (element) => element.outerHTML.slice(0, 4200),
-      )),
-    );
-  if (!(await page.locator(".title-navigation").count()))
-    throw new Error("Title-bar breadcrumb dropdowns are missing");
-  const viewSelector = page.getByTestId("breadcrumb-view");
-  await viewSelector.click();
+  await page.getByTestId("empty-workspace").waitFor();
+  await page.locator(".dock-empty-tabbar").waitFor();
+  const choices = page.locator(".dock-welcome-options button");
+  if (await choices.count() !== 12) throw new Error("Empty welcome must list every editor and view");
+
+  // Profile-first navigation, with independent layouts and notes.
+  const profiles = page.getByTestId("profile-select");
+  await profiles.click();
+  for (const name of ["Global", "Study", "Health", "Code", "Design", "Finance"]) {
+    if (!(await page.getByRole("menuitem", { name }).count()))
+      throw new Error("Missing default profile: " + name);
+  }
+  await page.keyboard.press("Escape");
+
+  await page.locator(".dock-welcome-options").getByRole("button", { name: "Notepad" }).click();
+  await page.locator('[data-dock-view="notepad"]').waitFor();
+  await page.getByTestId("notepad-editor").getByRole("textbox", { name: "Notepad" }).fill("Private Global note");
+  if (!(await page.locator('.canvas-dock-tab[data-canvas-tab="notepad"] .app-icon').count()))
+    throw new Error("Notepad tab icon missing");
+
+  const tab = page.locator('.canvas-dock-tab[data-canvas-tab="notepad"]').first();
+  await tab.click({ button: "right" });
+  await page.getByRole("menuitem", { name: "Pin to activity bar" }).click();
+  await page.locator('.activity-bar .activity-button[title="Notepad"]').waitFor();
+
+  await profiles.click();
+  await page.getByRole("menuitem", { name: "Study" }).click();
+  await page.getByTestId("empty-workspace").waitFor();
+  await page.locator(".dock-welcome-options").getByRole("button", { name: "Library" }).click();
+  await page.getByTestId("library-view").waitFor();
+  await page.locator(".library-list button").first().click();
+  await page.locator('[data-dock-view="artifacts"]').waitFor();
+  await profiles.click();
+  await page.getByRole("menuitem", { name: "Global" }).click();
+  await page.locator('[data-dock-view="notepad"]').waitFor();
+  if ((await page.getByTestId("notepad-editor").getByRole("textbox", { name: "Notepad" }).inputValue()) !== "Private Global note")
+    throw new Error("Profile-specific note was not restored");
+
+  // Workspace management.
+  await profiles.click();
+  await page.getByRole("menuitem", { name: "New profile" }).click();
+  await page.getByRole("textbox", { name: "Profile name" }).fill("Research");
+  await page.getByRole("button", { name: "Save profile" }).click();
+  await page.getByTestId("empty-workspace").waitFor();
+  await profiles.click();
+  await page.getByRole("menuitem", { name: "Delete profile" }).click();
+  await page.getByRole("button", { name: "Confirm delete" }).click();
+  await profiles.click();
+  await page.getByRole("menuitem", { name: "Global" }).click();
+
+  // Monaco uses bundled workers, source-backed contents and a real editor.
+  await page.getByTestId("breadcrumb-view").click();
   await page.getByRole("option", { name: "Monaco" }).click();
-  await page.locator('.dock-grid [data-dock-view="monaco"]').waitFor();
-  await page.locator('[data-testid="monaco-editor"]').waitFor();
-  await page.locator(".monaco-editor-host .monaco-editor").waitFor({ timeout: 20000 });
-  if ((await page.locator('select').count()) !== 0)
-    throw new Error("The application still exposes a native select");
-  const monacoTab = page.locator('.dock-grid .canvas-dock-tab[data-canvas-tab="monaco"]').first();
-  await monacoTab.click({ button: "right" });
-  await page.getByRole("menuitem", { name: "Split right" }).waitFor();
-  await page.keyboard.press("Escape");
-  await page.locator('.sidebar .nav-link[title="Projects"]').click();
+  await page.locator('[data-testid="monaco-editor"] .monaco-editor').waitFor({ timeout: 20000 });
+  await page.locator('.canvas-dock-tab[data-canvas-tab="monaco"] .app-icon').waitFor();
 
-  await page.waitForFunction(() => location.hash.includes("/projects"));
-  await page.locator(".dock-grid .dv-groupview").first().getByRole("button", { name: "Add tab" }).click();
-  await page.locator(".dock-add-menu").getByRole("menuitem", { name: "Overview" }).click();
-  await page.waitForFunction(() => location.hash.includes("/overview"));
-  if ((await page.locator(".dock-grid .dv-groupview").count()) !== 1)
-    throw new Error("Adding a tab created a separate group instead of reusing the tab bar");
-  if ((await page.locator(".dockview-theme-dark, .dockview-theme-light").count()) !== 1)
-    throw new Error("Expected exactly one root Dockview compositor");
-  await page.locator(".dock-grid .dv-groupview").first().getByRole("button", { name: "More tab actions" }).click();
-  const layoutActions = page.locator(".dock-more-menu");
-  await layoutActions.waitFor();
-  if ((await layoutActions.getByRole("menuitem").count()) !== 2)
-    throw new Error("The tab actions menu must contain split and reset");
-  await layoutActions.getByRole("menuitem", { name: "Split right" }).click();
-  await page.waitForFunction(() => document.querySelectorAll(".dock-grid .dv-groupview").length >= 2);
-  if (!(await page.evaluate(() => !!localStorage.getItem("canvas-dockview-layout-v1"))))
-    throw new Error("Dockview layout was not saved");
-  await page.reload({ waitUntil: "load" });
-  await page.locator('.dock-grid [data-dock-view="overview"]').first().waitFor();
-  await page.waitForFunction(() => document.querySelectorAll(".dock-grid .dv-groupview").length >= 2);
-  await page.locator(".dock-grid .dv-groupview").first().getByRole("button", { name: "More tab actions" }).click();
-  await page.locator(".dock-more-menu").getByRole("menuitem", { name: "Reset layout" }).click();
-  await page.waitForFunction(() => document.querySelectorAll(".dock-grid .dv-groupview").length === 1);
-  const notificationTrigger = page.getByTestId("notification-trigger");
-  await notificationTrigger.waitFor();
-  await notificationTrigger.click();
-  const notificationPanel = page.getByTestId("notification-center");
-  await notificationPanel.getByText("Layout reset").waitFor();
-  await notificationPanel.getByRole("menuitem", { name: "Clear notifications" }).click();
-  await notificationTrigger.click();
-  await page.getByTestId("notification-center").getByText("No notifications yet").waitFor();
-  await page.keyboard.press("Escape");
-  const sourceRow = page.locator(".source-context-row").first();
-  await sourceRow.click({ button: "right" });
-  await page.getByRole("menuitem", { name: "Copy source path" }).waitFor();
-  await page.keyboard.press("Escape");
-  await page.locator('.sidebar .nav-link[title="Knowledge graph"]').click();
-  await page.locator('.dock-grid [data-dock-view="graph"]').waitFor();
-  await page.waitForFunction(() => location.hash.includes("/graph"));
-  await page.locator('.sidebar .nav-link[title="Overview"]').click();
-  await page.locator('.dock-grid [data-dock-view="overview"]').first().waitFor();
-  await page.waitForFunction(() => location.hash.includes("/overview"));
-  if (await page.locator(".sidebar-footer").count()) throw new Error("Redundant sidebar snapshot footer remains");
-  if (await page.locator(".sidebar").getByText("Repository snapshot").count()) throw new Error("Snapshot information duplicated in sidebar");
-  if (await page.locator(".window-statusbar .snapshot-desktop").count() !== 1)
-    throw new Error("Read-only snapshot status is missing");
-  if (await page.locator(".window-statusbar").getByText("Canvas · Git snapshot").count())
-    throw new Error("Duplicate snapshot label remains in status bar");
+  // Settings expose all placement and unified scale controls.
+  await page.locator(".title-actions").getByRole("button", { name: "Settings" }).click();
+  await page.getByTestId("settings-page").waitFor();
+  await page.getByRole("button", { name: "UI scale" }).click();
+  await page.getByRole("option", { name: "Large" }).click();
+  if (!(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--ui-spacing").trim().endsWith("11px"))))
+    throw new Error("Scale preset did not synchronize spacing");
+  await page.getByRole("spinbutton", { name: "Spacing" }).fill("12");
+  await page.waitForFunction(() => getComputedStyle(document.documentElement).getPropertyValue("--ui-spacing").trim() === "12px");
+  await page.getByRole("spinbutton", { name: "Primary sidebar width" }).fill("260");
 
-  if (await page.locator(".project-header").count()) throw new Error("Redundant project header remains");
-  if (await page.locator(".sidebar-top").count()) throw new Error("Sidebar still reserves space for collapse control");
-  if (await page.locator('.sidebar [href="/settings"]').count()) throw new Error("Settings still appears in sidebar");
-
-  const resize = page.getByRole("separator", { name: "Resize sidebar" });
-  await resize.focus();
+  await page.getByRole("button", { name: "Navigation position" }).click();
+  await page.getByRole("option", { name: "Sidebar" }).click();
+  await page.locator(".navigation-tree").waitFor();
+  const handle = page.getByRole("separator", { name: "Resize sidebar" });
+  await handle.focus();
   await page.keyboard.press("ArrowRight");
-  await page.keyboard.press("ArrowRight");
-  await page.waitForFunction(
-    () => Number(document.querySelector(".sidebar-resizer")?.getAttribute("aria-valuenow")) >= 250,
-  );
-  const resizedWidth = Number(await resize.getAttribute("aria-valuenow"));
-  await page.waitForFunction(
-    (expected) => Math.abs(
-      (document.querySelector(".sidebar")?.getBoundingClientRect().width ?? 0) - expected,
-    ) <= 2,
-    resizedWidth,
-  );
-  await page.keyboard.press("Control+b");
-  await page.locator(".sidebar.collapsed").waitFor();
-  await page.keyboard.press("Control+b");
-  await page.locator(".sidebar:not(.collapsed)").waitFor();
-  await page.waitForFunction((expected) =>
-    Math.abs((document.querySelector(".sidebar")?.getBoundingClientRect().width ?? 0) - expected) <= 2,
-    resizedWidth,
-  );
-  const restoredWidth = await page.locator(".sidebar").evaluate((el) => el.getBoundingClientRect().width);
-  if (Math.abs(restoredWidth - resizedWidth) > 2)
-    throw new Error("Sidebar resize width was lost during collapse/expand");
-  await page.reload({ waitUntil: "load" });
-  await page.waitForFunction((expected) =>
-    Math.abs((document.querySelector(".sidebar")?.getBoundingClientRect().width ?? 0) - expected) <= 2,
-    resizedWidth,
-  );
-  const storedWidth = await page.locator(".sidebar").evaluate((el) => el.getBoundingClientRect().width);
-  if (Math.abs(storedWidth - resizedWidth) > 2)
-    throw new Error("Sidebar width failed to persist after reload");
-
-  const dividerBox = await resize.boundingBox();
-  if (!dividerBox) throw new Error("Sidebar pointer resize handle is not visible");
-  const pointerX = dividerBox.x + dividerBox.width / 2;
-  const pointerY = dividerBox.y + dividerBox.height / 2;
-  if (dividerBox.height < 50) throw new Error("Sidebar resize handle has no pointer hit area");
-  await page.mouse.move(pointerX, pointerY);
+  await page.waitForFunction(() => Number(document.querySelector(".sidebar-resizer")?.getAttribute("aria-valuenow")) === 276);
+  const before = await handle.boundingBox();
+  if (!before || before.height < 50) throw new Error("Sidebar drag handle must occupy full height");
+  await page.mouse.move(before.x + before.width/2, before.y + before.height/2);
   await page.mouse.down();
-  await page.mouse.move(pointerX + 62, pointerY, { steps: 6 });
+  await page.mouse.move(before.x + before.width/2 + 56, before.y + before.height/2, { steps: 6 });
   await page.mouse.up();
-  await page.waitForFunction(
-    (previous) => Number(document.querySelector(".sidebar-resizer")?.getAttribute("aria-valuenow")) >= previous + 40,
-    resizedWidth,
-  );
-  await page.waitForFunction(
-    (previous) => (document.querySelector(".sidebar")?.getBoundingClientRect().width ?? 0) >= previous + 35,
-    resizedWidth,
-  );
-  const draggedWidth = await page.locator(".sidebar").evaluate((el) => el.getBoundingClientRect().width);
-  if (draggedWidth < resizedWidth + 35) throw new Error("Sidebar pointer drag did not resize");
+  await page.waitForFunction(() => Number(document.querySelector(".sidebar-resizer")?.getAttribute("aria-valuenow")) >= 310);
 
+  await page.getByRole("button", { name: "Omnibar position" }).click();
+  await page.getByRole("option", { name: "Floating" }).click();
+  await page.locator(".floating-omnibar").waitFor();
+  const floatingHandle = page.getByRole("button", { name: "Drag omnibar" });
+  const floating = await floatingHandle.boundingBox();
+  if (!floating) throw new Error("Floating omnibar handle missing");
+  await page.mouse.move(floating.x + 5, floating.y + 5);
+  await page.mouse.down();
+  await page.mouse.move(floating.x + 95, floating.y + 65, { steps: 5 });
+  await page.mouse.up();
+  await page.waitForFunction(() => Number.parseFloat(document.querySelector(".floating-omnibar")?.style.left || "0") > 280);
 
-
-  await page.getByRole("button", { name: "Search pages and commands" }).click();
+  // Keep command palette/omnibar, but without breadcrumb path within it.
+  await page.keyboard.press("Control+k");
   await page.getByRole("dialog", { name: "Open navigation tree" }).waitFor();
+  if (await page.locator(".palette .palette-root").count())
+    throw new Error("Omnibar still contains the old breadcrumb path");
   await page.keyboard.press("Escape");
-  await page.locator(".palette-cover").waitFor({ state: "hidden" });
 
-  await page.getByRole("button", { name: "Settings", exact: true }).first().click();
-  await page.getByRole("heading", { name: "Settings", exact: true }).waitFor();
-  await page.getByRole("heading", { name: "Keyboard shortcuts" }).waitFor();
-  await page.getByRole("group", { name: "Skin selection" }).getByRole("button", { name: "Slate" }).click();
-  await page.waitForFunction(() => document.documentElement.dataset.skin === "slate");
-  await page.getByRole("group", { name: "Density" }).getByRole("button", { name: "Compact" }).click();
-  await page.waitForFunction(() => document.documentElement.dataset.density === "compact");
-  await page.getByTestId("canvas-language").click();
-  await page.getByRole("option", { name: "Čeština" }).click();
-  await page.getByRole("heading", { name: "Nastavení", exact: true }).waitFor();
-  await page.waitForFunction(() => document.documentElement.lang === "cs");
   await page.reload({ waitUntil: "load" });
-  await page.getByRole("heading", { name: "Nastavení", exact: true }).waitFor();
-  await page.waitForFunction(() => document.documentElement.dataset.skin === "slate");
-  await page.waitForFunction(() => document.documentElement.dataset.density === "compact");
-  await page.getByTestId("canvas-language").click();
-  await page.getByRole("option", { name: "Español" }).click();
-  await page.getByRole("heading", { name: "Configuración", exact: true }).waitFor();
-  await page.waitForFunction(() => document.documentElement.lang === "es");
-  await page.getByTestId("canvas-language").click();
-  await page.getByRole("option", { name: "English" }).click();
-  await page.getByRole("heading", { name: "Settings", exact: true }).waitFor();
+  await page.getByTestId("settings-page").waitFor();
+  if (await page.locator('select').count()) throw new Error("Native select remains");
+  if ((await page.getByRole("spinbutton", { name: "Spacing" }).inputValue()) !== "12")
+    throw new Error("Spacing preference was not retained");
 
-  await page.getByRole("button", { name: "Choose custom accent color" }).click();
-  await page.getByRole("textbox", { name: "Accent color hex value" }).fill("#dd66cc");
-  await page.waitForFunction(() => getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() === "#dd66cc");
-  await page.keyboard.press("Escape");
+  // Notification history and context menus come from actual UI events.
+  await page.getByTestId("notification-trigger").click();
+  await page.getByTestId("notification-center").waitFor();
+  if (await page.getByRole("menuitem", { name: "Clear notifications" }).count())
+    await page.getByRole("menuitem", { name: "Clear notifications" }).click();
+  else await page.keyboard.press("Escape");
 
-  const editSidebar = page.getByRole("button", { name: "Change shortcut for Toggle sidebar" });
-  await editSidebar.click();
-  await page.keyboard.press("Control+Shift+b");
-  await page.waitForFunction(() => (document.querySelector('[data-command="canvas.sidebar.toggle"] kbd')?.textContent ?? "").includes("B"));
-  await page.getByRole("button", { name: "Reset shortcut for Toggle sidebar" }).click();
-
-  await page.setViewportSize({ width: 390, height: 844 });
-  if (!(await page.locator(".window-statusbar .snapshot-mobile").isVisible()))
-    throw new Error("Condensed snapshot label is not visible on mobile");
-  if (await page.locator(".window-statusbar .snapshot-desktop").isVisible())
-    throw new Error("Desktop snapshot label overlaps the mobile status bar");
-
-  const overflow = await page.evaluate(
-    () => document.documentElement.scrollWidth > window.innerWidth + 1,
-  );
-  if (overflow) throw new Error("Canvas overflows the mobile viewport");
-
-  await page.getByRole("button", { name: "Toggle navigation" }).click();
-  await page.locator(".sidebar.mobile-open").waitFor();
-
-  if (errors.length) throw new Error(`Browser uncaught errors: ${errors.join("; ")}`);
-  console.log("Canvas Chromium smoke passed: Dockview layout, skin and density persistence, Czech/Spanish/English i18n, commands and mobile.");
+  if (errors.length) throw new Error("Browser exception: " + errors.join("; "));
+  console.log("Canvas profile-first prototype: Chromium acceptance passed");
 } finally {
   await browser.close();
 }

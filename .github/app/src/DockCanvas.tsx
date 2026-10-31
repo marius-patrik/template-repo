@@ -1,245 +1,125 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
+  createContext, useCallback, useContext, useEffect, useMemo, useRef, useState,
   type ReactNode,
 } from "react";
 import {
-  DockviewReact,
-  DockviewDefaultTab,
-  type IDockviewPanelHeaderProps,
-  themeDark,
-  themeLight,
-  type DockviewApi,
-  type DockviewReadyEvent,
-  type IDockviewPanelProps,
-  type IDockviewHeaderActionsProps,
+  DockviewReact, DockviewDefaultTab, themeDark, themeLight,
+  type DockviewApi, type DockviewReadyEvent, type IDockviewPanelProps,
+  type IDockviewPanelHeaderProps, type IDockviewHeaderActionsProps,
 } from "dockview-react";
-import { AnimatedIcon } from "./components/AnimatedIcon";
 import { useTranslation } from "react-i18next";
 import i18n from "./i18n";
+import { AnimatedIcon } from "./components/AnimatedIcon";
 import { CanvasContextMenu } from "./components/ui/ContextMenu";
 import { notify } from "./notifications";
-import {
-  VIEWS,
-  VIEW_GROUPS,
-  viewFromRoute,
-  viewLabel,
-  isCanvasView,
-  type CanvasView,
-} from "./views";
+import { VIEWS, viewLabel, viewFromRoute, isCanvasView, type CanvasView } from "./views";
 
-const LAYOUT_KEY = "canvas-dockview-layout-v1";
-type PaneContext = {
+const keyFor = (profileId: string) => `canvas-dockview-layout-v2-${profileId}`;
+let sequence = 0;
+type PaneContextValue = {
   render: (view: CanvasView) => ReactNode;
-  onNavigate: (route: string) => void;
-  resetLayout: () => void;
-  splitPanel: (view: CanvasView, groupId: string) => void;
+  navigate: (route: string) => void;
+  add: (view: CanvasView, groupId?: string) => void;
+  split: (view: CanvasView, panelId: string) => void;
+  reset: () => void;
+  pin: (view: CanvasView) => void;
+  pinned: CanvasView[];
+  showSettings: boolean;
 };
-const PaneContext = createContext<PaneContext | null>(null);
-const localizedTitle = (view: CanvasView) => i18n.t(viewLabel(view));
-const routeToView = viewFromRoute;
+const PaneContext = createContext<PaneContextValue | null>(null);
+
+function viewFromId(id: string): CanvasView {
+  const candidate = id.split(":")[1] ?? "";
+  return isCanvasView(candidate) ? candidate : "overview";
+}
+function title(view: CanvasView) { return i18n.t(viewLabel(view)); }
 
 function CanvasTab(props: IDockviewPanelHeaderProps) {
-  const workspace = useContext(PaneContext);
+  const shell = useContext(PaneContext);
   const { t } = useTranslation();
-  // Dockview tab header APIs may not expose the panel's initial parameters.
-  // Every Canvas panel has a canonical route/ tab/ split ID containing its view.
-  const name = props.api.id.split(":")[1] ?? "";
-  const view: CanvasView = isCanvasView(name) ? name : "overview";
+  const view = viewFromId(props.api.id);
+  const pinned = shell?.pinned.includes(view) ?? false;
   return (
-    <CanvasContextMenu
-      actions={[
-        {
-          icon: "split",
-          label: t("Split right"),
-          action: () => workspace?.splitPanel(view, props.api.id),
-        },
-        { icon: "close", label: t("Close tab"), action: () => props.api.close() },
-        { type: "separator" },
-        { icon: "reset", label: t("Reset layout"), action: () => workspace?.resetLayout() },
-      ]}
-    >
+    <CanvasContextMenu actions={[
+      { label: t(pinned ? "Unpin from activity bar" : "Pin to activity bar"), icon: "pin", action: () => shell?.pin(view) },
+      { label: t("Split right"), icon: "split", action: () => shell?.split(view, props.api.id) },
+      { label: t("Close tab"), icon: "close", action: () => props.api.close() },
+      { type: "separator" },
+      { label: t("Reset layout"), icon: "reset", action: () => shell?.reset() },
+    ]}>
       <div className="canvas-dock-tab" data-canvas-tab={view} data-animated-icon-trigger>
         <AnimatedIcon name={view} size={14} />
         <DockviewDefaultTab {...props} hideClose />
-        <button
-          type="button"
-          className="canvas-tab-close"
-          aria-label={t("Close tab")}
-          title={t("Close tab")}
-          onPointerDown={(event) => event.stopPropagation()}
-          onClick={(event) => {
-            event.stopPropagation();
-            props.api.close();
-          }}
-        >
+        <button type="button" className="canvas-tab-close" title={t("Close tab")}
+          aria-label={t("Close tab")} onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => { event.stopPropagation(); props.api.close(); }}>
           <AnimatedIcon name="close" size={14} />
         </button>
       </div>
     </CanvasContextMenu>
   );
 }
+function Panel({ params }: IDockviewPanelProps) {
+  const shell = useContext(PaneContext);
+  const requested = (params as { view?: string }).view ?? "overview";
+  const view = isCanvasView(requested) ? requested : "overview";
+  return <div className="dock-route-page" data-dock-view={view}>{shell?.render(view)}</div>;
+}
+const components = { page: Panel };
 const tabComponents = { canvas: CanvasTab };
 
-function DockedPage({ params }: IDockviewPanelProps) {
-  const context = useContext(PaneContext);
-  const candidate = (params as { view?: string }).view ?? "overview";
-  const view: CanvasView = isCanvasView(candidate) ? candidate : "overview";
+function TabPicker({ add, label }: { add: (view: CanvasView) => void; label: string }) {
+  const { t } = useTranslation();
   return (
-    <div className="dock-route-page" data-dock-view={view}>
-      {context?.render(view)}
-    </div>
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger asChild>
+        <button type="button" className="dock-add-trigger" aria-label={label} title={label}>
+          <AnimatedIcon name="plus" size={16} />
+        </button>
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content className="menu-content dock-add-menu" align="end" side="bottom" sideOffset={5} collisionPadding={10}>
+          <DropdownMenu.Label className="dock-add-group-label">{t("Available tabs")}</DropdownMenu.Label>
+          {VIEWS.map((item) => (
+            <DropdownMenu.Item key={item.id} className="menu-item dock-add-item" onSelect={() => add(item.id)}>
+              <AnimatedIcon name={item.id} size={16} /><span>{t(item.label)}</span>
+            </DropdownMenu.Item>
+          ))}
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
   );
 }
-const components = { page: DockedPage };
-
-function openRoute(api: DockviewApi, view: CanvasView) {
-  const existing =
-    api.getPanel(`route:${view}`) ??
-    api.panels.find((panel) => panel.api.getParameters().view === view);
-  if (existing) {
-    existing.api.setActive();
-    return;
-  }
-  api.addPanel({
-    id: `route:${view}`,
-    component: "page",
-    tabComponent: "canvas",
-    title: localizedTitle(view),
-    params: { view },
-  });
-}
-
-const TAB_GROUPS = VIEW_GROUPS.map((label) => ({
-  label,
-  views: VIEWS.filter((item) => item.group === label).map((item) => item.id),
-}));
-
-let tabSequence = 0;
-
-function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
-  const workspace = useContext(PaneContext);
+function HeaderActions({ containerApi, group }: IDockviewHeaderActionsProps) {
+  const shell = useContext(PaneContext);
   const { t } = useTranslation();
-
-  const addTab = (view: CanvasView) => {
-    // A new tab belongs to the group whose + was pressed, even when the same
-    // view is already open elsewhere. URL navigation is intentionally explicit.
-    const id = `tab:${view}:${Date.now().toString(36)}:${++tabSequence}`;
-    containerApi.addPanel({
-      id,
-      component: "page",
-      tabComponent: "canvas",
-      title: localizedTitle(view),
-      params: { view },
-      position: { referenceGroup: group.id },
-    });
-    workspace?.onNavigate(`/${view}`);
-    notify.success(t("Tab opened"));
-  };
-
-  const splitRight = () => {
-    const selected =
-      containerApi.panels.find((panel) => panel.group.id === group.id && panel.api.isVisible) ??
-      containerApi.panels.find((panel) => panel.group.id === group.id);
-    const candidate: unknown = selected?.api.getParameters().view;
-    const view: CanvasView =
-      typeof candidate === "string" && isCanvasView(candidate) ? candidate : "overview";
-    const id = `split:${view}:${Date.now().toString(36)}:${++tabSequence}`;
-    containerApi.addPanel({
-      id,
-      component: "page",
-      tabComponent: "canvas",
-      title: localizedTitle(view),
-      params: { view },
-      position: { referenceGroup: group.id, direction: "right" },
-    });
-    workspace?.onNavigate(`/${view}`);
-    notify.info(t("Panel split to the right"));
-  };
-
+  const active = containerApi.panels.find((p) => p.group.id === group.id && p.api.isVisible)
+    ?? containerApi.panels.find((p) => p.group.id === group.id);
+  const current = active ? viewFromId(active.id) : "overview";
   return (
-    <div
-      className="dock-header-actions"
-      data-dock-group={group.id}
-      onPointerDown={(event) => event.stopPropagation()}
-    >
+    <div className="dock-header-actions" onPointerDown={(event) => event.stopPropagation()}>
+      <TabPicker label={t("Add tab")} add={(view) => shell?.add(view, group.id)} />
+      {shell?.showSettings && <button className="dock-add-trigger" type="button"
+        aria-label={t("Settings")} title={t("Settings")} onClick={() => shell.navigate("/settings")}>
+        <AnimatedIcon name="settings" size={16} />
+      </button>}
       <DropdownMenu.Root>
         <DropdownMenu.Trigger asChild>
-          <button
-            type="button"
-            className="dock-add-trigger"
-            aria-label={t("Add tab")}
-            title={t("Add tab")}
-          >
-            <AnimatedIcon name="plus" size={15} />
-          </button>
-        </DropdownMenu.Trigger>
-        <DropdownMenu.Portal>
-          <DropdownMenu.Content
-            className="menu-content dock-add-menu"
-            align="end"
-            side="bottom"
-            sideOffset={5}
-            collisionPadding={10}
-            aria-label={t("Available tabs")}
-          >
-            {TAB_GROUPS.map((section, index) => (
-              <DropdownMenu.Group key={t(section.label)}>
-                {index > 0 && <DropdownMenu.Separator className="dock-add-separator" />}
-                <DropdownMenu.Label className="dock-add-group-label">
-                  {t(section.label)}
-                </DropdownMenu.Label>
-                {section.views.map((view) => (
-                  <DropdownMenu.Item
-                    key={view}
-                    className="menu-item dock-add-item"
-                    onSelect={() => addTab(view)}
-                  >
-                    <AnimatedIcon name={view} size={16} />
-                    <span>{t(viewLabel(view))}</span>
-                  </DropdownMenu.Item>
-                ))}
-              </DropdownMenu.Group>
-            ))}
-          </DropdownMenu.Content>
-        </DropdownMenu.Portal>
-      </DropdownMenu.Root>
-      <DropdownMenu.Root>
-        <DropdownMenu.Trigger asChild>
-          <button
-            type="button"
-            className="dock-more-trigger"
-            aria-label={t("More tab actions")}
-            title={t("More tab actions")}
-          >
+          <button className="dock-more-trigger" type="button" title={t("More tab actions")} aria-label={t("More tab actions")}>
             <AnimatedIcon name="more" size={17} />
           </button>
         </DropdownMenu.Trigger>
         <DropdownMenu.Portal>
-          <DropdownMenu.Content
-            className="menu-content dock-more-menu"
-            align="end"
-            side="bottom"
-            sideOffset={5}
-            collisionPadding={10}
-            aria-label={t("More tab actions")}
-          >
-            <DropdownMenu.Item className="menu-item dock-action-item" onSelect={splitRight}>
-              <AnimatedIcon name="split" size={16} />
-              <span>{t("Split right")}</span>
+          <DropdownMenu.Content className="menu-content dock-more-menu" align="end" sideOffset={5}>
+            <DropdownMenu.Item className="menu-item dock-action-item" onSelect={() => {
+              if (active) shell?.split(current, active.id);
+            }}>
+              <AnimatedIcon name="split" size={16} /><span>{t("Split right")}</span>
             </DropdownMenu.Item>
             <DropdownMenu.Separator className="dock-add-separator" />
-            <DropdownMenu.Item
-              className="menu-item dock-action-item"
-              onSelect={() => workspace?.resetLayout()}
-            >
-              <AnimatedIcon name="reset" size={16} />
-              <span>{t("Reset layout")}</span>
+            <DropdownMenu.Item className="menu-item dock-action-item" onSelect={() => shell?.reset()}>
+              <AnimatedIcon name="reset" size={16} /><span>{t("Reset layout")}</span>
             </DropdownMenu.Item>
           </DropdownMenu.Content>
         </DropdownMenu.Portal>
@@ -248,153 +128,160 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
   );
 }
 
-function saveLayout(api: DockviewApi) {
-  try {
-    localStorage.setItem(LAYOUT_KEY, JSON.stringify({ schema: 1, layout: api.toJSON() }));
-  } catch {
-    // Storage is optional in private browser sessions.
-  }
-}
-
 type Props = {
+  profileId: string;
   route: string;
   dark: boolean;
+  pinned: CanvasView[];
+  showSettings: boolean;
+  onPin: (view: CanvasView) => void;
   onNavigate: (route: string) => void;
-  renderView: (view: string) => ReactNode;
+  renderView: (view: CanvasView) => ReactNode;
 };
 
-export default function DockCanvas({ route, dark, onNavigate, renderView }: Props) {
+export default function DockCanvas({
+  profileId, route, dark, pinned, showSettings, onPin, onNavigate, renderView,
+}: Props) {
   const { t } = useTranslation();
   const apiRef = useRef<DockviewApi | null>(null);
   const disposables = useRef<Array<{ dispose: () => void }>>([]);
+  const [empty, setEmpty] = useState(true);
   const latest = useRef({ route, onNavigate });
   latest.current = { route, onNavigate };
-  const resetLayout = useCallback(() => {
+  const save = useCallback((api: DockviewApi) => {
+    try {
+      localStorage.setItem(keyFor(profileId), JSON.stringify({ schema: 2, layout: api.toJSON() }));
+    } catch { /* Storage may be disabled. */ }
+    setEmpty(api.panels.length === 0);
+  }, [profileId]);
+  const add = useCallback((view: CanvasView, groupId?: string) => {
     const api = apiRef.current;
     if (!api) return;
-    api.clear();
-    try {
-      localStorage.removeItem(LAYOUT_KEY);
-    } catch {
-      /* Browser storage is optional. */
-    }
-    openRoute(api, "overview");
-    latest.current.onNavigate("/overview");
-    notify.success(i18n.t("Layout reset"));
+    api.addPanel({
+      id: `tab:${view}:${++sequence}`,
+      component: "page", tabComponent: "canvas", title: title(view),
+      params: { view },
+      ...(groupId ? { position: { referenceGroup: groupId } } : {}),
+    });
+    latest.current.onNavigate(`/${view}`);
+    notify.info(i18n.t("Tab opened"));
   }, []);
-  const splitPanel = useCallback((view: CanvasView, panelId: string) => {
-    const api = apiRef.current;
-    const panel = api?.getPanel(panelId);
+  const split = useCallback((view: CanvasView, panelId: string) => {
+    const api = apiRef.current, panel = api?.getPanel(panelId);
     if (!api || !panel) return;
     api.addPanel({
-      id: `split:${view}:${Date.now().toString(36)}:${++tabSequence}`,
-      component: "page",
-      tabComponent: "canvas",
-      title: localizedTitle(view),
-      params: { view },
-      position: { referenceGroup: panel.group.id, direction: "right" },
+      id: `split:${view}:${++sequence}`,
+      component: "page", tabComponent: "canvas", title: title(view),
+      params: { view }, position: { referenceGroup: panel.group.id, direction: "right" },
     });
     latest.current.onNavigate(`/${view}`);
     notify.info(i18n.t("Panel split to the right"));
   }, []);
-  const panelContext = useMemo(
-    () => ({ render: renderView, onNavigate, resetLayout, splitPanel }),
-    [renderView, onNavigate, resetLayout, splitPanel],
-  );
+  const reset = useCallback(() => {
+    const api = apiRef.current;
+    if (!api) return;
+    api.clear();
+    save(api);
+    latest.current.onNavigate("/");
+    notify.success(i18n.t("Layout reset"));
+  }, [save]);
+  const shell = useMemo(() => ({
+    render: renderView, navigate: onNavigate, add, split, reset,
+    pin: onPin, pinned, showSettings,
+  }), [renderView, onNavigate, add, split, reset, onPin, pinned, showSettings]);
 
   useEffect(() => {
     const api = apiRef.current;
-    if (api) openRoute(api, routeToView(route));
+    const view = viewFromRoute(route);
+    if (!api || !view) return;
+    const existing = api.panels.find((panel) => panel.api.getParameters().view === view);
+    if (existing) { existing.api.setActive(); return; }
+    api.addPanel({ id: `route:${view}:${++sequence}`, component: "page", tabComponent: "canvas",
+      title: title(view), params: { view } });
   }, [route]);
-
   useEffect(() => {
     const api = apiRef.current;
     if (!api) return;
     for (const panel of api.panels) {
-      const candidate: unknown = panel.api.getParameters().view;
-      if (typeof candidate === "string" && isCanvasView(candidate)) {
-        panel.api.setTitle(t(viewLabel(candidate)));
-      }
+      const view = panel.api.getParameters().view;
+      if (typeof view === "string" && isCanvasView(view)) panel.api.setTitle(t(viewLabel(view)));
     }
   }, [t]);
-
-  useEffect(
-    () => () => {
-      for (const listener of disposables.current) listener.dispose();
-      disposables.current = [];
-      apiRef.current = null;
-    },
-    [],
-  );
+  useEffect(() => () => {
+    for (const listener of disposables.current) listener.dispose();
+    disposables.current = [];
+    apiRef.current = null;
+  }, []);
 
   const onReady = ({ api }: DockviewReadyEvent) => {
     apiRef.current = api;
-    let restored = false;
     try {
-      const raw = localStorage.getItem(LAYOUT_KEY);
+      const raw = localStorage.getItem(keyFor(profileId)) ??
+        (profileId === "global" ? localStorage.getItem("canvas-dockview-layout-v1") : null);
       if (raw) {
         const state: unknown = JSON.parse(raw);
-        if (
-          state &&
-          typeof state === "object" &&
-          "schema" in state &&
-          state.schema === 1 &&
-          "layout" in state
-        ) {
+        if (state && typeof state === "object" && "layout" in state)
           api.fromJSON(state.layout as Parameters<DockviewApi["fromJSON"]>[0]);
-          restored = api.panels.length > 0;
-        }
       }
     } catch {
-      try {
-        localStorage.removeItem(LAYOUT_KEY);
-      } catch {
-        /* unavailable */
-      }
+      try { localStorage.removeItem(keyFor(profileId)); } catch { /* no-op */ }
     }
-
-    disposables.current.forEach((listener) => {
-      listener.dispose();
-    });
+    for (const listener of disposables.current) listener.dispose();
     disposables.current = [
       api.onDidActivePanelChange(({ panel, origin }) => {
-        if (origin !== "user" || !panel) return;
-        const name: unknown = panel.api.getParameters().view;
-        if (typeof name !== "string" || !isCanvasView(name)) return;
-        if (routeToView(latest.current.route) !== name) {
-          latest.current.onNavigate(`/${name}`);
-        }
+        if (origin !== "user") return;
+        if (!panel && api.panels.length === 0) latest.current.onNavigate("/");
+        const view: unknown = panel?.api.getParameters().view;
+        if (typeof view === "string" && isCanvasView(view) && viewFromRoute(latest.current.route) !== view)
+          latest.current.onNavigate(`/${view}`);
       }),
       api.onDidLayoutChange(() => {
-        saveLayout(api);
+        save(api);
+        if (api.panels.length === 0 && latest.current.route !== "/") latest.current.onNavigate("/");
       }),
     ];
-
-    if (!restored) {
-      api.addPanel({
-        id: "route:overview",
-        component: "page",
-        tabComponent: "canvas",
-        title: localizedTitle("overview"),
-        params: { view: "overview" },
-      });
+    const view = viewFromRoute(latest.current.route);
+    if (view && !api.panels.some((panel) => panel.api.getParameters().view === view)) {
+      api.addPanel({ id: `route:${view}:${++sequence}`, component: "page",
+        tabComponent: "canvas", title: title(view), params: { view } });
     }
-    openRoute(api, routeToView(latest.current.route));
-    saveLayout(api);
+    save(api);
   };
 
   return (
-    <PaneContext.Provider value={panelContext}>
+    <PaneContext.Provider value={shell}>
       <div className="dock-workspace" data-testid="dockview-workspace">
-        <section className="dock-grid" aria-label="Dockview panels">
-          <DockviewReact
-            theme={dark ? themeDark : themeLight}
-            components={components}
-            tabComponents={tabComponents}
+        <section className={`dock-grid ${empty ? "dock-grid-empty" : ""}`} aria-label="Dockview panels">
+          <DockviewReact theme={dark ? themeDark : themeLight}
+            components={components} tabComponents={tabComponents}
             defaultTabComponent={CanvasTab}
-            rightHeaderActionsComponent={AddTabHeader}
-            onReady={onReady}
-          />
+            rightHeaderActionsComponent={HeaderActions} onReady={onReady} />
+          {empty && (
+            <div className="dock-empty-shell" data-testid="empty-workspace">
+              <div className="dock-empty-tabbar">
+                <span>{t("No open tabs")}</span>
+                <TabPicker label={t("Add tab")} add={add} />
+                {showSettings && <button type="button" className="dock-add-trigger"
+                  onClick={() => onNavigate("/settings")} aria-label={t("Settings")}>
+                  <AnimatedIcon name="settings" size={16} />
+                </button>}
+              </div>
+              <div className="dock-welcome">
+                <p className="eyebrow">{t("Your workspace")}</p>
+                <h1>{t("Start with a tab")}</h1>
+                <p className="muted">{t("Select an editor or a repository view to begin.")}</p>
+                <div className="dock-welcome-options">
+                  {VIEWS.map((item) => (
+                    <button type="button" key={item.id} onClick={() => add(item.id)}>
+                      <AnimatedIcon name={item.id} size={19} />
+                      <span>{t(item.label)}</span>
+                      <AnimatedIcon name="right" size={14} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </section>
       </div>
     </PaneContext.Provider>
