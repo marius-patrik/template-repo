@@ -849,7 +849,7 @@
     padding: 0;
     min-height: 27px;
   }
-  .cx-repository .cx-viewbar-modes button span {
+  .cx-repository .cx-viewbar-modes button span:not(.app-icon) {
     display: none;
   }
   .cx-repository .cx-viewbar-title strong {

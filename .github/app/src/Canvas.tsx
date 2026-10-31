@@ -238,27 +238,33 @@ export default function Canvas() {
   const graph = useMemo(() => {
     // Keep graph legible: show a focused, source-backed subgraph rather than
     // shrinking the entire repository into an unreadable vertical hairline.
-    const members = allPaths.filter((path) => categoryOf(path) === graphGroup);
+    const seeds = allPaths.filter((path) => categoryOf(path) === graphGroup).slice(0, 7);
+    const seedSet = new Set(seeds);
+    const nearby = edgesOfDocuments
+      .filter(([from, to]) => seedSet.has(from) || seedSet.has(to))
+      .flatMap(([from, to]) => [from, to])
+      .filter((path) => !seedSet.has(path));
+    const members = [...seeds, ...new Set(nearby)].slice(0, 9);
     const included = new Set(members);
     const layout = new dagre.graphlib.Graph();
-    layout.setGraph({ rankdir: "TB", ranksep: 74, nodesep: 32, marginx: 42, marginy: 42 });
+    layout.setGraph({ rankdir: "LR", ranksep: 80, nodesep: 24, marginx: 44, marginy: 44 });
     layout.setDefaultEdgeLabel(() => ({}));
-    for (const path of members) layout.setNode(path, { width: 220, height: 58 });
+    for (const path of members) layout.setNode(path, { width: 190, height: 54 });
     const relationships = edgesOfDocuments.filter(
       ([from, to]) => included.has(from) && included.has(to),
     );
     for (const [from, to] of relationships) layout.setEdge(from, to);
     if (members.length) dagre.layout(layout);
     const nodes: Node[] = members.map((path) => {
-      const point = layout.node(path) ?? { x: 110, y: 29 };
+      const point = layout.node(path) ?? { x: 95, y: 27 };
       return {
         id: path,
-        position: { x: point.x - 110, y: point.y - 29 },
+        position: { x: point.x - 95, y: point.y - 27 },
         data: { label: basename(path) },
         className: "cx-flow-node",
         style: {
-          width: 220,
-          height: 58,
+          width: 190,
+          height: 54,
           background: "var(--raised)",
           border: "1px solid var(--border)",
           color: "var(--text)",
