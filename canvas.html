@@ -1663,7 +1663,7 @@ The existing `.agents/tools/canvas.py` CLI is retained temporarily as the histor
 source inspector/exporter while CI validates the React replacement. Both are derived
 views; tracked authoring records remain authoritative.
 </pre></section>
-<section class="file" id="file-0056"><h3>.github/app/biome.json</h3><p class="meta">Git mode 100644 · c1c35d9b1ddc814c552c5c91f758119229814a36</p><pre>{
+<section class="file" id="file-0056"><h3>.github/app/biome.json</h3><p class="meta">Git mode 100644 · 65aebffa97d26fcd71f0354c1a81b7c57fd3ceb8</p><pre>{
   &quot;$schema&quot;: &quot;https://biomejs.dev/schemas/2.3.0/schema.json&quot;,
   &quot;formatter&quot;: {
     &quot;indentStyle&quot;: &quot;space&quot;,
@@ -1685,6 +1685,11 @@ views; tracked authoring records remain authoritative.
       &quot;source&quot;: {
         &quot;organizeImports&quot;: &quot;off&quot;
       }
+    }
+  },
+  &quot;css&quot;: {
+    &quot;parser&quot;: {
+      &quot;tailwindDirectives&quot;: true
     }
   }
 }
