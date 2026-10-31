@@ -339,7 +339,15 @@ export default function DockCanvas({
       }
     }
     // Normalize older saved panels while retaining active editor, notes, library and split groups.
-    const legacyRepositoryViews = new Set(["overview", "projects", "agents", "graph", "roadmap", "artifacts", "context"]);
+    const legacyRepositoryViews = new Set([
+      "overview",
+      "projects",
+      "agents",
+      "graph",
+      "roadmap",
+      "artifacts",
+      "context",
+    ]);
     let migrateCanvas = false;
     let migrateEditor = false;
     for (const panel of [...api.panels]) {
@@ -354,9 +362,11 @@ export default function DockCanvas({
         panel.api.close();
       }
     }
-    for (const view of (["canvas", "editor"] as const)) {
-      if ((view === "canvas" ? migrateCanvas : migrateEditor) &&
-          !api.panels.some((panel) => panel.api.getParameters().view === view)) {
+    for (const view of ["canvas", "editor"] as const) {
+      if (
+        (view === "canvas" ? migrateCanvas : migrateEditor) &&
+        !api.panels.some((panel) => panel.api.getParameters().view === view)
+      ) {
         api.addPanel({
           id: `migrated:${view}:${++sequence}`,
           component: "page",

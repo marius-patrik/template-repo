@@ -347,11 +347,7 @@ export function SidebarContents({
   const prefs = useCanvasConfig((state) => state.preferences);
   if (prefs.navigationPosition === "sidebar")
     return <NavigationTree current={current} onNavigate={onNavigate} />;
-  if (
-    !current ||
-    !["library", "editor"].includes(current)
-  )
-    return null;
+  if (!current || !["library", "editor"].includes(current)) return null;
   return (
     <div className="sidebar-source-list">
       <label className="sidebar-panel-heading" htmlFor="sidebar-source-filter">

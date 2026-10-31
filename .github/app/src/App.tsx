@@ -65,8 +65,12 @@ export default function App() {
   useEffect(() => {
     const old = path.split("?")[0].replace(/^\//, "");
     if (old === "monaco") navigate("/editor", { replace: true });
-    else if (["overview", "projects", "agents", "graph", "roadmap", "artifacts", "context"].includes(old))
-      navigate("/canvas" + (path.includes("?") ? "?" + path.split("?").slice(1).join("?") : ""), { replace: true });
+    else if (
+      ["overview", "projects", "agents", "graph", "roadmap", "artifacts", "context"].includes(old)
+    )
+      navigate("/canvas" + (path.includes("?") ? "?" + path.split("?").slice(1).join("?") : ""), {
+        replace: true,
+      });
     else if (old === "activity" || old === "workspace") navigate("/", { replace: true });
   }, [path, navigate]);
 
