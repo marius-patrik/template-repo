@@ -153,7 +153,9 @@ function SimplePage({ id, to }: { id: View; to: (p: string) => void }) {
             <p className="eyebrow">{t("Layout")}</p>
             <h2>{t("Arrange your workspace")}</h2>
             <p className="muted">
-              {t("Drag tabs to create groups, split panels, or float windows. Your arrangement is saved locally in this browser.")}
+              {t(
+                "Drag tabs to create groups, split panels, or float windows. Your arrangement is saved locally in this browser.",
+              )}
             </p>
             <Button variant="subtle" onClick={() => to("/graph")}>
               {t("Open graph")} <AnimatedIcon name="right" size={15} />
@@ -247,7 +249,9 @@ function SimplePage({ id, to }: { id: View; to: (p: string) => void }) {
             <MarkdownSource value={ctx.content} />
           ) : (
             <p className="muted">
-              {t("The template currently generates .agents/AGENTS.md from its agent rules. A separate root context file has not been assumed or fabricated.")}
+              {t(
+                "The template currently generates .agents/AGENTS.md from its agent rules. A separate root context file has not been assumed or fabricated.",
+              )}
             </p>
           )}
           <h3>{t("Available source documents")}</h3>
@@ -268,7 +272,9 @@ function SimplePage({ id, to }: { id: View; to: (p: string) => void }) {
             {t("Source revision")} {context.revision}
           </h2>
           <p className="muted">
-            {t("Built from tracked repository documents. No agent activity or task completion is inferred.")}
+            {t(
+              "Built from tracked repository documents. No agent activity or task completion is inferred.",
+            )}
           </p>
         </div>
       </div>

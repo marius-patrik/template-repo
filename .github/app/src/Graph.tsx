@@ -76,7 +76,15 @@ export default function Graph() {
         onNodeClick={(_, node) => setSelected(node.id)}
         nodesConnectable={false}
         nodesDraggable={false}
-        colorMode={theme === "light" ? "light" : theme === "dark" ? "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"}
+        colorMode={
+          theme === "light"
+            ? "light"
+            : theme === "dark"
+              ? "dark"
+              : window.matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light"
+        }
         proOptions={{ hideAttribution: true }}
       >
         <Background color="var(--border)" gap={22} size={1} />
