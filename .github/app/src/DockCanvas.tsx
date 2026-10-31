@@ -37,6 +37,7 @@ type PaneContextValue = {
   split: (view: CanvasView, panelId: string) => void;
   reset: () => void;
   newTab: () => void;
+  close: (panelId: string) => void;
   choose: (view: CanvasView, panelId: string) => void;
   pin: (view: CanvasView) => void;
   pinned: CanvasView[];
@@ -75,7 +76,7 @@ function CanvasTab(props: IDockviewPanelHeaderProps) {
               },
             ]
           : []),
-        { label: t("Close tab"), icon: "close", action: () => props.api.close() },
+        { label: t("Close tab"), icon: "close", action: () => shell?.close(props.api.id) },
         { type: "separator" },
         { label: t("Reset layout"), icon: "reset", action: () => shell?.reset() },
       ]}
@@ -95,7 +96,7 @@ function CanvasTab(props: IDockviewPanelHeaderProps) {
           onPointerDown={(event) => event.stopPropagation()}
           onClick={(event) => {
             event.stopPropagation();
-            props.api.close();
+            shell?.close(props.api.id);
           }}
         >
           <AnimatedIcon name="close" size={14} />
@@ -321,15 +322,20 @@ export default function DockCanvas({
     latest.current.onNavigate(`/${view}`);
     notify.info(i18n.t("Tab opened"));
   }, []);
-  const closeActive = useCallback(() => {
+  const closePanel = useCallback((panelId: string) => {
     const api = apiRef.current;
-    if (!api) return;
-    const active = api.activePanel;
-    if (!active) return;
-    active.api.close();
+    const panel = api?.getPanel(panelId);
+    if (!api || !panel) return;
+    panel.api.close();
     const next = api.activePanel?.api.getParameters().view;
+    // Update route synchronously with the close so a pending route effect cannot
+    // recreate the just-closed pane (particularly when replacing the new-tab picker).
     latest.current.onNavigate(typeof next === "string" && isCanvasView(next) ? `/${next}` : "/");
   }, []);
+  const closeActive = useCallback(() => {
+    const active = apiRef.current?.activePanel;
+    if (active) closePanel(active.id);
+  }, [closePanel]);
   useHotkey(hotkeys["canvas.tab.new"], newTab, { ignoreInputs: true });
   useHotkey(hotkeys["canvas.tab.close"], closeActive, { ignoreInputs: true });
   useEffect(() => {
@@ -352,12 +358,13 @@ export default function DockCanvas({
       split,
       reset,
       newTab,
+      close: closePanel,
       choose,
       pin: onPin,
       pinned,
       showSettings,
     }),
-    [renderView, onNavigate, add, split, reset, newTab, choose, onPin, pinned, showSettings],
+    [renderView, onNavigate, add, split, reset, newTab, closePanel, choose, onPin, pinned, showSettings],
   );
 
   useEffect(() => {
