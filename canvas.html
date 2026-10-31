@@ -6353,7 +6353,7 @@ if __name__ == &quot;__main__&quot;:
         print(f&quot;error: {error}&quot;, file=sys.stderr)
         sys.exit(1)
 </pre></section>
-<section class="file" id="file-0081"><h3>.github/tests/smoke_canvas.mjs</h3><p class="meta">Git mode 100644 · 60ee2d5d8ba76bc6ad9d653d49e40cd14757863b</p><pre>import { createRequire } from &quot;node:module&quot;;
+<section class="file" id="file-0081"><h3>.github/tests/smoke_canvas.mjs</h3><p class="meta">Git mode 100644 · 667c1bafe9a809d30d7d4ff929a82f6827360214</p><pre>import { createRequire } from &quot;node:module&quot;;
 import { resolve } from &quot;node:path&quot;;
 import { pathToFileURL } from &quot;node:url&quot;;
 
@@ -6429,7 +6429,7 @@ try {
   await page.locator(&quot;.sidebar:not(.collapsed)&quot;).waitFor();
 
   await page.getByRole(&quot;button&quot;, { name: &quot;Open navigation tree&quot; }).click();
-  await page.getByRole(&quot;dialog&quot;, { name: &quot;Omnibar navigation tree&quot; }).waitFor();
+  await page.getByRole(&quot;dialog&quot;, { name: &quot;Open navigation tree&quot; }).waitFor();
   await page.keyboard.press(&quot;Escape&quot;);
   await page.locator(&quot;.palette-cover&quot;).waitFor({ state: &quot;hidden&quot; });
 
