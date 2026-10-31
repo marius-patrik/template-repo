@@ -242,8 +242,8 @@ export const defaults: CanvasPreferences = {
   uiScale: "normal",
   ...SCALES.normal,
   sidebarWidth: 228,
-  titleBarHeight: 24,
-  statusBarHeight: 24,
+  titleBarHeight: 32,
+  statusBarHeight: 32,
   sidebarPosition: "left",
   activityBarPosition: "left",
   activityBarDensity: "comfortable",
@@ -338,7 +338,7 @@ export const useCanvasConfig = create<ConfigState>()(
     }),
     {
       name: "canvas-config",
-      version: 6,
+      version: 7,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ preferences: state.preferences }),
       migrate: (saved, previousVersion) => {
@@ -347,6 +347,12 @@ export const useCanvasConfig = create<ConfigState>()(
         const old = record.preferences;
         if (!old) return saved;
         const preferences = { ...old };
+        // Bring previous untouched chrome dimensions to the unified v2 scale.
+        if (previousVersion < 7 &&
+          preferences.titleBarHeight === 24 && preferences.statusBarHeight === 24) {
+          preferences.titleBarHeight = 32;
+          preferences.statusBarHeight = 32;
+        }
         // Existing default installations used titlebar navigation; move that
         // placement to the new default while retaining all other placements.
         if (previousVersion < 6 && preferences.navigationPosition === "titlebar")
