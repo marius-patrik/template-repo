@@ -129,17 +129,37 @@ function Panel({ params, api }: IDockviewPanelProps) {
 
 function WelcomeView({ onChoose }: { onChoose: (view: CanvasView) => void }) {
   const { t } = useTranslation();
+  const descriptions: Record<CanvasView, string> = {
+    canvas: "Explore repository relationships and source-backed context",
+    editor: "Read and edit local drafts with the Monaco editor",
+    library: "Browse the repository's available source documents",
+    settings: "Personalize the interface, controls, and workspaces",
+  };
   return (
-    <div className="dock-welcome" data-testid="new-tab-welcome">
-      <p className="eyebrow">{t("Your workspace")}</p>
-      <h1>{t("Start with a tab")}</h1>
-      <p className="muted">{t("Select an editor or a repository view to begin.")}</p>
-      <div className="dock-welcome-options">
-        {VIEWS.map((item) => (
+    <div className="dock-welcome cx-welcome" data-testid="new-tab-welcome">
+      <div className="cx-welcome-intro">
+        <span className="cx-section-caption">CANVAS / WORKSPACE</span>
+        <h1>{t("Start with a tab")}</h1>
+        <p className="muted">{t("Select an editor or a repository view to begin.")}</p>
+        <div className="cx-welcome-provenance">
+          <span className="cx-live-dot" aria-hidden="true" />
+          {t("Repository snapshot · read-only")}
+        </div>
+      </div>
+      <div className="dock-welcome-options cx-welcome-choices">
+        <div className="cx-welcome-options-head">
+          <span className="cx-section-caption">AVAILABLE TOOLS</span>
+          <span>0{VIEWS.length}</span>
+        </div>
+        {VIEWS.map((item, index) => (
           <button type="button" key={item.id} onClick={() => onChoose(item.id)}>
-            <AnimatedIcon name={item.id} size={19} />
-            <span>{t(item.label)}</span>
-            <AnimatedIcon name="right" size={14} />
+            <span className="cx-welcome-option-index">0{index + 1}</span>
+            <span className="cx-welcome-option-icon"><AnimatedIcon name={item.id} size={20} /></span>
+            <span className="cx-welcome-option-copy">
+              <strong>{t(item.label)}</strong>
+              <small>{t(descriptions[item.id])}</small>
+            </span>
+            <AnimatedIcon name="right" size={17} />
           </button>
         ))}
       </div>

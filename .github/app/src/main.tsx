@@ -14,6 +14,7 @@ import "dockview-react/dist/styles/dockview.css";
 import "./canvas-content.css";
 import "./interface.css";
 import "./preferences-content.css";
+import "./welcome-content.css";
 
 const root = document.getElementById("root");
 if (!root) throw new Error("Canvas root is missing");
