@@ -29,7 +29,7 @@ available editor/view. Deleting a profile removes its saved workspace layout.
 Tabs are not divided into artificial Workspace/System categories. The native
 Dockview strip supports tab icons, closing, drag-and-drop, splitting, context
 menus and a full editor picker. Monaco is a bundled local editor with bundled
-inline workers; unsaved draft text never writes Git data. Library is an
+inline workers; draft text is browser-local per profile and never writes Git data. Library is an
 embedded, source-backed document browser. Notepad is a profile-local blank
 editor.
 
@@ -49,7 +49,7 @@ allow repositioning without opening Settings. The activity bar contains default
 view shortcuts, the Notepad/Library editors and profile-scoped pinned tabs.
 The sidebar contains a navigation tree only when navigation is placed there;
 otherwise its contents reflect source-aware editors. The primary sidebar
-resizes with pointer or keyboard, and the width is directly editable in Settings.
+resizes using pointer-delta tracking or keyboard input, and its live width is directly editable in Settings.
 Collapsed state does not discard expanded width.
 
 ### Unified appearance
