@@ -262,7 +262,7 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
   };
   const panelContext = useMemo(
     () => ({ render: renderView, onNavigate, resetLayout }),
-    [renderView, onNavigate],
+    [renderView, onNavigate, resetLayout],
   );
 
   useEffect(() => {
