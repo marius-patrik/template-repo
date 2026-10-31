@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ComponentType, type Ref } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, type ComponentType, type Ref } from "react";
 import { useCanvasConfig } from "../config";
 import {
   LayoutGridIcon,
@@ -8,8 +8,6 @@ import {
   GitForkIcon,
   FileTextIcon,
   FilePenLineIcon,
-  BookTextIcon,
-  LibraryBigIcon,
   UserRoundCogIcon,
   BookmarkIcon,
   SquarePenIcon,
@@ -35,6 +33,30 @@ import {
 } from "lucide-animated";
 
 type IconHandle = { startAnimation: () => void; stopAnimation: () => void };
+/** A small shelf of books, consistent with the line icons without relying on an absent package export. */
+const BookshelfIcon = forwardRef<IconHandle, { size?: number }>(function BookshelfIcon(
+  { size = 18 },
+  ref,
+) {
+  const node = useRef<SVGSVGElement>(null);
+  useImperativeHandle(ref, () => ({
+    startAnimation: () => {
+      node.current?.animate(
+        [{ transform: "translateY(0)" }, { transform: "translateY(-1px)" }, { transform: "translateY(0)" }],
+        { duration: 240, easing: "ease-out" },
+      );
+    },
+    stopAnimation: () => node.current?.getAnimations().forEach((animation) => animation.cancel()),
+  }));
+  return (
+    <svg ref={node} width={size} height={size} viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
+      aria-hidden="true">
+      <rect x="3.5" y="4.5" width="4" height="15" rx="1" />
+      <path d="M11 5v14M14.5 5v14M17 6l3.5 13M2.5 20h19" />
+    </svg>
+  );
+});
 type IconProps = { size?: number; animateOnHover?: boolean; ref?: Ref<IconHandle> };
 const registry = {
   overview: LayoutGridIcon,
@@ -48,7 +70,7 @@ const registry = {
   artifacts: FileTextIcon,
   activity: HistoryIcon,
   context: FileTextIcon,
-  library: LibraryBigIcon,
+  library: BookshelfIcon,
   notepad: FilePenLineIcon,
   profile: UserRoundCogIcon,
   edit: SquarePenIcon,
