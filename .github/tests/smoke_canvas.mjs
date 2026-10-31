@@ -52,6 +52,7 @@ try {
   await page.getByRole("button", { name: "Open navigation tree" }).click();
   await page.getByRole("dialog", { name: "Omnibar navigation tree" }).waitFor();
   await page.keyboard.press("Escape");
+  await page.locator(".palette-cover").waitFor({ state: "hidden" });
 
   await page.getByRole("button", { name: "Settings", exact: true }).first().click();
   await page.getByRole("heading", { name: "Settings", exact: true }).waitFor();

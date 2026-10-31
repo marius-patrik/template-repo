@@ -421,6 +421,17 @@ export default function App() {
   useEffect(() => {
     if (paletteOpen) requestAnimationFrame(() => input.current?.focus());
   }, [paletteOpen]);
+  useEffect(() => {
+    if (!paletteOpen) return;
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setPaletteOpen(false);
+      }
+    };
+    window.addEventListener("keydown", onEscape, true);
+    return () => window.removeEventListener("keydown", onEscape, true);
+  }, [paletteOpen]);
   const go = (dest: string) => {
     navigate(dest);
     setMobileOpen(false);
