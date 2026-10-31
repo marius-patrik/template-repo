@@ -1847,7 +1847,7 @@ console.log(
   &quot;source records&quot;,
 );
 </pre></section>
-<section class="file" id="file-0063"><h3>.github/app/src/App.tsx</h3><p class="meta">Git mode 100644 · 0ca1bb4e7835f5c6255aca45f31050c2603ffabb</p><pre>import { useEffect, useMemo, useRef, useState } from &quot;react&quot;;
+<section class="file" id="file-0063"><h3>.github/app/src/App.tsx</h3><p class="meta">Git mode 100644 · 7c9a11154ce7e2ad7a4e11e22074e75dfd0246eb</p><pre>import { useEffect, useMemo, useRef, useState } from &quot;react&quot;;
 import * as DropdownMenu from &quot;@radix-ui/react-dropdown-menu&quot;;
 import { Link, Route, Switch, useLocation } from &quot;wouter&quot;;
 import { motion, AnimatePresence } from &quot;motion/react&quot;;
@@ -2216,9 +2216,6 @@ export default function App() {
     [search],
   );
   useEffect(() =&gt; {
-    setSelection(0);
-  }, [search]);
-  useEffect(() =&gt; {
     const onKey = (e: KeyboardEvent) =&gt; {
       if ((e.ctrlKey || e.metaKey) &amp;&amp; e.key.toLowerCase() === &quot;k&quot;) {
         e.preventDefault();
@@ -2429,7 +2426,7 @@ export default function App() {
                   value={search}
                   aria-label=&quot;Search routes&quot;
                   placeholder=&quot;Search pages and commands&quot;
-                  onChange={(e) =&gt; setSearch(e.target.value)}
+                  onChange={(e) =&gt; {setSearch(e.target.value);setSelection(0);}}
                   onKeyDown={(e) =&gt; {
                     if (e.key === &quot;ArrowDown&quot;) {
                       e.preventDefault();
