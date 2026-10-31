@@ -354,7 +354,7 @@ kbd {
   padding: calc(var(--ui-spacing) * 0.75);
   border-radius: calc(var(--ui-radius) * 1);
   z-index: 80;
-  box-shadow: 0 16px 55px #0005;
+  box-shadow: 0 16px 55px color-mix(in srgb, var(--shadow) 33%, transparent);
   min-width: 165px;
 }
 .menu-item {
@@ -514,7 +514,7 @@ kbd {
     calc(var(--ui-spacing) * 1.625) calc(var(--ui-spacing) * 2);
   display: grid;
   gap: calc(var(--ui-spacing) * 0.625);
-  box-shadow: 0 8px 30px #0004;
+  box-shadow: 0 8px 30px color-mix(in srgb, var(--shadow) 27%, transparent);
   font-size: calc(var(--app-font-size) * 0.8571);
 }
 .graph-selected span {
@@ -787,7 +787,7 @@ kbd {
 .palette-cover {
   position: fixed;
   inset: 0;
-  background: #0007;
+  background: color-mix(in srgb, var(--shadow) 47%, transparent);
   z-index: 100;
   display: flex;
   align-items: flex-start;
@@ -801,7 +801,7 @@ kbd {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: calc(var(--ui-radius) * 1.5);
-  box-shadow: 0 28px 90px #0009;
+  box-shadow: 0 28px 90px color-mix(in srgb, var(--shadow) 60%, transparent);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -918,7 +918,7 @@ kbd {
     width: min(280px, 85vw) !important;
     flex-basis: auto !important;
     transform: translateX(-110%);
-    box-shadow: 6px 0 30px #0004;
+    box-shadow: 6px 0 30px color-mix(in srgb, var(--shadow) 27%, transparent);
     transition: transform 0.19s ease;
   }
   .sidebar.mobile-open {
@@ -939,7 +939,7 @@ kbd {
     position: absolute;
     inset: 0;
     z-index: 9;
-    background: #0007;
+    background: color-mix(in srgb, var(--shadow) 47%, transparent);
     border: 0;
   }
   .main-column {
@@ -1105,8 +1105,8 @@ kbd {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #111;
-  box-shadow: 0 0 0 1px #fff8;
+  background: var(--surface);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--text) 53%, transparent);
 }
 .accent-custom-trigger {
   min-height: 34px;
@@ -1128,14 +1128,14 @@ kbd {
   height: 17px;
   flex: none;
   border-radius: calc(var(--ui-radius) * 0.625);
-  border: 1px solid #7775;
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
 }
 .accent-popover {
   background: var(--surface);
   border: 1px solid var(--border);
   color: var(--text);
   border-radius: calc(var(--ui-radius) * 1.25);
-  box-shadow: 0 20px 50px #0006;
+  box-shadow: 0 20px 50px color-mix(in srgb, var(--shadow) 40%, transparent);
   z-index: 150;
   padding: calc(var(--ui-spacing) * 2);
   width: min(275px, calc(100vw - 24px));
@@ -1271,7 +1271,7 @@ kbd {
   padding: calc(var(--ui-spacing) * 0.625) calc(var(--ui-spacing) * 1);
 }
 .keybind-error {
-  color: #eb8f85;
+  color: var(--danger);
   font-size: calc(var(--app-font-size) * 0.7857);
   line-height: 1.4;
 }
@@ -2003,7 +2003,7 @@ body.resizing-sidebar .sidebar {
   background: var(--surface);
   border: 1px solid var(--border);
   color: var(--text);
-  box-shadow: 0 14px 45px #0005;
+  box-shadow: 0 14px 45px color-mix(in srgb, var(--shadow) 33%, transparent);
   font: inherit;
   border-radius: calc(var(--ui-radius) * 1);
 }

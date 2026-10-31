@@ -1,155 +1,101 @@
-# Canvas Web — repository application
+# Canvas — React workspace prototype
 
-The first-class Canvas UI is authored in `.github/app`. A deterministic build step reads
-only allowlisted, Git-tracked repository documents and generates `src/generated/context.json`;
-this derived file is not edited manually. GitHub Actions compile a single React application into
-`.canvas-dist/index.html`, the repository's only published GitHub Pages entrypoint. No browser fetch, backend, credential, or independent authoritative
-project state is required.
+Canvas is one React/TypeScript application in `.github/app`. Its GitHub Pages output
+is the **single, self-contained** `.canvas-dist/index.html` (with
+`.canvas-dist/canvas.html` compatibility copy). No legacy Python Canvas renderer,
+root `canvas.html`, or DarkFactory submodule is part of this application.
 
-Stack: Bun, TypeScript, React, Rsbuild, Wouter (hash routes), Tailwind CSS v4, shadcn-style
-Radix primitives, Motion, lucide-animated, React Flow + Dagre, and Dockview.
+## Authoritative data versus browser state
 
-Local commands from `.github/app`:
+The build embeds a deterministic, allowlisted snapshot from Git-tracked Markdown
+and repository metadata in `src/generated/context.json`. Repository records
+are authoritative. The web application does not run agents, mutate repository
+files, invent telemetry, or expose arbitrary files. Published Pages are public;
+review the build's allowlist before expanding data access.
+
+Profiles, tab layouts, navigation choices, UI scale and scratch drafts live
+**only in the current browser** (versioned local storage). This is not a
+cross-device synchronization service.
+
+## Profile-first workspace
+
+The first navigation step selects a **profile**. Defaults are Global, Study,
+Health, Code, Design and Finance. Users can create, rename, delete and switch
+profiles. Each profile has its own independent Dockview arrangement, selected
+view, pinned activity-bar editors, notes and Monaco scratch documents. Closing
+the last tab preserves an empty tab strip and shows a welcome page with every
+available editor/view. Deleting a profile removes its saved workspace layout.
+
+Tabs are not divided into artificial Workspace/System categories. The native
+Dockview strip supports tab icons, closing, drag-and-drop, splitting, context
+menus and a full editor picker. Monaco is a bundled local editor with bundled
+inline workers; unsaved draft text never writes Git data. Library is an
+embedded, source-backed document browser. Notepad is a profile-local blank
+editor.
+
+### Configurable application surfaces
+
+| Surface | Allowed placements |
+| --- | --- |
+| Navigation | Sidebar, title bar, omnibar, status bar, hidden |
+| Omnibar trigger | Title bar, sidebar, status bar, floating draggable, hidden |
+| Settings access | Title bar, activity bar, status bar, tab bar |
+| Activity bar | Left, right, top, bottom, hidden |
+| Primary sidebar | Left, right |
+
+The omnibar is still the **Mod+K command/search UI**, not a permanent breadcrumb.
+The title-bar breadcrumb is independent. Context menus on interactive surfaces
+allow repositioning without opening Settings. The activity bar contains default
+view shortcuts, the Notepad/Library editors and profile-scoped pinned tabs.
+The sidebar contains a navigation tree only when navigation is placed there;
+otherwise its contents reflect source-aware editors. The primary sidebar
+resizes with pointer or keyboard, and the width is directly editable in Settings.
+Collapsed state does not discard expanded width.
+
+### Unified appearance
+
+Every semantic color is available as an editable token for dark and light
+palettes, including the shared **border** color; Graphite, Slate and Contrast
+are starting palettes. UI scale presets adjust **font size, icon size, border
+radius and spacing together**:
+
+| Preset | Text | Icon | Radius | Spacing |
+| --- | ---: | ---: | ---: | ---: |
+| Small | 12 px | 15 px | 4 px | 6 px |
+| Normal | 14 px | 18 px | 8 px | 8 px |
+| Large | 16 px | 21 px | 12 px | 11 px |
+
+Each dimension is separately editable after selecting a preset. Layout uses
+`--ui-spacing`, `--ui-radius`, `--app-font-size` and the unified palette
+variables. The same spacing token feeds application-level gaps and padding,
+not a separate, independently configured density scale. The selected language
+(English, Czech or Spanish), appearance and command shortcuts are stored
+locally. The current Radix-based menus, selectors and notification center are
+accessible without native HTML dropdown widgets. Notifications retain up to
+40 genuine local UI events, not simulated execution activity.
+
+## Development and build
+
+The stack is React 19, TypeScript, Bun, Rsbuild 2, Tailwind CSS 4, Motion,
+Dockview, Radix UI, lucide-animated, Monaco, React Flow, Zustand, Zod,
+TanStack Hotkeys, i18next, Biome and Playwright.
 
 ```sh
-bun install
-bun run dev
+cd .github/app
+bun install --frozen-lockfile
+bun run context
 bun run typecheck
+bun run lint
+bun run format:check
 bun run build
 ```
 
-Site publishing requires the repository administrator to configure
-**Settings → Pages → Source: GitHub Actions**. No workflow can bypass missing
-GitHub Pages authorization or organization policy.
+CI also validates the compiled standalone HTML, exact build order, allowlisted
+source generation and browser interaction in Chromium. The `canvas-pages.yml`
+pipeline deploys qualifying feature-branch pushes through `canvas-preview`
+and main through `github-pages`, subject to GitHub Pages environment policy.
 
-**Privacy:** GitHub Pages is a public deployment for this repo. The builder uses an
-explicit allowlist and does not publish raw private archives, credentials or all
-repository files. Reusing the app in a private repo must involve a separate security
-review, not automatically opt in to public publishing.
-
-The former root `canvas.html`, Python Canvas renderer and separate synchronization
-workflow have been removed. `.github/app/` is the sole Canvas implementation. The
-repository's authored records remain authoritative; `context.json` and compiled HTML
-are derived projections, not alternate data stores. The root DarkFactory Git submodule
-has also been removed; managed external DarkFactory workflows remain independent.
-
-## Prototype delivery
-
-Pages builds on the feature branch deploy through the `canvas-preview` environment; after a reviewed release, main deploys through `github-pages`. Source input is compiled at build time and navigation remains local/read-only. The design/prototyping phase does not end automatically with a successful deployment.
-
-## Current prototype controls
-
-- The application title bar owns the global sidebar toggle, omnibar and Settings.
-- The project route tree lives in the omnibar; the redundant secondary header was retired.
-- Shortcuts are registered centrally with TanStack Hotkeys, defaulting to Mod+B (sidebar) and Mod+K (omnibar), and are editable in Settings. Custom bindings persist only in the current browser.
-- Accent color selection uses react-colorful inside a Radix Popover and validates contrast using colord. The theme state remains local and independent of repository authority.
-
-## Dockview application shell (v0.9)
-
-Dockview now renders every route within one application-level compositor, replacing the
-old nested Workbench instance and fixed page-switching layout. The title bar, omnibar,
-navigation and status bar remain global. The Dockview tab strip provides a `+` dropdown and a three-dot menu. The latter
-splits the clicked group to the right or resets the complete layout. The redundant
-secondary workspace toolbar has been removed. Drag-and-drop
-rearrangement, group splitting and panel closing are native Dockview interactions.
-
-Wouter hash routes and Dockview tab selection are synchronized. Local layout preferences
-are persisted under `canvas-dockview-layout-v1` and can be reset without changing
-repository data. The build remains a static, read-only repository snapshot.
-
-The Dockview compositor uses the official dockview-react panel API and keeps layout
-state as UI-only local data; no authored repository file is modified through drag/drop.
-
-Dockview layout acceptance is checked in Chromium before every Pages publication.
-
-### Dockview tab creation
-
-Every Dockview group header has a `+` action with a Radix dropdown listing all eleven route views, grouped as Workspace and System. Selecting an option creates a new tab in that group, including when the same view is already open in another tab. Wouter follows the new active tab. Keyboard and touch access use Radix's built-in menu behavior.
-
-The browser smoke test selects the Radix dropdown portal via its stable `.dock-add-menu` class rather than relying on an implementation-specific ARIA wrapper; it still verifies all ten accessible menu items.
-
-In the per-group three-dot menu, **Split right** duplicates that group's visible tab in a new group; **Reset layout** clears the saved local Dockview layout and returns to Overview. The global title bar and status bar remain outside Dockview.
-
-## Skinning and localization (prototype v0.9)
-
-The appearance implementation deliberately uses the existing Tailwind CSS v4 token
-contract rather than adding a second CSS-in-JS framework. `@theme inline` provides
-the Tailwind-facing semantic token names and plain CSS variables remain the runtime
-bridge to native Dockview group/tab styling and shadcn-style UI primitives.
-`data-theme`, `data-skin` and `data-density` control orthogonal visual properties:
-
-- Mode: dark, light, or system preference (reacts to OS changes).
-- Skin: Graphite (existing), Slate (cool neutral), and Contrast (stronger boundaries).
-- Density: comfortable or compact spacing, including Dockview tab strip height.
-- Accent: previous presets or validated custom HEX colors; text contrast checked with colord.
-- Typography: existing bounded font/icon size preferences.
-
-`zustand` `persist` stores versioned local configuration. `zod` validates rehydrated
-values, with legacy migration from `canvas-preferences`. No config is sent to a
-remote service, and no state is written to repository records. Reset restores
-defaults without clearing Dockview layout or custom keybindings.
-
-`i18next`, `react-i18next`, and `i18next-browser-languagedetector` provide
-English, Czech, and Spanish UI dictionaries compiled into the standalone HTML.
-The detector prioritizes `canvas-language` in local storage, then the browser
-language, with English as fallback. Switching in Settings updates the HTML
-`lang` attribute, route labels and Dockview tabs without a reload; the setting
-persists across reloads. Repository-authored Markdown remains in its original
-language and is never machine-translated or rewritten.
-
-### Dependency research and architecture decision
-
-- **Tailwind v4 token variables** — selected for runtime styling compatibility,
-  zero second styling system and existing CSS/shadcn integration.
-- **Zustand + Zod** — selected for typed runtime settings, storage versioning,
-  migrations and validation of untrusted browser data.
-- **i18next + react-i18next** — selected for runtime language selection,
-  interpolation, browser language detection, fallbacks and static resources.
-- **next-themes** — evaluated, not adopted. It specializes in system/theme
-  switching, but not the multidimensional skin/density/configuration contract.
-- **Panda CSS / vanilla-extract** — evaluated, not adopted. Both offer typed
-  theming, but would duplicate/replace the existing Tailwind v4 pipeline.
-- **Tolgee** — future translation-management option, not installed; initial
-  prototype remains static/offline and does not need translation servers.
-
-Keep user-facing display strings as i18n keys; retain stable canonical IDs for
-routes, commands and source files. New languages should add a resource dictionary,
-not fork the UI.
-
-Build checks now verify localized Czech/English labels, the locale persisted across reload, and visual density/skin configuration while retaining existing Dockview and keyboard acceptance tests.
-
-Localization acceptance additionally verifies Spanish, Czech and English Settings language transitions, with no translation of source Markdown. Knowledge-graph labels use the same catalog, and graph light/dark mode follows the appearance preference.
-
-Version 0.9 release acceptance includes HTML order, type checking, Biome, three built-in skins, spacing density, browser-persisted language and existing Dockview/shortcut smoke coverage.
-
-## Interaction prototype — navigation, menus, notifications and Monaco
-
-The only application is the compiled React Pages app. The left side of the title bar
-contains three Radix Select navigation steps (section > source repository > view);
-the repository step lists only the source actually compiled into the snapshot.
-Search/commands remain available via the title-bar search button and Mod+K.
-The responsive sidebar has a keyboard-accessible drag separator whose expanded width
-is remembered separately from its collapsed state (`canvas-sidebar-width-v1`).
-
-Radix Select and Context Menu supply keyboard/focus/portal behavior for language,
-Monaco source files, title-bar navigation, sidebar actions and Dockview tabs.
-A Sonner-based global toast surface provides actionable success and error feedback.\nThe Radix notification center preserves up to 40 genuine browser-local UI events\n(with timestamps and unread markers), validates restored entries, and allows clearing\nthe history. It never claims to represent live agent activity.
-Dockview tabs include route icons and allow right-click actions. Icons use
-`lucide-animated` with animation triggered from the full interactive parent;
-Monaco's `</>` badge supplements the animated icon frame because that glyph is
-not present in the pinned animated icon set.
-
-Monaco is a genuine locally bundled editor, not a CDN-loaded imitation. The three
-Monaco editor workers are inlined into the build. Its initial documents come from
-the same explicitly allowlisted repository snapshot as the rest of the app. Changes
-are **in-memory scratch drafts** for the active tab instance and never modify
-Git sources or imply source-control write permissions. Clipboard export and reset
-provide explicit actions. There are no fabricated agent task states or graph edges:
-document relationships are derived from authored Markdown links to tracked paths.
-
-The application remains in user-controlled prototyping. CI must pass typecheck,
-lint, formatting, standalone Pages build and browser smoke before a preview is
-considered technically verified; CI passing is not final design approval.
-
-Build uses Rsbuild 2 to inline Monaco's local worker entrypoints. The Pages HTML
-is validated after compilation for correct mount/script order and browser behavior.
+**Prototyping is open** until the user explicitly approves completion.
+Successful CI or deployment is not design approval. Keep changes on
+`feat/canvas-react-pages`; do not merge into development/main without
+authorization.

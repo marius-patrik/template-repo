@@ -89,26 +89,15 @@ try {
   await page.waitForFunction(() => Number(document.querySelector(".sidebar-resizer")?.getAttribute("aria-valuenow")) === 276);
   const before = await handle.boundingBox();
   if (!before || before.height < 50) throw new Error("Sidebar drag handle must occupy full height");
-  const center = { x: before.x + before.width / 2, y: before.y + before.height / 2 };
-  const inspect = async (phase) => {
-    const details = await page.evaluate(({ x, y }) => ({
-      hit: document.elementFromPoint(x, y)?.outerHTML.slice(0, 350),
-      resizing: document.body.classList.contains("resizing-sidebar"),
-      attr: document.querySelector(".sidebar-resizer")?.getAttribute("aria-valuenow"),
-      width: document.querySelector(".sidebar")?.getBoundingClientRect().width,
-    }), center);
-    console.log("sidebar diagnostic", phase, JSON.stringify({ before, ...details }));
-  };
-  await inspect("before");
-  await page.mouse.move(center.x, center.y);
+  const pointerX = before.x + before.width / 2;
+  const pointerY = before.y + before.height / 2;
+  await page.mouse.move(pointerX, pointerY);
   await page.mouse.down();
-  await inspect("down");
-  await page.mouse.move(center.x + 56, center.y, { steps: 6 });
-  await inspect("move");
+  await page.mouse.move(pointerX + 56, pointerY, { steps: 6 });
   await page.mouse.up();
-  const resized = Number(await handle.getAttribute("aria-valuenow"));
-  if (resized < 310) throw new Error(`Sidebar pointer resize failed, expected >=310, received ${resized}`);
-
+  await page.waitForFunction(
+    () => Number(document.querySelector(".sidebar-resizer")?.getAttribute("aria-valuenow")) >= 325,
+  );
   await page.getByRole("combobox", { name: "Omnibar position" }).click();
   await page.getByRole("option", { name: "Floating" }).click();
   await page.locator(".floating-omnibar").waitFor();

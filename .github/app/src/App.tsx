@@ -312,6 +312,7 @@ export default function App() {
   );
   const [collapsed, setCollapsed] = useState(false);
   const resizing = useRef(false);
+  const resizeOrigin = useRef({ x: 0, width: 228 });
   const currentProfileId = useProfiles((state) => state.currentId);
   const activeProfile = useProfiles((state) =>
     state.profiles.find((p) => p.id === state.currentId),
@@ -358,6 +359,7 @@ export default function App() {
     root.style.setProperty("--app-font-size", prefs.fontSize + "px");
     root.style.setProperty("--app-icon-size", prefs.iconSize + "px");
     root.style.setProperty("--ui-radius", prefs.radius + "px");
+    root.style.setProperty("--skin-radius", prefs.radius + "px");
     root.style.setProperty("--ui-spacing", prefs.spacing + "px");
   }, [prefs, dark]);
   useEffect(() => {
@@ -502,6 +504,7 @@ export default function App() {
           )}
           <div className={`primary-content sidebar-${prefs.sidebarPosition}`}>
             {(prefs.navigationPosition === "sidebar" ||
+              prefs.omnibarPosition === "sidebar" ||
               (page !== null &&
                 ["library", "monaco", "artifacts", "context", "agents", "roadmap"].includes(
                   page,
@@ -551,24 +554,17 @@ export default function App() {
                       if (collapsed || event.button !== 0) return;
                       event.preventDefault();
                       resizing.current = true;
+                      resizeOrigin.current = { x: event.clientX, width: prefs.sidebarWidth };
                       event.currentTarget.setPointerCapture(event.pointerId);
                       document.body.classList.add("resizing-sidebar");
                     }}
                     onPointerMove={(event) => {
-                      if (resizing.current)
-                        updatePreferences({
-                          sidebarWidth: Math.min(
-                            480,
-                            Math.max(
-                              180,
-                              Math.round(
-                                prefs.sidebarPosition === "left"
-                                  ? event.clientX
-                                  : window.innerWidth - event.clientX,
-                              ),
-                            ),
-                          ),
-                        });
+                      if (!resizing.current) return;
+                      const sign = prefs.sidebarPosition === "left" ? 1 : -1;
+                      const delta = (event.clientX - resizeOrigin.current.x) * sign;
+                      updatePreferences({
+                        sidebarWidth: Math.min(480, Math.max(180, Math.round(resizeOrigin.current.width + delta))),
+                      });
                     }}
                     onLostPointerCapture={() => {
                       resizing.current = false;

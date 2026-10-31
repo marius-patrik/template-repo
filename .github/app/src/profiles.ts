@@ -8,9 +8,11 @@ export type Profile = {
   route: string;
   pinned: CanvasView[];
   note: string;
+  selectedDocument: string;
+  drafts: Record<string, string>;
 };
 const initialProfiles: Profile[] = ["Global", "Study", "Health", "Code", "Design", "Finance"].map(
-  (name) => ({ id: name.toLowerCase(), name, route: "/", pinned: [], note: "" }),
+  (name) => ({ id: name.toLowerCase(), name, route: "/", pinned: [], note: "", selectedDocument: "", drafts: {} }),
 );
 type State = {
   profiles: Profile[];
@@ -22,6 +24,8 @@ type State = {
   setRoute: (path: string) => void;
   togglePin: (view: CanvasView) => void;
   setNote: (text: string) => void;
+  setMonacoPath: (path: string) => void;
+  setDraft: (path: string, content: string | null) => void;
 };
 export const useProfiles = create<State>()(
   persist(
@@ -36,7 +40,7 @@ export const useProfiles = create<State>()(
         if (!name || get().profiles.length >= 50) return null;
         const id = crypto.randomUUID();
         set((state) => ({
-          profiles: [...state.profiles, { id, name, route: "/", pinned: [], note: "" }],
+          profiles: [...state.profiles, { id, name, route: "/", pinned: [], note: "", selectedDocument: "", drafts: {} }],
           currentId: id,
         }));
         return id;
@@ -48,12 +52,15 @@ export const useProfiles = create<State>()(
             profiles: state.profiles.map((p) => (p.id === id ? { ...p, name } : p)),
           }));
       },
-      removeProfile: (id) =>
+      removeProfile: (id) => {
+        if (!get().profiles.some((p) => p.id === id) || get().profiles.length <= 1) return;
         set((state) => {
-          if (state.profiles.length === 1) return state;
           const profiles = state.profiles.filter((p) => p.id !== id);
           return { profiles, currentId: state.currentId === id ? profiles[0].id : state.currentId };
-        }),
+        });
+        try { localStorage.removeItem(`canvas-dockview-layout-v2-${id}`); }
+        catch { /* Browsers may deny storage access. */ }
+      },
       setRoute: (route) =>
         set((state) => ({
           profiles: state.profiles.map((p) => (p.id === state.currentId ? { ...p, route } : p)),
@@ -71,6 +78,24 @@ export const useProfiles = create<State>()(
                 },
           ),
         })),
+      setMonacoPath: (selectedDocument) =>
+        set((state) => ({
+          profiles: state.profiles.map((p) =>
+            p.id === state.currentId ? { ...p, selectedDocument } : p,
+          ),
+        })),
+      setDraft: (path, content) => {
+        if (!path || path.length > 300) return;
+        set((state) => ({
+          profiles: state.profiles.map((p) => {
+            if (p.id !== state.currentId) return p;
+            const drafts = { ...p.drafts };
+            if (content === null) delete drafts[path];
+            else drafts[path] = content;
+            return { ...p, drafts };
+          }),
+        }));
+      },
       setNote: (note) =>
         set((state) => ({
           profiles: state.profiles.map((p) =>
@@ -116,6 +141,15 @@ export const useProfiles = create<State>()(
                       .slice(0, 20)
                   : [],
                 note: typeof value.note === "string" ? value.note.slice(0, 100000) : "",
+                selectedDocument: typeof value.selectedDocument === "string"
+                  ? value.selectedDocument.slice(0, 300) : "",
+                drafts: value.drafts && typeof value.drafts === "object" &&
+                  !Array.isArray(value.drafts)
+                  ? Object.fromEntries(
+                    Object.entries(value.drafts).filter(
+                      ([path, content]) => path.length <= 300 && typeof content === "string",
+                    ).slice(0, 64),
+                  ) : {},
               }))
           : [];
         if (!profiles.length) return current;

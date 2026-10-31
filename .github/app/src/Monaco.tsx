@@ -13,6 +13,7 @@ import { CanvasSelect } from "./components/ui/CanvasSelect";
 import context from "./generated/context.json";
 import { notify } from "./notifications";
 import { useCanvasConfig } from "./config";
+import { useProfiles } from "./profiles";
 
 self.MonacoEnvironment = {
   getWorker(_moduleId: string, label: string) {
@@ -33,6 +34,10 @@ const languageFor = (path: string) =>
 export default function Monaco() {
   const { t } = useTranslation();
   const theme = useCanvasConfig((state) => state.preferences.theme);
+  const fontSize = useCanvasConfig((state) => state.preferences.fontSize);
+  const profile = useProfiles((state) => state.profiles.find((p) => p.id === state.currentId));
+  const setPath = useProfiles((state) => state.setMonacoPath);
+  const setDraft = useProfiles((state) => state.setDraft);
   const [systemDark, setSystemDark] = useState(
     () => window.matchMedia("(prefers-color-scheme: dark)").matches,
   );
@@ -43,9 +48,10 @@ export default function Monaco() {
     return () => query.removeEventListener("change", change);
   }, []);
   const docs = context.documents;
-  const [path, setPath] = useState(docs[0]?.path ?? "");
-  // Scratch edits are scoped to the current tab instance, not persisted to Git or browser storage.
-  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const path = docs.some((d) => d.path === profile?.selectedDocument)
+    ? (profile?.selectedDocument ?? "")
+    : (docs[0]?.path ?? "");
+  const drafts = profile?.drafts ?? {};
   const original = docs.find((doc) => doc.path === path)?.content ?? "";
   const value = drafts[path] ?? original;
   const dark = theme === "system" ? systemDark : theme === "dark";
@@ -77,11 +83,7 @@ export default function Monaco() {
             className="canvas-button canvas-button-ghost"
             onClick={() => {
               if (!path) return;
-              setDrafts((prev) => {
-                const next = { ...prev };
-                delete next[path];
-                return next;
-              });
+              setDraft(path, null);
               notify.info(t("Scratch changes reverted"));
             }}
             disabled={!(path in drafts)}
@@ -114,11 +116,11 @@ export default function Monaco() {
             language={languageFor(path)}
             value={value}
             theme={dark ? "vs-dark" : "light"}
-            onChange={(next) => setDrafts((prev) => ({ ...prev, [path]: next ?? "" }))}
+            onChange={(next) => setDraft(path, next ?? "")}
             options={{
               automaticLayout: true,
               minimap: { enabled: true },
-              fontSize: 13,
+              fontSize,
               scrollBeyondLastLine: false,
               wordWrap: "on",
               tabSize: 2,

@@ -279,7 +279,10 @@ export function ActivityBar({
     (state) => state.profiles.find((p) => p.id === state.currentId)?.pinned ?? [],
   );
   const togglePin = useProfiles((state) => state.togglePin);
-  const shortcuts = ["notepad", "library"] as CanvasView[];
+  const shortcuts: CanvasView[] = [
+    "overview", "projects", "agents", "graph", "roadmap",
+    "artifacts", "activity", "context", "notepad", "library",
+  ];
   const entries = [...new Set([...shortcuts, ...pinned])];
   return (
     <div
