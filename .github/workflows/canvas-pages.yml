@@ -51,7 +51,7 @@ jobs:
           path: .canvas-dist
 
   deploy:
-    if: github.event.repository.private == false && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: github.event.repository.private == false && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/canvas-react-pages') && github.event_name == 'push'
     needs: build
     runs-on: ubuntu-latest
     environment:
