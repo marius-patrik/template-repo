@@ -4,12 +4,12 @@ import a11yPlugin from "colord/plugins/a11y";
 import { formatForDisplay, useAppHotkeys, useHotkey } from "@tanstack/react-hotkeys";
 import { AccentColorPicker, accentPresets } from "./AccentColorPicker";
 import KeyboardSettings from "./KeyboardSettings";
-import { Link, Route, Switch, useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "motion/react";
 import { AnimatedIcon } from "./components/AnimatedIcon";
 import { Button } from "./components/ui/button";
 import Graph from "./Graph";
-import Workbench from "./Workbench";
+import DockCanvas from "./DockCanvas";
 import context from "./generated/context.json";
 
 type View =
@@ -152,12 +152,35 @@ function SimplePage({ id, to }: { id: View; to: (p: string) => void }) {
   const ctx = docs.find((x) => x.path === "AGENTS.md");
   if (id === "workspace")
     return (
-      <div className="workbench-page">
+      <div className="page workspace-board">
         <PageIntro
           title="Workspace"
-          detail="Dockable, resizable panels for interacting with repository-derived context."
+          detail="A configurable working surface. Open views with the sidebar or omnibar, then arrange their tabs with Dockview."
         />
-        <Workbench dark={document.documentElement.dataset.theme !== "light"} />
+        <div className="workspace-board-grid">
+          <section className="panel padded">
+            <p className="eyebrow">Layout</p>
+            <h2>Arrange your workspace</h2>
+            <p className="muted">
+              Drag tabs to create groups, split panels, or float windows.
+              Your arrangement is saved locally in this browser.
+            </p>
+            <Button variant="subtle" onClick={() => to("/graph")}>
+              Open graph <AnimatedIcon name="right" size={15} />
+            </Button>
+          </section>
+          <section className="panel padded">
+            <p className="eyebrow">Repository context</p>
+            <h2>{context.name}</h2>
+            <p className="muted">{context.repository}</p>
+            <p className="muted">
+              {context.documents.length} authored source documents · revision {context.revision}
+            </p>
+            <Button variant="subtle" onClick={() => to("/artifacts")}>
+              Browse artifacts <AnimatedIcon name="right" size={15} />
+            </Button>
+          </section>
+        </div>
       </div>
     );
   if (id === "graph")
@@ -516,25 +539,22 @@ export default function App() {
           </nav>
         </aside>
         <div className="main-column">
-          <main className="page-container">
-            <Switch>
-              <Route path="/overview">
-                <Overview to={go} />
-              </Route>
-              <Route path="/settings">
-                <Settings prefs={prefs} setPrefs={setPrefs} />
-              </Route>
-              {nav
-                .filter((n) => n.id !== "overview" && n.id !== "settings")
-                .map((n) => (
-                  <Route key={n.id} path={"/" + n.id}>
-                    <SimplePage id={n.id} to={go} />
-                  </Route>
-                ))}
-              <Route>
-                <Overview to={go} />
-              </Route>
-            </Switch>
+          <main className="dock-content">
+            <DockCanvas
+              route={path}
+              onNavigate={go}
+              dark={
+                prefs.theme === "system"
+                  ? window.matchMedia("(prefers-color-scheme: dark)").matches
+                  : prefs.theme === "dark"
+              }
+              renderView={(view) => {
+                const id = view as View;
+                if (id === "overview") return <Overview to={go} />;
+                if (id === "settings") return <Settings prefs={prefs} setPrefs={setPrefs} />;
+                return <SimplePage id={id} to={go} />;
+              }}
+            />
           </main>
         </div>
       </div>
