@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { colord, extend } from "colord";
+import a11yPlugin from "colord/plugins/a11y";
+import { formatForDisplay, useAppHotkeys, useHotkey } from "@tanstack/react-hotkeys";
+import { AccentColorPicker, accentPresets } from "./AccentColorPicker";
+import KeyboardSettings from "./KeyboardSettings";
 import { Link, Route, Switch, useLocation } from "wouter";
 import { motion, AnimatePresence } from "motion/react";
 import { AnimatedIcon } from "./components/AnimatedIcon";
@@ -20,9 +24,9 @@ type View =
   | "context"
   | "settings";
 type Theme = "dark" | "light" | "system";
-type Accent = "neutral" | "blue" | "sage" | "violet";
-type Preferences = { theme: Theme; accent: Accent; fontSize: number; iconSize: number };
+type Preferences = { theme: Theme; accent: string; fontSize: number; iconSize: number };
 const defaults: Preferences = { theme: "dark", accent: "neutral", fontSize: 14, iconSize: 18 };
+extend([a11yPlugin]);
 const nav: { id: View; label: string; group: string }[] = [
   { id: "overview", label: "Overview", group: "Workspace" },
   { id: "workspace", label: "Workspace", group: "Workspace" },
@@ -42,7 +46,8 @@ function loadPrefs(): Preferences {
     if (
       data &&
       ["dark", "light", "system"].includes(data.theme) &&
-      ["neutral", "blue", "sage", "violet"].includes(data.accent) &&
+      typeof data.accent === "string" &&
+      (accentPresets.some((preset) => preset.id === data.accent) || /^#[0-9a-f]{6}$/i.test(data.accent)) &&
       [13, 14, 15, 16].includes(data.fontSize) &&
       [16, 18, 20].includes(data.iconSize)
     )
@@ -313,15 +318,19 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
     <div className="page">
       <PageIntro
         title="Settings"
-        detail="Local appearance preferences only. No repository configuration is changed."
+        detail="Appearance and keyboard preferences are local to this browser."
       />
       <section className="panel padded settings-panel">
         <h2>Appearance</h2>
         {options("theme", ["dark", "light", "system"] as const, "Theme")}
-        {options("accent", ["neutral", "blue", "sage", "violet"] as const, "Accent")}
+        <div className="setting-row accent-setting">
+          <strong>Accent color</strong>
+          <AccentColorPicker value={prefs.accent} onChange={(accent) => setPrefs({ ...prefs, accent })} />
+        </div>
         {options("fontSize", [13, 14, 15, 16] as const, "Text size")}
         {options("iconSize", [16, 18, 20] as const, "Icon size")}
       </section>
+      <KeyboardSettings />
       <p className="muted settings-note">
         Canvas v0.6.0 · Prototype. Local UI settings are not authoritative project data.
       </p>
@@ -330,6 +339,7 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
 }
 export default function App() {
   const [path, navigate] = useLocation();
+  const hotkeys = useAppHotkeys();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -350,7 +360,15 @@ export default function App() {
           : "light"
         : prefs.theme;
     document.documentElement.dataset.theme = resolved;
-    document.documentElement.dataset.accent = prefs.accent;
+    document.documentElement.dataset.accent = accentPresets.some((preset) => preset.id === prefs.accent) ? prefs.accent : "custom";
+    if (/^#[0-9a-f]{6}$/i.test(prefs.accent) && colord(prefs.accent).isValid()) {
+      const color = colord(prefs.accent);
+      document.documentElement.style.setProperty("--accent", color.toHex());
+      document.documentElement.style.setProperty("--accent-foreground", color.contrast("#ffffff") >= color.contrast("#111113") ? "#ffffff" : "#111113");
+    } else {
+      document.documentElement.style.removeProperty("--accent");
+      document.documentElement.style.removeProperty("--accent-foreground");
+    }
     document.documentElement.style.setProperty("--app-font-size", prefs.fontSize + "px");
     document.documentElement.style.setProperty("--app-icon-size", prefs.iconSize + "px");
     try {
@@ -367,17 +385,6 @@ export default function App() {
     [search],
   );
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        setPaletteOpen((v) => !v);
-      }
-      if (e.key === "Escape") setPaletteOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-  useEffect(() => {
     if (paletteOpen) requestAnimationFrame(() => input.current?.focus());
   }, [paletteOpen]);
   const go = (dest: string) => {
@@ -386,6 +393,16 @@ export default function App() {
     setPaletteOpen(false);
     setSearch("");
   };
+  useHotkey(hotkeys["canvas.sidebar.toggle"], () => {
+    if (window.matchMedia("(max-width: 700px)").matches) setMobileOpen((v) => !v);
+    else setCollapsed((v) => !v);
+  }, { ignoreInputs: true });
+  useHotkey(hotkeys["canvas.omnibar.toggle"], () => setPaletteOpen((v) => !v), { ignoreInputs: false });
+  useHotkey(hotkeys["canvas.settings.open"], () => go("/settings"));
+  useHotkey(hotkeys["canvas.overview.open"], () => go("/overview"));
+  useHotkey(hotkeys["canvas.workspace.open"], () => go("/workspace"));
+  useHotkey(hotkeys["canvas.projects.open"], () => go("/projects"));
+  useHotkey(hotkeys["canvas.graph.open"], () => go("/graph"));
   const icon = (name: string, size = prefs.iconSize) => <AnimatedIcon name={name} size={size} />;
   return (
     <div className="app-root">
@@ -399,10 +416,16 @@ export default function App() {
           >
             {icon("expand")}
           </Button>
-          <span className="app-symbol">{icon("workspace", 16)}</span>
+          <Button
+            size="icon"
+            className="desktop-toggle"
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            onClick={() => setCollapsed((value) => !value)}
+          >
+            {icon(collapsed ? "expand" : "collapse")}
+          </Button>
           <strong>Canvas</strong>
-          <span className="title-separator">/</span>
-          <span className="title-product">{context.name}</span>
         </div>
         <div className="omnibar-area">
           <button
@@ -417,7 +440,7 @@ export default function App() {
             <span className="crumb">{context.name}</span>
             {icon("right", 12)}
             <strong>{title}</strong>
-            <kbd>⌘ K</kbd>
+            <kbd>{hotkeys["canvas.omnibar.toggle"].hotkey ? formatForDisplay(hotkeys["canvas.omnibar.toggle"].hotkey) : "Unbound"}</kbd>
           </button>
         </div>
         <Button
@@ -448,22 +471,12 @@ export default function App() {
           ].join(" ")}
           aria-label="Main navigation"
         >
-          <div className="sidebar-top">
-            <Button
-              size="icon"
-              title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-              onClick={() => setCollapsed((v) => !v)}
-            >
-              {icon(collapsed ? "expand" : "collapse")}
-            </Button>
-          </div>
           <nav className="sidebar-navigation">
             {["Workspace", "System"].map((group) => (
               <div className="nav-group" key={group}>
-                {!collapsed && <div className="nav-group-label">{group}</div>}
+                {(!collapsed || mobileOpen) && <div className="nav-group-label">{group}</div>}
                 {nav
-                  .filter((n) => n.group === group)
+                  .filter((n) => n.group === group && n.id !== "settings")
                   .map((n) => (
                     <Link
                       href={"/" + n.id}
@@ -474,53 +487,17 @@ export default function App() {
                       aria-current={page === n.id ? "page" : undefined}
                     >
                       {icon(n.id)}
-                      {!collapsed && <span>{n.label}</span>}
+                      {(!collapsed || mobileOpen) && <span>{n.label}</span>}
                     </Link>
                   ))}
               </div>
             ))}
           </nav>
           <div className="sidebar-footer">
-            {!collapsed && <small>Repository snapshot · read-only</small>}
+            {(!collapsed || mobileOpen) && <small>Repository snapshot · read-only</small>}
           </div>
         </aside>
         <div className="main-column">
-          <div className="project-header">
-            <div className="selector-group">
-              <DropdownMenu.Root>
-                <DropdownMenu.Trigger asChild>
-                  <button type="button" className="context-selector">
-                    <span className="eyebrow">Workspace</span>
-                    <strong>Personal workspace</strong>
-                    {icon("down", 13)}
-                  </button>
-                </DropdownMenu.Trigger>
-                <DropdownMenu.Portal>
-                  <DropdownMenu.Content sideOffset={7} align="start" className="menu-content">
-                    <DropdownMenu.Item className="menu-item">Personal workspace</DropdownMenu.Item>
-                  </DropdownMenu.Content>
-                </DropdownMenu.Portal>
-              </DropdownMenu.Root>
-              {icon("right", 13)}
-              <DropdownMenu.Root>
-                <DropdownMenu.Trigger asChild>
-                  <button type="button" className="context-selector">
-                    <span className="eyebrow">Project</span>
-                    <strong>{context.name}</strong>
-                    {icon("down", 13)}
-                  </button>
-                </DropdownMenu.Trigger>
-                <DropdownMenu.Portal>
-                  <DropdownMenu.Content sideOffset={7} align="start" className="menu-content">
-                    <DropdownMenu.Item className="menu-item" onSelect={() => go("/overview")}>
-                      {context.name}
-                    </DropdownMenu.Item>
-                  </DropdownMenu.Content>
-                </DropdownMenu.Portal>
-              </DropdownMenu.Root>
-            </div>
-            <div className="snapshot-reference">REVISION / {context.revision}</div>
-          </div>
           <main className="page-container">
             <Switch>
               <Route path="/overview">
@@ -582,7 +559,8 @@ export default function App() {
                     setSelection(0);
                   }}
                   onKeyDown={(e) => {
-                    if (e.key === "ArrowDown") {
+                    if (e.key === "Escape") { e.preventDefault(); setPaletteOpen(false); }
+                if (e.key === "ArrowDown") {
                       e.preventDefault();
                       setSelection((s) => Math.min(s + 1, filtered.length - 1));
                     }
