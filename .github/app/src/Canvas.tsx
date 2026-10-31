@@ -75,7 +75,9 @@ const groupCounts = categories.map((name) => ({
 }));
 const relevant = (perspective: Perspective) => {
   if (perspective === "agents")
-    return documents.filter((doc) => /agents|instructions|governance/i.test(doc.path));
+    return documents
+      .filter((doc) => /agents|instructions|governance/i.test(doc.path))
+      .sort((a, b) => Number(/(?:^|\\/)AGENTS\\.md$/i.test(b.path)) - Number(/(?:^|\\/)AGENTS\\.md$/i.test(a.path)));
   if (perspective === "roadmap")
     return documents.filter((doc) => /plan|roadmap|prd|todo|milestone/i.test(doc.path));
   if (perspective === "context")
