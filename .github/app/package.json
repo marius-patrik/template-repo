@@ -11,7 +11,7 @@
     "typecheck": "bun run context && tsc --noEmit",
     "check": "bun run context && bun run typecheck && bun run lint && bun run format:check && bun run build",
     "lint": "biome lint . --max-diagnostics=100",
-    "format:check": "biome ci .",
+    "format:check": "biome ci . --max-diagnostics=200",
     "format:write": "biome check --write ."
   },
   "dependencies": {
