@@ -47,8 +47,9 @@ Pages builds on the feature branch deploy through the `canvas-preview` environme
 
 Dockview now renders every route within one application-level compositor, replacing the
 old nested Workbench instance and fixed page-switching layout. The title bar, omnibar,
-navigation and status bar remain global. The workspace toolbar supports tab navigation,
-splitting the active view, opening the graph and resetting the layout. Drag-and-drop
+navigation and status bar remain global. The Dockview tab strip provides a `+` dropdown and a three-dot menu. The latter
+splits the clicked group to the right or resets the complete layout. The redundant
+secondary workspace toolbar has been removed. Drag-and-drop
 rearrangement, group splitting and panel closing are native Dockview interactions.
 
 Wouter hash routes and Dockview tab selection are synchronized. Local layout preferences
@@ -65,3 +66,5 @@ Dockview layout acceptance is checked in Chromium before every Pages publication
 Every Dockview group header has a `+` action with a Radix dropdown listing all ten route views, grouped as Workspace and System. Selecting an option creates a new tab in that group, including when the same view is already open in another tab. Wouter follows the new active tab. Keyboard and touch access use Radix's built-in menu behavior.
 
 The browser smoke test selects the Radix dropdown portal via its stable `.dock-add-menu` class rather than relying on an implementation-specific ARIA wrapper; it still verifies all ten accessible menu items.
+
+In the per-group three-dot menu, **Split right** duplicates that group's visible tab in a new group; **Reset layout** clears the saved local Dockview layout and returns to Overview. The global title bar and status bar remain outside Dockview.
