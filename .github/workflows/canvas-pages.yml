@@ -16,8 +16,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: canvas-pages
-  cancel-in-progress: false
+  group: canvas-pages-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
