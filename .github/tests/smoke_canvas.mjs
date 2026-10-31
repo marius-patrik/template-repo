@@ -2,7 +2,7 @@ import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
-const require = createRequire(resolve(".github/app/package.json"));
+const require = createRequire(resolve("package.json"));
 const { chromium } = require("playwright");
 const url = pathToFileURL(resolve(process.argv[2] ?? ".canvas-dist/index.html")).href;
 const browser = await chromium.launch({ headless: true });
