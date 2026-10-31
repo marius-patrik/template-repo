@@ -166,18 +166,6 @@ export default function Canvas() {
   };
   return (
     <div className="canvas-studio" data-testid="canvas-studio">
-      <header className="canvas-studio-header">
-        <div className="canvas-studio-title">
-          <AnimatedIcon name="canvas" size={19} />
-          <div>
-            <strong>Canvas</strong>
-            <span>{context.repository}</span>
-          </div>
-        </div>
-        <span className="canvas-studio-revision">
-          {context.revision} · {t("Read-only snapshot")}
-        </span>
-      </header>
       <nav className="canvas-perspectives" aria-label={t("Canvas") + " · " + t("Navigation")}>
         {perspectives.map((item) => (
           <button
