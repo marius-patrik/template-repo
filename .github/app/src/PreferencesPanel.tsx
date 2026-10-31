@@ -271,12 +271,12 @@ export default function PreferencesPanel() {
       <div className="settings-group">
         <h2>{t("Component token mapping")}</h2>
         <p className="muted">{t("Override a component's color and scale tokens without changing the global palette. Inherit keeps the global setting.")}</p>
-        <div className="component-token-table" role="table" aria-label={t("Component token mapping")}>
+        <div className="component-token-table" aria-label={t("Component token mapping")}>
           {COMPONENTS.map((component) => (
             <div className="component-token-row" key={component}>
               <strong>{t(readable(component))}</strong>
               {(["surface","text","border","accent","font","icon","spacing"] as const).map((field) => (
-                <label key={field} className="component-token-cell">
+                <div key={field} className="component-token-cell">
                   <span>{t(readable(field))}</span>
                   <CanvasSelect
                     label={t(readable(component)) + " · " + t(readable(field))}
@@ -292,7 +292,7 @@ export default function PreferencesPanel() {
                       } as CanvasPreferences["componentThemes"]);
                     }}
                   />
-                </label>
+                </div>
               ))}
             </div>
           ))}
