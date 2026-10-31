@@ -67,7 +67,7 @@ export default function ColorEditor({
           {mode === "hsl"
             ? <HslColorPicker color={hsl} onChange={(hslValue) => set(colord(hslValue).toHex())} />
             : <HexColorPicker color={value} onChange={set} />}
-          <div className="color-editor-tabs" role="group" aria-label="Color format">
+          <div className="color-editor-tabs" aria-label="Color format">
             {(["hex","rgb","hsl"] as const).map((choice) => (
               <button key={choice} type="button" aria-pressed={mode === choice}
                 className={mode === choice ? "active" : ""} onClick={() => setMode(choice)}>{choice.toUpperCase()}</button>
