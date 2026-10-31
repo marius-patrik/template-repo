@@ -81,6 +81,20 @@ try {
   await page.getByRole("button", { name: "Settings", exact: true }).first().click();
   await page.getByRole("heading", { name: "Settings", exact: true }).waitFor();
   await page.getByRole("heading", { name: "Keyboard shortcuts" }).waitFor();
+  await page.getByRole("group", { name: "Skin selection" }).getByRole("button", { name: "Slate" }).click();
+  await page.waitForFunction(() => document.documentElement.dataset.skin === "slate");
+  await page.getByRole("group", { name: "Density" }).getByRole("button", { name: "Compact" }).click();
+  await page.waitForFunction(() => document.documentElement.dataset.density === "compact");
+  await page.locator("#canvas-language").selectOption("cs");
+  await page.getByRole("heading", { name: "Nastavení", exact: true }).waitFor();
+  await page.waitForFunction(() => document.documentElement.lang === "cs");
+  await page.reload({ waitUntil: "load" });
+  await page.getByRole("heading", { name: "Nastavení", exact: true }).waitFor();
+  await page.waitForFunction(() => document.documentElement.dataset.skin === "slate");
+  await page.waitForFunction(() => document.documentElement.dataset.density === "compact");
+  await page.locator("#canvas-language").selectOption("en");
+  await page.getByRole("heading", { name: "Settings", exact: true }).waitFor();
+
   await page.getByRole("button", { name: "Choose custom accent color" }).click();
   await page.getByRole("textbox", { name: "Accent color hex value" }).fill("#dd66cc");
   await page.waitForFunction(() => getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() === "#dd66cc");
@@ -107,7 +121,7 @@ try {
   await page.locator(".sidebar.mobile-open").waitFor();
 
   if (errors.length) throw new Error(`Browser uncaught errors: ${errors.join("; ")}`);
-  console.log("Canvas Chromium smoke passed: Dockview tab actions, split/restore/reset, routes, chrome, shortcuts, settings and mobile.");
+  console.log("Canvas Chromium smoke passed: Dockview layout, skin and density persistence, Czech/English i18n, commands and mobile.");
 } finally {
   await browser.close();
 }
