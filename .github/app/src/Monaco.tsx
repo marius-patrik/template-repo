@@ -6,12 +6,13 @@ import "monaco-editor/esm/vs/language/typescript/monaco.contribution";
 import EditorWorker from "./workers/editor.worker.ts?worker&inline";
 import JsonWorker from "./workers/json.worker.ts?worker&inline";
 import TypeScriptWorker from "./workers/typescript.worker.ts?worker&inline";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AnimatedIcon } from "./components/AnimatedIcon";
 import { CanvasSelect } from "./components/ui/CanvasSelect";
 import context from "./generated/context.json";
 import { notify } from "./notifications";
+import { useCanvasConfig } from "./config";
 
 self.MonacoEnvironment = {
   getWorker(_moduleId: string, label: string) {
@@ -31,13 +32,23 @@ const languageFor = (path: string) =>
 
 export default function Monaco() {
   const { t } = useTranslation();
+  const theme = useCanvasConfig((state) => state.preferences.theme);
+  const [systemDark, setSystemDark] = useState(
+    () => window.matchMedia("(prefers-color-scheme: dark)").matches,
+  );
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-color-scheme: dark)");
+    const change = () => setSystemDark(query.matches);
+    query.addEventListener("change", change);
+    return () => query.removeEventListener("change", change);
+  }, []);
   const docs = context.documents;
   const [path, setPath] = useState(docs[0]?.path ?? "");
   // Scratch edits are scoped to the current tab instance, not persisted to Git or browser storage.
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const original = docs.find((doc) => doc.path === path)?.content ?? "";
   const value = drafts[path] ?? original;
-  const dark = document.documentElement.dataset.theme !== "light";
+  const dark = theme === "system" ? systemDark : theme === "dark";
   return (
     <div className="monaco-pane">
       <div className="monaco-toolbar">

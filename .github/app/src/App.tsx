@@ -13,7 +13,7 @@ import { Button } from "./components/ui/button";
 import { CanvasSelect } from "./components/ui/CanvasSelect";
 import { CanvasContextMenu } from "./components/ui/ContextMenu";
 import Monaco from "./Monaco";
-import { Notifications, notify } from "./notifications";
+import { NotificationCenter, Notifications, notify } from "./notifications";
 import { VIEWS as nav, VIEW_GROUPS, type CanvasView as View, viewLabel } from "./views";
 import { version as appVersion } from "../package.json";
 import Graph from "./Graph";
@@ -95,15 +95,44 @@ function SourceIndex({ onOpen }: { onOpen: (id: string) => void }) {
   return (
     <div className="source-index">
       {context.documents.map((d) => (
-        <button type="button" key={d.path} className="doc-row" onClick={() => onOpen(d.path)}>
-          <span>
-            <AnimatedIcon name="artifacts" />
-            {d.path}
-          </span>
-          <small>
-            {t("Open document")} <AnimatedIcon name="right" size={13} />
-          </small>
-        </button>
+        <CanvasContextMenu
+          key={d.path}
+          actions={[
+            { icon: "artifacts", label: t("Open document"), action: () => onOpen(d.path) },
+            {
+              icon: "copy",
+              label: t("Copy source path"),
+              action: () => {
+                void navigator.clipboard.writeText(d.path).then(
+                  () => notify.success(t("Copied to clipboard")),
+                  () => notify.error(t("Clipboard unavailable")),
+                );
+              },
+            },
+            {
+              icon: "copy",
+              label: t("Copy source content"),
+              action: () => {
+                void navigator.clipboard.writeText(d.content).then(
+                  () => notify.success(t("Copied to clipboard")),
+                  () => notify.error(t("Clipboard unavailable")),
+                );
+              },
+            },
+          ]}
+        >
+          <div className="source-context-row">
+            <button type="button" className="doc-row" onClick={() => onOpen(d.path)}>
+              <span>
+                <AnimatedIcon name="artifacts" />
+                {d.path}
+              </span>
+              <small>
+                {t("Open document")} <AnimatedIcon name="right" size={13} />
+              </small>
+            </button>
+          </div>
+        </CanvasContextMenu>
       ))}
     </div>
   );
@@ -623,6 +652,7 @@ export default function App() {
         </div>
         <strong className="title-center">Canvas</strong>
         <div className="title-actions">
+          <NotificationCenter />
           <Button
             size="icon"
             aria-label={t("Search pages and commands")}

@@ -191,11 +191,23 @@ const english = [
   "Revert",
   "Copy",
   "Open views with the sidebar or title-bar dropdowns, then arrange their tabs with Dockview.",
+  "Notifications",
+  "Unread notifications: {{count}}",
+  "No notifications yet",
+  "Clear notifications",
+  "Copy source path",
+  "Copy source content",
 ] as const;
 
 const en = Object.fromEntries(english.map((value) => [value, value]));
 
 const cs: Record<string, string> = {
+  "Notifications": "Oznámení",
+  "Unread notifications: {{count}}": "Nepřečtená oznámení: {{count}}",
+  "No notifications yet": "Zatím žádná oznámení",
+  "Clear notifications": "Vymazat oznámení",
+  "Copy source path": "Kopírovat cestu k souboru",
+  "Copy source content": "Kopírovat obsah souboru",
   Monaco: "Monaco",
   "Workspace navigation": "Navigace pracovním prostorem",
   Section: "Sekce",
@@ -398,6 +410,12 @@ const cs: Record<string, string> = {
   "Density selection": "Výběr hustoty",
 };
 const es: Record<string, string> = {
+  "Notifications": "Notificaciones",
+  "Unread notifications: {{count}}": "Notificaciones sin leer: {{count}}",
+  "No notifications yet": "Aún no hay notificaciones",
+  "Clear notifications": "Borrar notificaciones",
+  "Copy source path": "Copiar ruta del archivo",
+  "Copy source content": "Copiar contenido del archivo",
   Monaco: "Monaco",
   "Workspace navigation": "Navegación del espacio de trabajo",
   Section: "Sección",
