@@ -29,7 +29,7 @@ export function AccentColorPicker({
 
   return (
     <div className="accent-controls">
-      <div className="accent-swatches" role="group" aria-label="Accent color presets">
+      <fieldset className="accent-swatches" aria-label="Accent color presets">
         {accentPresets.map((preset) => (
           <button
             type="button"
@@ -44,7 +44,7 @@ export function AccentColorPicker({
             {value === preset.id && <span className="swatch-mark" />}
           </button>
         ))}
-      </div>
+      </fieldset>
       <Popover.Root open={open} onOpenChange={setOpen}>
         <Popover.Trigger asChild>
           <button
