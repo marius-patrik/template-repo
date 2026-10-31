@@ -123,9 +123,8 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
 
   const splitRight = () => {
     const selected =
-      containerApi.panels.find(
-        (panel) => panel.group.id === group.id && panel.api.isVisible,
-      ) ?? containerApi.panels.find((panel) => panel.group.id === group.id);
+      containerApi.panels.find((panel) => panel.group.id === group.id && panel.api.isVisible) ??
+      containerApi.panels.find((panel) => panel.group.id === group.id);
     const candidate: unknown = selected?.api.getParameters().view;
     const view: CanvasView =
       typeof candidate === "string" && isView(candidate) ? candidate : "overview";
@@ -195,7 +194,9 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
             aria-label="More tab actions"
             title="More tab actions"
           >
-            <span className="dock-more-glyph" aria-hidden="true">···</span>
+            <span className="dock-more-glyph" aria-hidden="true">
+              ···
+            </span>
           </button>
         </DropdownMenu.Trigger>
         <DropdownMenu.Portal>
@@ -207,10 +208,7 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
             collisionPadding={10}
             aria-label="Tab layout actions"
           >
-            <DropdownMenu.Item
-              className="menu-item dock-action-item"
-              onSelect={splitRight}
-            >
+            <DropdownMenu.Item className="menu-item dock-action-item" onSelect={splitRight}>
               <AnimatedIcon name="workspace" size={16} />
               <span>Split right</span>
             </DropdownMenu.Item>
