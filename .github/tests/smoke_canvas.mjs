@@ -54,6 +54,18 @@ try {
 
   await page.locator(".dock-welcome-options").getByRole("button", { name: "Editor" }).click();
   await page.locator('[data-dock-view="editor"]').waitFor();
+  console.log("EDITOR_GEOMETRY:", JSON.stringify(await page.evaluate(() =>
+    [".dv-content-container","[data-dock-view='editor']", ".dock-route-page", ".monaco-pane", ".monaco-toolbar", ".monaco-editor-host"]
+      .map((selector) => {
+        const element = document.querySelector(selector);
+        if (!element) return { selector, missing: true };
+        const box = element.getBoundingClientRect();
+        const css = getComputedStyle(element);
+        return { selector, width: box.width, height: box.height,
+          display: css.display, overflow: css.overflow, flex: css.flex, visibility: css.visibility };
+      })
+  )));
+  await captureReview("EDITOR", page);
   await page.getByTestId("monaco-editor").waitFor();
   if (await page.locator(".monaco-source-select > strong").count())
     throw new Error("Editor must not duplicate the tab title");
