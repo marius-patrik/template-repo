@@ -1287,6 +1287,17 @@ kbd {
   }
 }
 
-.accent-swatches { border: 0; margin: 0; padding: 0; min-width: 0; }
-:root[data-accent="amber"] { --accent: #edbb79; --accent-foreground: #21180d; }
-:root[data-theme="light"][data-accent="amber"] { --accent: #9c5113; --accent-foreground: #fff; }
+.accent-swatches {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+:root[data-accent="amber"] {
+  --accent: #edbb79;
+  --accent-foreground: #21180d;
+}
+:root[data-theme="light"][data-accent="amber"] {
+  --accent: #9c5113;
+  --accent-foreground: #fff;
+}
