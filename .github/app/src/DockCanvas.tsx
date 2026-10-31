@@ -5,7 +5,6 @@ import {
   useEffect,
   useMemo,
   useRef,
-  useState,
   type ReactNode,
 } from "react";
 import {
@@ -37,6 +36,7 @@ type CanvasView = (typeof ROUTES)[number];
 type PaneContext = {
   render: (view: CanvasView) => ReactNode;
   onNavigate: (route: string) => void;
+  resetLayout: () => void;
 };
 const PaneContext = createContext<PaneContext | null>(null);
 const TITLES: Record<CanvasView, string> = {
@@ -120,9 +120,28 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
     workspace?.onNavigate(`/${view}`);
   };
 
+  const splitRight = () => {
+    const selected =
+      containerApi.panels.find(
+        (panel) => panel.group.id === group.id && panel.api.isVisible,
+      ) ?? containerApi.panels.find((panel) => panel.group.id === group.id);
+    const candidate: unknown = selected?.api.getParameters().view;
+    const view: CanvasView =
+      typeof candidate === "string" && isView(candidate) ? candidate : "overview";
+    const id = `split:${view}:${Date.now().toString(36)}:${++tabSequence}`;
+    containerApi.addPanel({
+      id,
+      component: "page",
+      title: TITLES[view],
+      params: { view },
+      position: { referenceGroup: group.id, direction: "right" },
+    });
+    workspace?.onNavigate(`/${view}`);
+  };
+
   return (
     <div
-      className="dock-tab-add"
+      className="dock-header-actions"
       data-dock-group={group.id}
       onPointerDown={(event) => event.stopPropagation()}
     >
@@ -167,6 +186,44 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
           </DropdownMenu.Content>
         </DropdownMenu.Portal>
       </DropdownMenu.Root>
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger asChild>
+          <button
+            type="button"
+            className="dock-more-trigger"
+            aria-label="More tab actions"
+            title="More tab actions"
+          >
+            <span className="dock-more-glyph" aria-hidden="true">···</span>
+          </button>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Portal>
+          <DropdownMenu.Content
+            className="menu-content dock-more-menu"
+            align="end"
+            side="bottom"
+            sideOffset={5}
+            collisionPadding={10}
+            aria-label="Tab layout actions"
+          >
+            <DropdownMenu.Item
+              className="menu-item dock-action-item"
+              onSelect={splitRight}
+            >
+              <AnimatedIcon name="workspace" size={16} />
+              <span>Split right</span>
+            </DropdownMenu.Item>
+            <DropdownMenu.Separator className="dock-add-separator" />
+            <DropdownMenu.Item
+              className="menu-item dock-action-item"
+              onSelect={() => workspace?.resetLayout()}
+            >
+              <AnimatedIcon name="overview" size={16} />
+              <span>Reset layout</span>
+            </DropdownMenu.Item>
+          </DropdownMenu.Content>
+        </DropdownMenu.Portal>
+      </DropdownMenu.Root>
     </div>
   );
 }
@@ -191,10 +248,20 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
   const disposables = useRef<Array<{ dispose: () => void }>>([]);
   const latest = useRef({ route, onNavigate });
   latest.current = { route, onNavigate };
-  const serial = useRef(0);
-  const [count, setCount] = useState(0);
+  const resetLayout = () => {
+    const api = apiRef.current;
+    if (!api) return;
+    api.clear();
+    try {
+      localStorage.removeItem(LAYOUT_KEY);
+    } catch {
+      /* Browser storage is optional. */
+    }
+    openRoute(api, "overview");
+    latest.current.onNavigate("/overview");
+  };
   const panelContext = useMemo(
-    () => ({ render: renderView, onNavigate }),
+    () => ({ render: renderView, onNavigate, resetLayout }),
     [renderView, onNavigate],
   );
 
@@ -251,7 +318,6 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
         }
       }),
       api.onDidLayoutChange(() => {
-        setCount(api.panels.length);
         saveLayout(api);
       }),
     ];
@@ -265,85 +331,12 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
       });
     }
     openRoute(api, routeToView(latest.current.route));
-    setCount(api.panels.length);
     saveLayout(api);
-  };
-
-  const splitRight = () => {
-    const api = apiRef.current;
-    if (!api) return;
-    const active = api.activePanel;
-    const candidate: unknown = active?.api.getParameters().view;
-    const view =
-      typeof candidate === "string" && isView(candidate) ? candidate : routeToView(route);
-    const id = `split:${view}:${++serial.current}:${Date.now()}`;
-    api.addPanel({
-      id,
-      component: "page",
-      title: TITLES[view],
-      params: { view },
-      position: active ? { referencePanel: active.id, direction: "right" } : { direction: "right" },
-    });
-    latest.current.onNavigate(`/${view}`);
-  };
-
-  const resetLayout = () => {
-    const api = apiRef.current;
-    if (!api) return;
-    api.clear();
-    try {
-      localStorage.removeItem(LAYOUT_KEY);
-    } catch {
-      /* unavailable */
-    }
-    openRoute(api, "overview");
-    latest.current.onNavigate("/overview");
   };
 
   return (
     <PaneContext.Provider value={panelContext}>
       <div className="dock-workspace" data-testid="dockview-workspace">
-        <div className="dock-toolbar">
-          <div className="dock-toolbar-title">
-            <span className="dock-eyebrow">WORKSPACE</span>
-            <span className="dock-toolbar-divider" aria-hidden="true">
-              /
-            </span>
-            <span>Panels</span>
-            <span className="dock-panel-count">{count}</span>
-          </div>
-          <div className="dock-toolbar-actions">
-            <button
-              type="button"
-              className="dock-toolbar-button"
-              onClick={() => latest.current.onNavigate("/graph")}
-              aria-label="Open knowledge graph"
-              title="Open knowledge graph"
-            >
-              <AnimatedIcon name="graph" size={15} />
-              <span>Graph</span>
-            </button>
-            <button
-              type="button"
-              className="dock-toolbar-button"
-              onClick={splitRight}
-              aria-label="Split active panel right"
-              title="Split active panel right"
-            >
-              <AnimatedIcon name="workspace" size={15} />
-              <span>Split right</span>
-            </button>
-            <button
-              type="button"
-              className="dock-toolbar-button"
-              onClick={resetLayout}
-              aria-label="Reset panel layout"
-              title="Reset panel layout"
-            >
-              Reset layout
-            </button>
-          </div>
-        </div>
         <section className="dock-grid" aria-label="Dockview panels">
           <DockviewReact
             theme={dark ? themeDark : themeLight}
