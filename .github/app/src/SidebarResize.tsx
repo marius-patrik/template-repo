@@ -3,53 +3,74 @@ import { useTranslation } from "react-i18next";
 import { useCanvasConfig } from "./config";
 
 const clamp = (width: number) => Math.round(Math.max(180, Math.min(480, width)));
-type Drag = { id: number; x: number; width: number; next: number; frame: number };
+type Drag = {
+  id: number;
+  startX: number;
+  startWidth: number;
+  nextWidth: number;
+  frame: number;
+  finish: () => void;
+};
 
-/** Resizes a CSS variable directly; only settled dimensions are persisted. */
+/** Pointer tracking is attached to the window; React rerenders cannot drop the drag.
+ * CSS is updated in rAF and the settled value is persisted once on release. */
 export default function SidebarResize() {
   const { t } = useTranslation();
-  const width = useCanvasConfig((s) => s.preferences.sidebarWidth);
-  const side = useCanvasConfig((s) => s.preferences.sidebarPosition);
-  const set = useCanvasConfig((s) => s.setPreferences);
+  const width = useCanvasConfig((state) => state.preferences.sidebarWidth);
+  const side = useCanvasConfig((state) => state.preferences.sidebarPosition);
+  const set = useCanvasConfig((state) => state.setPreferences);
   const drag = useRef<Drag | null>(null);
+
   const start = useCallback(
     (event: PointerEvent<HTMLHRElement>) => {
-      if (event.button !== 0) return;
+      if (event.button !== 0 || drag.current) return;
       event.preventDefault();
-      drag.current = { id: event.pointerId, x: event.clientX, width, next: width, frame: 0 };
-      document.body.classList.add("cx-resizing");
-      event.currentTarget.setPointerCapture(event.pointerId);
-    },
-    [width],
-  );
-  const move = useCallback(
-    (event: PointerEvent<HTMLHRElement>) => {
-      const item = drag.current;
-      if (!item || item.id !== event.pointerId) return;
+      const id = event.pointerId;
+      const startX = event.clientX;
+      const startWidth = width;
       const sign = side === "left" ? 1 : -1;
-      item.next = clamp(item.width + sign * (event.clientX - item.x));
-      if (!item.frame) {
-        item.frame = requestAnimationFrame(() => {
-          if (!drag.current) return;
-          drag.current.frame = 0;
-          document.documentElement.style.setProperty(
-            "--cx-sidebar-width",
-            `${drag.current.next}px`,
-          );
+      const onMove = (current: globalThis.PointerEvent) => {
+        const state = drag.current;
+        if (!state || current.pointerId !== state.id) return;
+        state.nextWidth = clamp(startWidth + sign * (current.clientX - startX));
+        if (state.frame) return;
+        state.frame = requestAnimationFrame(() => {
+          const active = drag.current;
+          if (!active) return;
+          active.frame = 0;
+          document.documentElement.style.setProperty("--cx-sidebar-width", `${active.nextWidth}px`);
         });
-      }
+      };
+      const finish = () => {
+        const state = drag.current;
+        drag.current = null;
+        window.removeEventListener("pointermove", onMove, true);
+        window.removeEventListener("pointerup", onEnd, true);
+        window.removeEventListener("pointercancel", onEnd, true);
+        document.body.classList.remove("cx-resizing");
+        if (!state) return;
+        if (state.frame) cancelAnimationFrame(state.frame);
+        document.documentElement.style.setProperty("--cx-sidebar-width", `${state.nextWidth}px`);
+        if (state.nextWidth !== state.startWidth) set({ sidebarWidth: state.nextWidth });
+      };
+      const onEnd = (current: globalThis.PointerEvent) => {
+        if (current.pointerId === id) finish();
+      };
+      drag.current = {
+        id,
+        startX,
+        startWidth,
+        nextWidth: startWidth,
+        frame: 0,
+        finish,
+      };
+      document.body.classList.add("cx-resizing");
+      window.addEventListener("pointermove", onMove, true);
+      window.addEventListener("pointerup", onEnd, true);
+      window.addEventListener("pointercancel", onEnd, true);
     },
-    [side],
+    [set, side, width],
   );
-  const end = useCallback(() => {
-    const item = drag.current;
-    drag.current = null;
-    document.body.classList.remove("cx-resizing");
-    if (!item) return;
-    if (item.frame) cancelAnimationFrame(item.frame);
-    if (item.next !== item.width) set({ sidebarWidth: item.next });
-    document.documentElement.style.setProperty("--cx-sidebar-width", `${item.next}px`);
-  }, [set]);
   const keyboard = useCallback(
     (event: KeyboardEvent<HTMLHRElement>) => {
       const direction = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
@@ -61,15 +82,15 @@ export default function SidebarResize() {
       event.preventDefault();
       set({ sidebarWidth: next });
     },
-    [side, set, width],
+    [set, side, width],
   );
   useEffect(() => {
-    document.documentElement.style.setProperty("--cx-sidebar-width", `${width}px`);
+    if (!drag.current) document.documentElement.style.setProperty("--cx-sidebar-width", `${width}px`);
   }, [width]);
   useEffect(
     () => () => {
+      drag.current?.finish();
       document.body.classList.remove("cx-resizing");
-      if (drag.current?.frame) cancelAnimationFrame(drag.current.frame);
     },
     [],
   );
@@ -83,12 +104,6 @@ export default function SidebarResize() {
       aria-valuemax={480}
       tabIndex={0}
       onPointerDown={start}
-      onPointerMove={move}
-      onPointerUp={(event) => {
-        if (event.currentTarget.hasPointerCapture(event.pointerId))
-          event.currentTarget.releasePointerCapture(event.pointerId);
-      }}
-      onLostPointerCapture={end}
       onDoubleClick={() => set({ sidebarWidth: 228 })}
       onKeyDown={keyboard}
     />
