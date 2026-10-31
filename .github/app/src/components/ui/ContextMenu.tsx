@@ -18,12 +18,12 @@ export function CanvasContextMenu({
       <ContextMenu.Trigger asChild>{children}</ContextMenu.Trigger>
       <ContextMenu.Portal>
         <ContextMenu.Content className="menu-content canvas-context-menu" collisionPadding={10}>
-          {actions.map((item, index) =>
+          {actions.map((item) =>
             item.type === "separator" ? (
-              <ContextMenu.Separator key={`separator-${index}`} className="dock-add-separator" />
+              <ContextMenu.Separator key="separator" className="dock-add-separator" />
             ) : (
               <ContextMenu.Item
-                key={`${item.label}-${index}`}
+                key={item.label}
                 className="menu-item context-action"
                 disabled={item.disabled}
                 onSelect={item.action}
