@@ -64,7 +64,7 @@ Dockview layout acceptance is checked in Chromium before every Pages publication
 
 ### Dockview tab creation
 
-Every Dockview group header has a `+` action with a Radix dropdown listing all ten route views, grouped as Workspace and System. Selecting an option creates a new tab in that group, including when the same view is already open in another tab. Wouter follows the new active tab. Keyboard and touch access use Radix's built-in menu behavior.
+Every Dockview group header has a `+` action with a Radix dropdown listing all eleven route views, grouped as Workspace and System. Selecting an option creates a new tab in that group, including when the same view is already open in another tab. Wouter follows the new active tab. Keyboard and touch access use Radix's built-in menu behavior.
 
 The browser smoke test selects the Radix dropdown portal via its stable `.dock-add-menu` class rather than relying on an implementation-specific ARIA wrapper; it still verifies all ten accessible menu items.
 
@@ -121,3 +121,32 @@ Build checks now verify localized Czech/English labels, the locale persisted acr
 Localization acceptance additionally verifies Spanish, Czech and English Settings language transitions, with no translation of source Markdown. Knowledge-graph labels use the same catalog, and graph light/dark mode follows the appearance preference.
 
 Version 0.9 release acceptance includes HTML order, type checking, Biome, three built-in skins, spacing density, browser-persisted language and existing Dockview/shortcut smoke coverage.
+
+## Interaction prototype — navigation, menus, notifications and Monaco
+
+The only application is the compiled React Pages app. The left side of the title bar
+contains three Radix Select navigation steps (section > source repository > view);
+the repository step lists only the source actually compiled into the snapshot.
+Search/commands remain available via the title-bar search button and Mod+K.
+The responsive sidebar has a keyboard-accessible drag separator whose expanded width
+is remembered separately from its collapsed state (`canvas-sidebar-width-v1`).
+
+Radix Select and Context Menu supply keyboard/focus/portal behavior for language,
+Monaco source files, title-bar navigation, sidebar actions and Dockview tabs.
+A Sonner-based global toast surface provides actionable success and error feedback.
+Dockview tabs include route icons and allow right-click actions. Icons use
+`lucide-animated` with animation triggered from the full interactive parent;
+Monaco's `</>` badge supplements the animated icon frame because that glyph is
+not present in the pinned animated icon set.
+
+Monaco is a genuine locally bundled editor, not a CDN-loaded imitation. The three
+Monaco editor workers are inlined into the build. Its initial documents come from
+the same explicitly allowlisted repository snapshot as the rest of the app. Changes
+are **in-memory scratch drafts** for the active tab instance and never modify
+Git sources or imply source-control write permissions. Clipboard export and reset
+provide explicit actions. There are no fabricated agent task states or graph edges:
+document relationships are derived from authored Markdown links to tracked paths.
+
+The application remains in user-controlled prototyping. CI must pass typecheck,
+lint, formatting, standalone Pages build and browser smoke before a preview is
+considered technically verified; CI passing is not final design approval.
