@@ -1973,8 +1973,12 @@ export function AccentColorPicker({
   );
 }
 </pre></section>
-<section class="file" id="file-0065"><h3>.github/app/src/App.tsx</h3><p class="meta">Git mode 100644 · 711947e0ef4a117303877369f6458f558099c1e6</p><pre>import { useEffect, useMemo, useRef, useState } from &quot;react&quot;;
-import * as DropdownMenu from &quot;@radix-ui/react-dropdown-menu&quot;;
+<section class="file" id="file-0065"><h3>.github/app/src/App.tsx</h3><p class="meta">Git mode 100644 · 888a6765557781b18ce3798dc59abb54a6a77d5e</p><pre>import { useEffect, useMemo, useRef, useState } from &quot;react&quot;;
+import { colord, extend } from &quot;colord&quot;;
+import a11yPlugin from &quot;colord/plugins/a11y&quot;;
+import { formatForDisplay, useAppHotkeys, useHotkey } from &quot;@tanstack/react-hotkeys&quot;;
+import { AccentColorPicker, accentPresets } from &quot;./AccentColorPicker&quot;;
+import KeyboardSettings from &quot;./KeyboardSettings&quot;;
 import { Link, Route, Switch, useLocation } from &quot;wouter&quot;;
 import { motion, AnimatePresence } from &quot;motion/react&quot;;
 import { AnimatedIcon } from &quot;./components/AnimatedIcon&quot;;
@@ -1995,9 +1999,9 @@ type View =
   | &quot;context&quot;
   | &quot;settings&quot;;
 type Theme = &quot;dark&quot; | &quot;light&quot; | &quot;system&quot;;
-type Accent = &quot;neutral&quot; | &quot;blue&quot; | &quot;sage&quot; | &quot;violet&quot;;
-type Preferences = { theme: Theme; accent: Accent; fontSize: number; iconSize: number };
+type Preferences = { theme: Theme; accent: string; fontSize: number; iconSize: number };
 const defaults: Preferences = { theme: &quot;dark&quot;, accent: &quot;neutral&quot;, fontSize: 14, iconSize: 18 };
+extend([a11yPlugin]);
 const nav: { id: View; label: string; group: string }[] = [
   { id: &quot;overview&quot;, label: &quot;Overview&quot;, group: &quot;Workspace&quot; },
   { id: &quot;workspace&quot;, label: &quot;Workspace&quot;, group: &quot;Workspace&quot; },
@@ -2017,7 +2021,8 @@ function loadPrefs(): Preferences {
     if (
       data &amp;&amp;
       [&quot;dark&quot;, &quot;light&quot;, &quot;system&quot;].includes(data.theme) &amp;&amp;
-      [&quot;neutral&quot;, &quot;blue&quot;, &quot;sage&quot;, &quot;violet&quot;].includes(data.accent) &amp;&amp;
+      typeof data.accent === &quot;string&quot; &amp;&amp;
+      (accentPresets.some((preset) =&gt; preset.id === data.accent) || /^#[0-9a-f]{6}$/i.test(data.accent)) &amp;&amp;
       [13, 14, 15, 16].includes(data.fontSize) &amp;&amp;
       [16, 18, 20].includes(data.iconSize)
     )
@@ -2288,15 +2293,19 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
     &lt;div className=&quot;page&quot;&gt;
       &lt;PageIntro
         title=&quot;Settings&quot;
-        detail=&quot;Local appearance preferences only. No repository configuration is changed.&quot;
+        detail=&quot;Appearance and keyboard preferences are local to this browser.&quot;
       /&gt;
       &lt;section className=&quot;panel padded settings-panel&quot;&gt;
         &lt;h2&gt;Appearance&lt;/h2&gt;
         {options(&quot;theme&quot;, [&quot;dark&quot;, &quot;light&quot;, &quot;system&quot;] as const, &quot;Theme&quot;)}
-        {options(&quot;accent&quot;, [&quot;neutral&quot;, &quot;blue&quot;, &quot;sage&quot;, &quot;violet&quot;] as const, &quot;Accent&quot;)}
+        &lt;div className=&quot;setting-row accent-setting&quot;&gt;
+          &lt;strong&gt;Accent color&lt;/strong&gt;
+          &lt;AccentColorPicker value={prefs.accent} onChange={(accent) =&gt; setPrefs({ ...prefs, accent })} /&gt;
+        &lt;/div&gt;
         {options(&quot;fontSize&quot;, [13, 14, 15, 16] as const, &quot;Text size&quot;)}
         {options(&quot;iconSize&quot;, [16, 18, 20] as const, &quot;Icon size&quot;)}
       &lt;/section&gt;
+      &lt;KeyboardSettings /&gt;
       &lt;p className=&quot;muted settings-note&quot;&gt;
         Canvas v0.6.0 · Prototype. Local UI settings are not authoritative project data.
       &lt;/p&gt;
@@ -2305,6 +2314,7 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
 }
 export default function App() {
   const [path, navigate] = useLocation();
+  const hotkeys = useAppHotkeys();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -2325,7 +2335,15 @@ export default function App() {
           : &quot;light&quot;
         : prefs.theme;
     document.documentElement.dataset.theme = resolved;
-    document.documentElement.dataset.accent = prefs.accent;
+    document.documentElement.dataset.accent = accentPresets.some((preset) =&gt; preset.id === prefs.accent) ? prefs.accent : &quot;custom&quot;;
+    if (/^#[0-9a-f]{6}$/i.test(prefs.accent) &amp;&amp; colord(prefs.accent).isValid()) {
+      const color = colord(prefs.accent);
+      document.documentElement.style.setProperty(&quot;--accent&quot;, color.toHex());
+      document.documentElement.style.setProperty(&quot;--accent-foreground&quot;, color.contrast(&quot;#ffffff&quot;) &gt;= color.contrast(&quot;#111113&quot;) ? &quot;#ffffff&quot; : &quot;#111113&quot;);
+    } else {
+      document.documentElement.style.removeProperty(&quot;--accent&quot;);
+      document.documentElement.style.removeProperty(&quot;--accent-foreground&quot;);
+    }
     document.documentElement.style.setProperty(&quot;--app-font-size&quot;, prefs.fontSize + &quot;px&quot;);
     document.documentElement.style.setProperty(&quot;--app-icon-size&quot;, prefs.iconSize + &quot;px&quot;);
     try {
@@ -2342,17 +2360,6 @@ export default function App() {
     [search],
   );
   useEffect(() =&gt; {
-    const onKey = (e: KeyboardEvent) =&gt; {
-      if ((e.ctrlKey || e.metaKey) &amp;&amp; e.key.toLowerCase() === &quot;k&quot;) {
-        e.preventDefault();
-        setPaletteOpen((v) =&gt; !v);
-      }
-      if (e.key === &quot;Escape&quot;) setPaletteOpen(false);
-    };
-    window.addEventListener(&quot;keydown&quot;, onKey);
-    return () =&gt; window.removeEventListener(&quot;keydown&quot;, onKey);
-  }, []);
-  useEffect(() =&gt; {
     if (paletteOpen) requestAnimationFrame(() =&gt; input.current?.focus());
   }, [paletteOpen]);
   const go = (dest: string) =&gt; {
@@ -2361,6 +2368,16 @@ export default function App() {
     setPaletteOpen(false);
     setSearch(&quot;&quot;);
   };
+  useHotkey(hotkeys[&quot;canvas.sidebar.toggle&quot;], () =&gt; {
+    if (window.matchMedia(&quot;(max-width: 700px)&quot;).matches) setMobileOpen((v) =&gt; !v);
+    else setCollapsed((v) =&gt; !v);
+  }, { ignoreInputs: true });
+  useHotkey(hotkeys[&quot;canvas.omnibar.toggle&quot;], () =&gt; setPaletteOpen((v) =&gt; !v), { ignoreInputs: false });
+  useHotkey(hotkeys[&quot;canvas.settings.open&quot;], () =&gt; go(&quot;/settings&quot;));
+  useHotkey(hotkeys[&quot;canvas.overview.open&quot;], () =&gt; go(&quot;/overview&quot;));
+  useHotkey(hotkeys[&quot;canvas.workspace.open&quot;], () =&gt; go(&quot;/workspace&quot;));
+  useHotkey(hotkeys[&quot;canvas.projects.open&quot;], () =&gt; go(&quot;/projects&quot;));
+  useHotkey(hotkeys[&quot;canvas.graph.open&quot;], () =&gt; go(&quot;/graph&quot;));
   const icon = (name: string, size = prefs.iconSize) =&gt; &lt;AnimatedIcon name={name} size={size} /&gt;;
   return (
     &lt;div className=&quot;app-root&quot;&gt;
@@ -2374,10 +2391,16 @@ export default function App() {
           &gt;
             {icon(&quot;expand&quot;)}
           &lt;/Button&gt;
-          &lt;span className=&quot;app-symbol&quot;&gt;{icon(&quot;workspace&quot;, 16)}&lt;/span&gt;
+          &lt;Button
+            size=&quot;icon&quot;
+            className=&quot;desktop-toggle&quot;
+            title={collapsed ? &quot;Expand sidebar&quot; : &quot;Collapse sidebar&quot;}
+            aria-label={collapsed ? &quot;Expand sidebar&quot; : &quot;Collapse sidebar&quot;}
+            onClick={() =&gt; setCollapsed((value) =&gt; !value)}
+          &gt;
+            {icon(collapsed ? &quot;expand&quot; : &quot;collapse&quot;)}
+          &lt;/Button&gt;
           &lt;strong&gt;Canvas&lt;/strong&gt;
-          &lt;span className=&quot;title-separator&quot;&gt;/&lt;/span&gt;
-          &lt;span className=&quot;title-product&quot;&gt;{context.name}&lt;/span&gt;
         &lt;/div&gt;
         &lt;div className=&quot;omnibar-area&quot;&gt;
           &lt;button
@@ -2392,7 +2415,7 @@ export default function App() {
             &lt;span className=&quot;crumb&quot;&gt;{context.name}&lt;/span&gt;
             {icon(&quot;right&quot;, 12)}
             &lt;strong&gt;{title}&lt;/strong&gt;
-            &lt;kbd&gt;⌘ K&lt;/kbd&gt;
+            &lt;kbd&gt;{hotkeys[&quot;canvas.omnibar.toggle&quot;].hotkey ? formatForDisplay(hotkeys[&quot;canvas.omnibar.toggle&quot;].hotkey) : &quot;Unbound&quot;}&lt;/kbd&gt;
           &lt;/button&gt;
         &lt;/div&gt;
         &lt;Button
@@ -2423,22 +2446,12 @@ export default function App() {
           ].join(&quot; &quot;)}
           aria-label=&quot;Main navigation&quot;
         &gt;
-          &lt;div className=&quot;sidebar-top&quot;&gt;
-            &lt;Button
-              size=&quot;icon&quot;
-              title={collapsed ? &quot;Expand sidebar&quot; : &quot;Collapse sidebar&quot;}
-              aria-label={collapsed ? &quot;Expand sidebar&quot; : &quot;Collapse sidebar&quot;}
-              onClick={() =&gt; setCollapsed((v) =&gt; !v)}
-            &gt;
-              {icon(collapsed ? &quot;expand&quot; : &quot;collapse&quot;)}
-            &lt;/Button&gt;
-          &lt;/div&gt;
           &lt;nav className=&quot;sidebar-navigation&quot;&gt;
             {[&quot;Workspace&quot;, &quot;System&quot;].map((group) =&gt; (
               &lt;div className=&quot;nav-group&quot; key={group}&gt;
-                {!collapsed &amp;&amp; &lt;div className=&quot;nav-group-label&quot;&gt;{group}&lt;/div&gt;}
+                {(!collapsed || mobileOpen) &amp;&amp; &lt;div className=&quot;nav-group-label&quot;&gt;{group}&lt;/div&gt;}
                 {nav
-                  .filter((n) =&gt; n.group === group)
+                  .filter((n) =&gt; n.group === group &amp;&amp; n.id !== &quot;settings&quot;)
                   .map((n) =&gt; (
                     &lt;Link
                       href={&quot;/&quot; + n.id}
@@ -2449,53 +2462,17 @@ export default function App() {
                       aria-current={page === n.id ? &quot;page&quot; : undefined}
                     &gt;
                       {icon(n.id)}
-                      {!collapsed &amp;&amp; &lt;span&gt;{n.label}&lt;/span&gt;}
+                      {(!collapsed || mobileOpen) &amp;&amp; &lt;span&gt;{n.label}&lt;/span&gt;}
                     &lt;/Link&gt;
                   ))}
               &lt;/div&gt;
             ))}
           &lt;/nav&gt;
           &lt;div className=&quot;sidebar-footer&quot;&gt;
-            {!collapsed &amp;&amp; &lt;small&gt;Repository snapshot · read-only&lt;/small&gt;}
+            {(!collapsed || mobileOpen) &amp;&amp; &lt;small&gt;Repository snapshot · read-only&lt;/small&gt;}
           &lt;/div&gt;
         &lt;/aside&gt;
         &lt;div className=&quot;main-column&quot;&gt;
-          &lt;div className=&quot;project-header&quot;&gt;
-            &lt;div className=&quot;selector-group&quot;&gt;
-              &lt;DropdownMenu.Root&gt;
-                &lt;DropdownMenu.Trigger asChild&gt;
-                  &lt;button type=&quot;button&quot; className=&quot;context-selector&quot;&gt;
-                    &lt;span className=&quot;eyebrow&quot;&gt;Workspace&lt;/span&gt;
-                    &lt;strong&gt;Personal workspace&lt;/strong&gt;
-                    {icon(&quot;down&quot;, 13)}
-                  &lt;/button&gt;
-                &lt;/DropdownMenu.Trigger&gt;
-                &lt;DropdownMenu.Portal&gt;
-                  &lt;DropdownMenu.Content sideOffset={7} align=&quot;start&quot; className=&quot;menu-content&quot;&gt;
-                    &lt;DropdownMenu.Item className=&quot;menu-item&quot;&gt;Personal workspace&lt;/DropdownMenu.Item&gt;
-                  &lt;/DropdownMenu.Content&gt;
-                &lt;/DropdownMenu.Portal&gt;
-              &lt;/DropdownMenu.Root&gt;
-              {icon(&quot;right&quot;, 13)}
-              &lt;DropdownMenu.Root&gt;
-                &lt;DropdownMenu.Trigger asChild&gt;
-                  &lt;button type=&quot;button&quot; className=&quot;context-selector&quot;&gt;
-                    &lt;span className=&quot;eyebrow&quot;&gt;Project&lt;/span&gt;
-                    &lt;strong&gt;{context.name}&lt;/strong&gt;
-                    {icon(&quot;down&quot;, 13)}
-                  &lt;/button&gt;
-                &lt;/DropdownMenu.Trigger&gt;
-                &lt;DropdownMenu.Portal&gt;
-                  &lt;DropdownMenu.Content sideOffset={7} align=&quot;start&quot; className=&quot;menu-content&quot;&gt;
-                    &lt;DropdownMenu.Item className=&quot;menu-item&quot; onSelect={() =&gt; go(&quot;/overview&quot;)}&gt;
-                      {context.name}
-                    &lt;/DropdownMenu.Item&gt;
-                  &lt;/DropdownMenu.Content&gt;
-                &lt;/DropdownMenu.Portal&gt;
-              &lt;/DropdownMenu.Root&gt;
-            &lt;/div&gt;
-            &lt;div className=&quot;snapshot-reference&quot;&gt;REVISION / {context.revision}&lt;/div&gt;
-          &lt;/div&gt;
           &lt;main className=&quot;page-container&quot;&gt;
             &lt;Switch&gt;
               &lt;Route path=&quot;/overview&quot;&gt;
@@ -2557,7 +2534,8 @@ export default function App() {
                     setSelection(0);
                   }}
                   onKeyDown={(e) =&gt; {
-                    if (e.key === &quot;ArrowDown&quot;) {
+                    if (e.key === &quot;Escape&quot;) { e.preventDefault(); setPaletteOpen(false); }
+                if (e.key === &quot;ArrowDown&quot;) {
                       e.preventDefault();
                       setSelection((s) =&gt; Math.min(s + 1, filtered.length - 1));
                     }
