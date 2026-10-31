@@ -6013,7 +6013,7 @@ if __name__ == &quot;__main__&quot;:
         print(f&quot;error: {error}&quot;, file=sys.stderr)
         sys.exit(1)
 </pre></section>
-<section class="file" id="file-0081"><h3>.github/tests/smoke_canvas.mjs</h3><p class="meta">Git mode 100644 · 9e31dcd574a9577b4388846e5d757c716314aaeb</p><pre>import { createRequire } from &quot;node:module&quot;;
+<section class="file" id="file-0081"><h3>.github/tests/smoke_canvas.mjs</h3><p class="meta">Git mode 100644 · 60ee2d5d8ba76bc6ad9d653d49e40cd14757863b</p><pre>import { createRequire } from &quot;node:module&quot;;
 import { resolve } from &quot;node:path&quot;;
 import { pathToFileURL } from &quot;node:url&quot;;
 
@@ -6096,6 +6096,20 @@ try {
   await page.getByRole(&quot;button&quot;, { name: &quot;Settings&quot;, exact: true }).first().click();
   await page.getByRole(&quot;heading&quot;, { name: &quot;Settings&quot;, exact: true }).waitFor();
   await page.getByRole(&quot;heading&quot;, { name: &quot;Keyboard shortcuts&quot; }).waitFor();
+  await page.getByRole(&quot;group&quot;, { name: &quot;Skin selection&quot; }).getByRole(&quot;button&quot;, { name: &quot;Slate&quot; }).click();
+  await page.waitForFunction(() =&gt; document.documentElement.dataset.skin === &quot;slate&quot;);
+  await page.getByRole(&quot;group&quot;, { name: &quot;Density&quot; }).getByRole(&quot;button&quot;, { name: &quot;Compact&quot; }).click();
+  await page.waitForFunction(() =&gt; document.documentElement.dataset.density === &quot;compact&quot;);
+  await page.locator(&quot;#canvas-language&quot;).selectOption(&quot;cs&quot;);
+  await page.getByRole(&quot;heading&quot;, { name: &quot;Nastavení&quot;, exact: true }).waitFor();
+  await page.waitForFunction(() =&gt; document.documentElement.lang === &quot;cs&quot;);
+  await page.reload({ waitUntil: &quot;load&quot; });
+  await page.getByRole(&quot;heading&quot;, { name: &quot;Nastavení&quot;, exact: true }).waitFor();
+  await page.waitForFunction(() =&gt; document.documentElement.dataset.skin === &quot;slate&quot;);
+  await page.waitForFunction(() =&gt; document.documentElement.dataset.density === &quot;compact&quot;);
+  await page.locator(&quot;#canvas-language&quot;).selectOption(&quot;en&quot;);
+  await page.getByRole(&quot;heading&quot;, { name: &quot;Settings&quot;, exact: true }).waitFor();
+
   await page.getByRole(&quot;button&quot;, { name: &quot;Choose custom accent color&quot; }).click();
   await page.getByRole(&quot;textbox&quot;, { name: &quot;Accent color hex value&quot; }).fill(&quot;#dd66cc&quot;);
   await page.waitForFunction(() =&gt; getComputedStyle(document.documentElement).getPropertyValue(&quot;--accent&quot;).trim() === &quot;#dd66cc&quot;);
@@ -6122,7 +6136,7 @@ try {
   await page.locator(&quot;.sidebar.mobile-open&quot;).waitFor();
 
   if (errors.length) throw new Error(`Browser uncaught errors: ${errors.join(&quot;; &quot;)}`);
-  console.log(&quot;Canvas Chromium smoke passed: Dockview tab actions, split/restore/reset, routes, chrome, shortcuts, settings and mobile.&quot;);
+  console.log(&quot;Canvas Chromium smoke passed: Dockview layout, skin and density persistence, Czech/English i18n, commands and mobile.&quot;);
 } finally {
   await browser.close();
 }
