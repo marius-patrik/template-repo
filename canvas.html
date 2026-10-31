@@ -2629,7 +2629,7 @@ export default function App() {
   );
 }
 </pre></section>
-<section class="file" id="file-0066"><h3>.github/app/src/DockCanvas.tsx</h3><p class="meta">Git mode 100644 · 44f731a18fff3d8c277c983ba939b244dc0733e1</p><pre>import {
+<section class="file" id="file-0066"><h3>.github/app/src/DockCanvas.tsx</h3><p class="meta">Git mode 100644 · 6fa7acfa9f8874975963491442a86b9180836150</p><pre>import {
   createContext,
   useContext,
   useEffect,
@@ -2771,7 +2771,7 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
       try { localStorage.removeItem(LAYOUT_KEY); } catch { /* unavailable */ }
     }
 
-    disposables.current.forEach((listener) =&gt; listener.dispose());
+    disposables.current.forEach((listener) =&gt; { listener.dispose(); });
     disposables.current = [
       api.onDidActivePanelChange(({ panel, origin }) =&gt; {
         if (origin !== &quot;user&quot; || !panel) return;
@@ -2871,13 +2871,13 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
             &lt;/button&gt;
           &lt;/div&gt;
         &lt;/div&gt;
-        &lt;div className=&quot;dock-grid&quot; aria-label=&quot;Dockview panels&quot;&gt;
+        &lt;section className=&quot;dock-grid&quot; aria-label=&quot;Dockview panels&quot;&gt;
           &lt;DockviewReact
             theme={dark ? themeDark : themeLight}
             components={components}
             onReady={onReady}
           /&gt;
-        &lt;/div&gt;
+        &lt;/section&gt;
       &lt;/div&gt;
     &lt;/PaneContext.Provider&gt;
   );
