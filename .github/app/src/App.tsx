@@ -94,7 +94,10 @@ function Overview({ to }: { to: (p: string) => void }) {
             <Graph />
           </div>
           <div className="panel-footnote">
-            {context.documents.length} source documents · {context.paths.length} documented records
+            {t("{{documents}} source documents · {{records}} documented records", {
+              documents: context.documents.length,
+              records: context.paths.length,
+            })
           </div>
         </section>
         <div className="stack">
@@ -102,7 +105,9 @@ function Overview({ to }: { to: (p: string) => void }) {
             <p className="eyebrow">{t("Project identity")}</p>
             <h2>{context.repository}</h2>
             <p className="muted">
-              Build source: Git-tracked documents. Revision {context.revision}.
+              {t("Build source: Git-tracked documents. Revision {{revision}}.", {
+                revision: context.revision,
+              })}
             </p>
             <div className="meta-list">
               <span>{t("Current branch")}</span>
@@ -148,8 +153,7 @@ function SimplePage({ id, to }: { id: View; to: (p: string) => void }) {
             <p className="eyebrow">{t("Layout")}</p>
             <h2>{t("Arrange your workspace")}</h2>
             <p className="muted">
-              Drag tabs to create groups, split panels, or float windows. Your arrangement is saved
-              locally in this browser.
+              {t("Drag tabs to create groups, split panels, or float windows. Your arrangement is saved locally in this browser.")}
             </p>
             <Button variant="subtle" onClick={() => to("/graph")}>
               {t("Open graph")} <AnimatedIcon name="right" size={15} />
@@ -160,7 +164,10 @@ function SimplePage({ id, to }: { id: View; to: (p: string) => void }) {
             <h2>{context.name}</h2>
             <p className="muted">{context.repository}</p>
             <p className="muted">
-              {context.documents.length} authored source documents · revision {context.revision}
+              {t("{{documents}} authored source documents · revision {{revision}}", {
+                documents: context.documents.length,
+                revision: context.revision,
+              })}
             </p>
             <Button variant="subtle" onClick={() => to("/artifacts")}>
               {t("Browse artifacts")} <AnimatedIcon name="right" size={15} />
@@ -208,7 +215,7 @@ function SimplePage({ id, to }: { id: View; to: (p: string) => void }) {
           {prd ? (
             <MarkdownSource value={prd.content} />
           ) : (
-            <p className="muted">No generated PRD is available in this snapshot.</p>
+            <p className="muted">{t("No generated PRD is available in this snapshot.")}</p>
           )}
         </div>
       </div>
@@ -225,7 +232,7 @@ function SimplePage({ id, to }: { id: View; to: (p: string) => void }) {
           {agents ? (
             <MarkdownSource value={agents.content} />
           ) : (
-            <p className="muted">No agent-rule document is available.</p>
+            <p className="muted">{t("No agent-rule document is available.")}</p>
           )}
         </div>
       </div>
@@ -235,16 +242,15 @@ function SimplePage({ id, to }: { id: View; to: (p: string) => void }) {
       <div className="page">
         <PageIntro title="Context" detail="Context authority and repository-authored Markdown." />
         <div className="panel padded">
-          <h2>{ctx ? "AGENTS.md" : "Root AGENTS.md is not configured"}</h2>
+          <h2>{ctx ? "AGENTS.md" : t("Root AGENTS.md is not configured")}</h2>
           {ctx ? (
             <MarkdownSource value={ctx.content} />
           ) : (
             <p className="muted">
-              The template currently generates .agents/AGENTS.md from its agent rules. A separate
-              root context file has not been assumed or fabricated.
+              {t("The template currently generates .agents/AGENTS.md from its agent rules. A separate root context file has not been assumed or fabricated.")}
             </p>
           )}
-          <h3>Available source documents</h3>
+          <h3>{t("Available source documents")}</h3>
           <SourceIndex onOpen={(p) => to("/artifacts?file=" + encodeURIComponent(p))} />
         </div>
       </div>
@@ -262,8 +268,7 @@ function SimplePage({ id, to }: { id: View; to: (p: string) => void }) {
             {t("Source revision")} {context.revision}
           </h2>
           <p className="muted">
-            Built from tracked repository documents. No agent activity or task completion is
-            inferred.
+            {t("Built from tracked repository documents. No agent activity or task completion is inferred.")}
           </p>
         </div>
       </div>
@@ -712,7 +717,7 @@ export default function App() {
                 ))}
                 {!filtered.length && <p className="empty-state">{t("No matching routes.")}</p>}
               </div>
-              <div className="palette-footer">↑ ↓ navigate · ↵ open · Esc dismiss</div>
+              <div className="palette-footer">{t("↑ ↓ navigate · ↵ open · Esc dismiss")}</div>
             </motion.div>
           </motion.div>
         )}
