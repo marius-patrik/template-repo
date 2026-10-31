@@ -61,16 +61,30 @@ function CanvasTab(props: IDockviewPanelHeaderProps) {
   return (
     <CanvasContextMenu
       actions={[
-        ...(!isNew ? [
-          { label: t(pinned ? "Unpin from activity bar" : "Pin to activity bar"), icon: "pin", action: () => shell?.pin(view) },
-          { label: t("Split right"), icon: "split", action: () => shell?.split(view, props.api.id) },
-        ] : []),
+        ...(!isNew
+          ? [
+              {
+                label: t(pinned ? "Unpin from activity bar" : "Pin to activity bar"),
+                icon: "pin",
+                action: () => shell?.pin(view),
+              },
+              {
+                label: t("Split right"),
+                icon: "split",
+                action: () => shell?.split(view, props.api.id),
+              },
+            ]
+          : []),
         { label: t("Close tab"), icon: "close", action: () => props.api.close() },
         { type: "separator" },
         { label: t("Reset layout"), icon: "reset", action: () => shell?.reset() },
       ]}
     >
-      <div className="canvas-dock-tab" data-canvas-tab={isNew ? "new" : view} data-animated-icon-trigger>
+      <div
+        className="canvas-dock-tab"
+        data-canvas-tab={isNew ? "new" : view}
+        data-animated-icon-trigger
+      >
         <AnimatedIcon name={isNew ? "plus" : view} size={14} />
         <DockviewDefaultTab {...props} hideClose />
         <button
@@ -139,7 +153,13 @@ function HeaderActions({ containerApi, group }: IDockviewHeaderActionsProps) {
   const current = active ? viewFromId(active.id) : "canvas";
   return (
     <div className="dock-header-actions" onPointerDown={(event) => event.stopPropagation()}>
-      <button className="dock-add-trigger" type="button" aria-label={t("New tab")} title={t("New tab")} onClick={() => shell?.newTab()}>
+      <button
+        className="dock-add-trigger"
+        type="button"
+        aria-label={t("New tab")}
+        title={t("New tab")}
+        onClick={() => shell?.newTab()}
+      >
         <AnimatedIcon name="plus" size={16} />
       </button>
       {shell?.showSettings && (
@@ -177,7 +197,11 @@ function HeaderActions({ containerApi, group }: IDockviewHeaderActionsProps) {
             </DropdownMenu.Item>
             <DropdownMenu.Separator className="dock-add-separator" />
             {VIEWS.map((item) => (
-              <DropdownMenu.Item className="menu-item dock-action-item" key={item.id} onSelect={() => shell?.add(item.id, group.id)}>
+              <DropdownMenu.Item
+                className="menu-item dock-action-item"
+                key={item.id}
+                onSelect={() => shell?.add(item.id, group.id)}
+              >
                 <AnimatedIcon name={item.id} size={16} />
                 <span>{t(item.label)}</span>
               </DropdownMenu.Item>
@@ -476,7 +500,13 @@ export default function DockCanvas({
             <div className="dock-empty-shell" data-testid="empty-workspace">
               <div className="dock-empty-tabbar">
                 <span>{t("No open tabs")}</span>
-                <button className="dock-add-trigger" type="button" aria-label={t("New tab")} title={t("New tab")} onClick={newTab}>
+                <button
+                  className="dock-add-trigger"
+                  type="button"
+                  aria-label={t("New tab")}
+                  title={t("New tab")}
+                  onClick={newTab}
+                >
                   <AnimatedIcon name="plus" size={16} />
                 </button>
                 {showSettings && (

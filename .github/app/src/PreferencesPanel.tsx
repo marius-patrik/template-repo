@@ -115,11 +115,13 @@ function NumberPreference({
   );
 }
 const dimensionScale = (value: number, dimension: "fontSize" | "iconSize" | "spacing") =>
-  (Object.keys(SCALES) as Array<keyof typeof SCALES>).reduce((closest, size) =>
-    Math.abs(SCALES[size][dimension] - value) < Math.abs(SCALES[closest][dimension] - value)
-      ? size
-      : closest,
-  "normal" as keyof typeof SCALES);
+  (Object.keys(SCALES) as Array<keyof typeof SCALES>).reduce(
+    (closest, size) =>
+      Math.abs(SCALES[size][dimension] - value) < Math.abs(SCALES[closest][dimension] - value)
+        ? size
+        : closest,
+    "normal" as keyof typeof SCALES,
+  );
 
 export default function PreferencesPanel() {
   const { t, i18n } = useTranslation();
@@ -172,10 +174,18 @@ export default function PreferencesPanel() {
           {(["fontSize", "iconSize", "spacing"] as const).map((dimension) => (
             <Choice
               key={dimension}
-              label={dimension === "fontSize" ? "Text size" : dimension === "iconSize" ? "Icon size" : "Spacing"}
+              label={
+                dimension === "fontSize"
+                  ? "Text size"
+                  : dimension === "iconSize"
+                    ? "Icon size"
+                    : "Spacing"
+              }
               value={dimensionScale(prefs[dimension], dimension)}
               values={["small", "normal", "large"]}
-              onChange={(value) => patch(dimension, SCALES[value as keyof typeof SCALES][dimension])}
+              onChange={(value) =>
+                patch(dimension, SCALES[value as keyof typeof SCALES][dimension])
+              }
             />
           ))}
           <NumberPreference

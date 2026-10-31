@@ -15,12 +15,15 @@
   font-size: calc(var(--app-font-size) * 0.8571);
   padding-inline: max(4px, calc(var(--ui-spacing) * 0.875));
 }
-.window-titlebar :is(.desktop-toggle,.mobile-toggle,.title-actions button,.canvas-select-trigger) {
+.window-titlebar
+  :is(.desktop-toggle, .mobile-toggle, .title-actions button, .canvas-select-trigger) {
   height: var(--chrome-control-height);
   min-height: 0;
   max-height: var(--chrome-control-height);
 }
-.window-titlebar :is(.desktop-toggle,.mobile-toggle,.title-actions button) { width: var(--chrome-control-height); }
+.window-titlebar :is(.desktop-toggle, .mobile-toggle, .title-actions button) {
+  width: var(--chrome-control-height);
+}
 .window-titlebar .omnibar-trigger,
 .title-center .omnibar-trigger {
   height: var(--chrome-control-height);
@@ -30,9 +33,9 @@
   height: var(--statusbar-height);
   min-height: var(--statusbar-height);
   max-height: var(--statusbar-height);
-  font-size: calc(var(--app-font-size) * .73);
+  font-size: calc(var(--app-font-size) * 0.73);
 }
-.window-statusbar :is(.status-omnibar .omnibar-trigger,.status-settings) {
+.window-statusbar :is(.status-omnibar .omnibar-trigger, .status-settings) {
   height: max(18px, calc(var(--statusbar-height) - 3px));
 }
 .dock-grid .dockview-theme-dark,
@@ -44,57 +47,95 @@
   --dv-tabs-and-actions-container-height: max(30px, calc(var(--ui-spacing) * 4));
 }
 .dock-grid .dv-tab {
-  font-size: calc(var(--app-font-size) * .88);
+  font-size: calc(var(--app-font-size) * 0.88);
 }
-.dock-grid .dv-tab:is(.dv-active-tab,.dv-activegroup-visiblepanel-tab,.dv-inactivegroup-visiblepanel-tab),
+.dock-grid
+  .dv-tab:is(.dv-active-tab, .dv-activegroup-visiblepanel-tab, .dv-inactivegroup-visiblepanel-tab),
 .dock-grid .dv-tab[aria-selected="true"] {
   color: var(--selection-label);
   background: var(--selection-surface);
   box-shadow: inset 0 -2px 0 var(--selection-stroke);
 }
-.dock-grid .dv-tab:is(.dv-active-tab,.dv-activegroup-visiblepanel-tab,.dv-inactivegroup-visiblepanel-tab) .app-icon,
-.dock-grid .dv-tab[aria-selected="true"] .app-icon { color: var(--selection-label); }
-:is(.navigation-tree-item,.activity-button,.canvas-perspectives button,.canvas-source-row,.canvas-doc-picker button,.canvas-mode-switch button).active {
+.dock-grid
+  .dv-tab:is(.dv-active-tab, .dv-activegroup-visiblepanel-tab, .dv-inactivegroup-visiblepanel-tab)
+  .app-icon,
+.dock-grid .dv-tab[aria-selected="true"] .app-icon {
+  color: var(--selection-label);
+}
+:is(
+  .navigation-tree-item,
+  .activity-button,
+  .canvas-perspectives button,
+  .canvas-source-row,
+  .canvas-doc-picker button,
+  .canvas-mode-switch button
+).active {
   color: var(--selection-label);
   background: var(--selection-surface);
 }
-.navigation-tree-item.active { box-shadow: inset 2px 0 0 var(--selection-stroke); }
-.activity-button { position: relative; }
+.navigation-tree-item.active {
+  box-shadow: inset 2px 0 0 var(--selection-stroke);
+}
+.activity-button {
+  position: relative;
+}
 .activity-button.active::before {
   content: "";
   position: absolute;
   width: 2px;
   top: 22%;
   bottom: 22%;
-  left: calc(var(--ui-spacing) * -.45);
+  left: calc(var(--ui-spacing) * -0.45);
   background: var(--selection-stroke);
   border-radius: var(--ui-radius);
 }
 .activity-position-right > .activity-bar .activity-button.active::before {
   left: auto;
-  right: calc(var(--ui-spacing) * -.45);
+  right: calc(var(--ui-spacing) * -0.45);
 }
 .activity-position-top > .activity-bar .activity-button.active::before,
 .activity-position-bottom > .activity-bar .activity-button.active::before {
   left: 22%;
   right: 22%;
   top: auto;
-  bottom: calc(var(--ui-spacing) * -.25);
+  bottom: calc(var(--ui-spacing) * -0.25);
   height: 2px;
   width: auto;
 }
-.activity-new-tab { color: var(--accent); }
-.activity-new-tab:hover { color: var(--accent); background: var(--selection-surface); }
-.activity-separator { display: block; width: 60%; height: 1px; margin: calc(var(--ui-spacing) * .35) auto; background: var(--border); flex: none; }
+.activity-new-tab {
+  color: var(--accent);
+}
+.activity-new-tab:hover {
+  color: var(--accent);
+  background: var(--selection-surface);
+}
+.activity-separator {
+  display: block;
+  width: 60%;
+  height: 1px;
+  margin: calc(var(--ui-spacing) * 0.35) auto;
+  background: var(--border);
+  flex: none;
+}
 .activity-position-top .activity-separator,
-.activity-position-bottom .activity-separator { height: 55%; width: 1px; margin: auto calc(var(--ui-spacing) * .35); }
+.activity-position-bottom .activity-separator {
+  height: 55%;
+  width: 1px;
+  margin: auto calc(var(--ui-spacing) * 0.35);
+}
 
 /* Expanded sidebar and activity rail read as one connected navigation surface.
    Collapsing it leaves ONLY the working activity rail, not a second empty 58px rail. */
 .work-area:has(.sidebar:not(.collapsed)) > .activity-bar,
-.work-area:has(.sidebar:not(.collapsed)) .sidebar { background: var(--surface); }
-.work-area:has(.sidebar:not(.collapsed)) > .activity-bar { border-color: transparent; }
-.work-area:has(.sidebar:not(.collapsed)) .sidebar { border-color: var(--border); }
+.work-area:has(.sidebar:not(.collapsed)) .sidebar {
+  background: var(--surface);
+}
+.work-area:has(.sidebar:not(.collapsed)) > .activity-bar {
+  border-color: transparent;
+}
+.work-area:has(.sidebar:not(.collapsed)) .sidebar {
+  border-color: var(--border);
+}
 .sidebar.collapsed {
   width: 0;
   flex: 0 0 0px;
@@ -104,11 +145,23 @@
   padding: 0;
   visibility: hidden;
 }
-.sidebar-resizer.disabled { display: none; }
-.sidebar:not(.collapsed) { width: var(--sidebar-width); flex-basis: var(--sidebar-width); }
-.activity-bar { padding-block: max(3px, calc(var(--ui-spacing) * .7)); }
-.activity-compact .activity-button { width: max(24px, calc(var(--ui-spacing) * 3.7)); height: max(24px,calc(var(--ui-spacing) * 3.7)); }
-.activity-bar .activity-button { font-size: var(--app-font-size); }
+.sidebar-resizer.disabled {
+  display: none;
+}
+.sidebar:not(.collapsed) {
+  width: var(--sidebar-width);
+  flex-basis: var(--sidebar-width);
+}
+.activity-bar {
+  padding-block: max(3px, calc(var(--ui-spacing) * 0.7));
+}
+.activity-compact .activity-button {
+  width: max(24px, calc(var(--ui-spacing) * 3.7));
+  height: max(24px, calc(var(--ui-spacing) * 3.7));
+}
+.activity-bar .activity-button {
+  font-size: var(--app-font-size);
+}
 .dock-welcome,
 .dock-new-tab .dock-welcome {
   width: 100%;
@@ -116,27 +169,53 @@
   margin: 0 auto;
   padding: calc(var(--ui-spacing) * 5) calc(var(--ui-spacing) * 4);
 }
-.dock-new-tab { overflow: auto; min-height: 0; background: var(--bg); }
-.dock-new-tab .dock-welcome-options { margin-top: calc(var(--ui-spacing) * 3); }
-.dock-new-tab .dock-welcome-options button { min-height: calc(var(--ui-spacing) * 6); }
-.dock-new-tab .dock-welcome-options button:hover { color: var(--accent); border-color: var(--accent); }
+.dock-new-tab {
+  overflow: auto;
+  min-height: 0;
+  background: var(--bg);
+}
+.dock-new-tab .dock-welcome-options {
+  margin-top: calc(var(--ui-spacing) * 3);
+}
+.dock-new-tab .dock-welcome-options button {
+  min-height: calc(var(--ui-spacing) * 6);
+}
+.dock-new-tab .dock-welcome-options button:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
 /* Per-dimension small/normal/large options control these single runtime variables.
    Don't use a second CSS font scale that diverges from the preference value. */
-.menu-content,.dock-add-menu,.dock-more-menu,.menu-item,.canvas-select-trigger,.dock-welcome-options button {
-  font-size: calc(var(--app-font-size) * .88);
+.menu-content,
+.dock-add-menu,
+.dock-more-menu,
+.menu-item,
+.canvas-select-trigger,
+.dock-welcome-options button {
+  font-size: calc(var(--app-font-size) * 0.88);
 }
-.token-grid { gap: calc(var(--ui-spacing) * 1.25); }
+.token-grid {
+  gap: calc(var(--ui-spacing) * 1.25);
+}
 .token-color-trigger {
   min-width: 0;
   gap: var(--ui-spacing);
-  font-size: calc(var(--app-font-size) * .94);
+  font-size: calc(var(--app-font-size) * 0.94);
   padding: calc(var(--ui-spacing) * 1.2);
 }
-.token-color-trigger code { font-size: calc(var(--app-font-size) * .82); }
+.token-color-trigger code {
+  font-size: calc(var(--app-font-size) * 0.82);
+}
 @media (max-width: 700px) {
-  .window-titlebar { grid-template-columns: minmax(0, 1fr) auto minmax(40px,auto); }
-  .dock-new-tab .dock-welcome { padding: calc(var(--ui-spacing) * 3); }
+  .window-titlebar {
+    grid-template-columns: minmax(0, 1fr) auto minmax(40px, auto);
+  }
+  .dock-new-tab .dock-welcome {
+    padding: calc(var(--ui-spacing) * 3);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .sidebar { transition: none; }
+  .sidebar {
+    transition: none;
+  }
 }

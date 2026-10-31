@@ -290,7 +290,13 @@ export function ActivityBar({
       aria-label={t("Activity bar")}
       data-testid="activity-bar"
     >
-      <button type="button" className="activity-button activity-new-tab" title={t("New tab")} aria-label={t("New tab")} onClick={onNewTab}>
+      <button
+        type="button"
+        className="activity-button activity-new-tab"
+        title={t("New tab")}
+        aria-label={t("New tab")}
+        onClick={onNewTab}
+      >
         <AnimatedIcon name="plus" size={18} />
       </button>
       <span className="activity-separator" aria-hidden="true" />
