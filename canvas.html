@@ -1633,7 +1633,7 @@ Describe precisely what changed and why.
 src/generated/
 ../../.canvas-dist/
 </pre></section>
-<section class="file" id="file-0055"><h3>.github/app/README.md</h3><p class="meta">Git mode 100644 · 472ee7636a8caa23aab87c84ca83d68146f6e9b6</p><pre># Canvas Web — repository application
+<section class="file" id="file-0055"><h3>.github/app/README.md</h3><p class="meta">Git mode 100644 · eb7a665e1e819c80ac89dc96d844db176d013871</p><pre># Canvas Web — repository application
 
 The first-class Canvas UI is authored in `.github/app`. A deterministic build step reads
 only allowlisted, Git-tracked repository documents and generates `src/generated/context.json`;
@@ -1694,6 +1694,10 @@ The Dockview compositor uses the official dockview-react panel API and keeps lay
 state as UI-only local data; no authored repository file is modified through drag/drop.
 
 Dockview layout acceptance is checked in Chromium before every Pages publication.
+
+### Dockview tab creation
+
+Every Dockview group header has a `+` action with a Radix dropdown listing all ten route views, grouped as Workspace and System. Selecting an option creates a new tab in that group, including when the same view is already open in another tab. Wouter follows the new active tab. Keyboard and touch access use Radix&#x27;s built-in menu behavior.
 </pre></section>
 <section class="file" id="file-0056"><h3>.github/app/biome.json</h3><p class="meta">Git mode 100644 · b7e3d5edf47ef879ecb3eabc17772d2817b11c64</p><pre>{
   &quot;$schema&quot;: &quot;https://biomejs.dev/schemas/2.6.4/schema.json&quot;,
@@ -2656,7 +2660,8 @@ export default function App() {
   );
 }
 </pre></section>
-<section class="file" id="file-0066"><h3>.github/app/src/DockCanvas.tsx</h3><p class="meta">Git mode 100644 · 6ec3ff3a08552adb4929bbbd51ea6d94a43c7bcf</p><pre>import {
+<section class="file" id="file-0066"><h3>.github/app/src/DockCanvas.tsx</h3><p class="meta">Git mode 100644 · d4f3e2420c5c6e35693b7909214e71c8d5a38cca</p><pre>import * as DropdownMenu from &quot;@radix-ui/react-dropdown-menu&quot;;
+import {
   createContext,
   useContext,
   useEffect,
@@ -2672,6 +2677,7 @@ import {
   type DockviewApi,
   type DockviewReadyEvent,
   type IDockviewPanelProps,
+  type IDockviewHeaderActionsProps,
 } from &quot;dockview-react&quot;;
 import { AnimatedIcon } from &quot;./components/AnimatedIcon&quot;;
 
@@ -2690,7 +2696,10 @@ const ROUTES = [
 ] as const;
 
 type CanvasView = (typeof ROUTES)[number];
-type PaneContext = { render: (view: CanvasView) =&gt; ReactNode };
+type PaneContext = {
+  render: (view: CanvasView) =&gt; ReactNode;
+  onNavigate: (route: string) =&gt; void;
+};
 const PaneContext = createContext&lt;PaneContext | null&gt;(null);
 const TITLES: Record&lt;CanvasView, string&gt; = {
   overview: &quot;Overview&quot;,
@@ -2738,6 +2747,74 @@ function openRoute(api: DockviewApi, view: CanvasView) {
   });
 }
 
+const TAB_GROUPS: Array&lt;{ label: string; views: CanvasView[] }&gt; = [
+  { label: &quot;Workspace&quot;, views: [&quot;overview&quot;, &quot;workspace&quot;, &quot;projects&quot;, &quot;agents&quot;, &quot;graph&quot;, &quot;roadmap&quot;, &quot;artifacts&quot;, &quot;activity&quot;] },
+  { label: &quot;System&quot;, views: [&quot;context&quot;, &quot;settings&quot;] },
+];
+let tabSequence = 0;
+
+function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
+  const workspace = useContext(PaneContext);
+
+  const addTab = (view: CanvasView) =&gt; {
+    // A new tab belongs to the group whose + was pressed, even when the same
+    // view is already open elsewhere. URL navigation is intentionally explicit.
+    const id = `tab:${view}:${Date.now().toString(36)}:${++tabSequence}`;
+    containerApi.addPanel({
+      id,
+      component: &quot;page&quot;,
+      title: TITLES[view],
+      params: { view },
+      position: { referenceGroup: group.id },
+    });
+    workspace?.onNavigate(`/${view}`);
+  };
+
+  return (
+    &lt;div className=&quot;dock-tab-add&quot; data-dock-group={group.id} onPointerDown={(event) =&gt; event.stopPropagation()}&gt;
+      &lt;DropdownMenu.Root&gt;
+        &lt;DropdownMenu.Trigger asChild&gt;
+          &lt;button
+            type=&quot;button&quot;
+            className=&quot;dock-add-trigger&quot;
+            aria-label=&quot;Add tab&quot;
+            title=&quot;Add a tab to this group&quot;
+          &gt;
+            &lt;AnimatedIcon name=&quot;plus&quot; size={15} /&gt;
+          &lt;/button&gt;
+        &lt;/DropdownMenu.Trigger&gt;
+        &lt;DropdownMenu.Portal&gt;
+          &lt;DropdownMenu.Content
+            className=&quot;menu-content dock-add-menu&quot;
+            align=&quot;end&quot;
+            side=&quot;bottom&quot;
+            sideOffset={5}
+            collisionPadding={10}
+            aria-label=&quot;Available tabs&quot;
+          &gt;
+            {TAB_GROUPS.map((section, index) =&gt; (
+              &lt;DropdownMenu.Group key={section.label}&gt;
+                {index &gt; 0 &amp;&amp; &lt;DropdownMenu.Separator className=&quot;dock-add-separator&quot; /&gt;}
+                &lt;DropdownMenu.Label className=&quot;dock-add-group-label&quot;&gt;{section.label}&lt;/DropdownMenu.Label&gt;
+                {section.views.map((view) =&gt; (
+                  &lt;DropdownMenu.Item
+                    key={view}
+                    className=&quot;menu-item dock-add-item&quot;
+                    onSelect={() =&gt; addTab(view)}
+                  &gt;
+                    &lt;AnimatedIcon name={view} size={16} /&gt;
+                    &lt;span&gt;{TITLES[view]}&lt;/span&gt;
+                  &lt;/DropdownMenu.Item&gt;
+                ))}
+              &lt;/DropdownMenu.Group&gt;
+            ))}
+          &lt;/DropdownMenu.Content&gt;
+        &lt;/DropdownMenu.Portal&gt;
+      &lt;/DropdownMenu.Root&gt;
+    &lt;/div&gt;
+  );
+}
+
 function saveLayout(api: DockviewApi) {
   try {
     localStorage.setItem(LAYOUT_KEY, JSON.stringify({ schema: 1, layout: api.toJSON() }));
@@ -2760,7 +2837,10 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
   latest.current = { route, onNavigate };
   const serial = useRef(0);
   const [count, setCount] = useState(0);
-  const panelContext = useMemo(() =&gt; ({ render: renderView }), [renderView]);
+  const panelContext = useMemo(
+    () =&gt; ({ render: renderView, onNavigate }),
+    [renderView, onNavigate],
+  );
 
   useEffect(() =&gt; {
     const api = apiRef.current;
@@ -2912,6 +2992,7 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
           &lt;DockviewReact
             theme={dark ? themeDark : themeLight}
             components={components}
+            rightHeaderActionsComponent={AddTabHeader}
             onReady={onReady}
           /&gt;
         &lt;/section&gt;
@@ -3187,7 +3268,7 @@ declare module &quot;@tanstack/react-hotkeys&quot; {
   }
 }
 </pre></section>
-<section class="file" id="file-0070"><h3>.github/app/src/components/AnimatedIcon.tsx</h3><p class="meta">Git mode 100644 · 5c2917c166d910c644048cd562ed233c780acf6a</p><pre>import type { ComponentType } from &quot;react&quot;;
+<section class="file" id="file-0070"><h3>.github/app/src/components/AnimatedIcon.tsx</h3><p class="meta">Git mode 100644 · 1480b7a5b3cf847c82e1f24fbc1b8c4d38dfcf3b</p><pre>import type { ComponentType } from &quot;react&quot;;
 import {
   LayoutGridIcon,
   BlocksIcon,
@@ -3198,6 +3279,7 @@ import {
   HistoryIcon,
   SettingsIcon,
   SearchIcon,
+  PlusIcon,
   ChevronRightIcon,
   ChevronDownIcon,
   PanelLeftCloseIcon,
@@ -3221,6 +3303,7 @@ const registry: Record&lt;string, ComponentType&lt;{ size?: number }&gt;&gt; = {
   context: FileTextIcon,
   settings: SettingsIcon,
   search: SearchIcon,
+  plus: PlusIcon,
   right: ChevronRightIcon,
   down: ChevronDownIcon,
   collapse: PanelLeftCloseIcon,
@@ -5275,7 +5358,7 @@ if __name__ == &quot;__main__&quot;:
         print(f&quot;error: {error}&quot;, file=sys.stderr)
         sys.exit(1)
 </pre></section>
-<section class="file" id="file-0079"><h3>.github/tests/smoke_canvas.mjs</h3><p class="meta">Git mode 100644 · 162facb69228fe78ac920090ed4d9fbf70fcb80e</p><pre>import { createRequire } from &quot;node:module&quot;;
+<section class="file" id="file-0079"><h3>.github/tests/smoke_canvas.mjs</h3><p class="meta">Git mode 100644 · dd7ea6eb598d3d5b6af1d3e6c102ef9910550653</p><pre>import { createRequire } from &quot;node:module&quot;;
 import { resolve } from &quot;node:path&quot;;
 import { pathToFileURL } from &quot;node:url&quot;;
 
@@ -5293,6 +5376,21 @@ try {
   await page.locator(&quot;.window-titlebar&quot;).waitFor();
   await page.locator(&quot;.window-statusbar&quot;).waitFor();
   await page.locator(&#x27;.dock-grid [data-dock-view=&quot;overview&quot;]&#x27;).waitFor();
+  const addTab = page.locator(&quot;.dock-grid .dv-groupview&quot;).first().getByRole(&quot;button&quot;, { name: &quot;Add tab&quot; });
+  await addTab.waitFor();
+  await addTab.click();
+  const menu = page.getByRole(&quot;menu&quot;, { name: &quot;Available tabs&quot; });
+  await menu.waitFor();
+  if ((await menu.getByRole(&quot;menuitem&quot;).count()) !== 10)
+    throw new Error(&quot;Add-tab dropdown must contain every Canvas view&quot;);
+  await menu.getByRole(&quot;menuitem&quot;, { name: &quot;Projects&quot; }).click();
+  await page.locator(&#x27;.dock-grid [data-dock-view=&quot;projects&quot;]&#x27;).waitFor();
+  await page.waitForFunction(() =&gt; location.hash.includes(&quot;/projects&quot;));
+  await page.locator(&quot;.dock-grid .dv-groupview&quot;).first().getByRole(&quot;button&quot;, { name: &quot;Add tab&quot; }).click();
+  await page.getByRole(&quot;menu&quot;, { name: &quot;Available tabs&quot; }).getByRole(&quot;menuitem&quot;, { name: &quot;Overview&quot; }).click();
+  await page.waitForFunction(() =&gt; location.hash.includes(&quot;/overview&quot;));
+  if ((await page.locator(&quot;.dock-grid .dv-groupview&quot;).count()) !== 1)
+    throw new Error(&quot;Adding a tab created a separate group instead of reusing the tab bar&quot;);
   if ((await page.locator(&quot;.dockview-theme-dark, .dockview-theme-light&quot;).count()) !== 1)
     throw new Error(&quot;Expected exactly one root Dockview compositor&quot;);
   await page.getByRole(&quot;button&quot;, { name: &quot;Split active panel right&quot; }).click();
