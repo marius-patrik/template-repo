@@ -1981,18 +1981,18 @@ export function AccentColorPicker({
   );
 }
 </pre></section>
-<section class="file" id="file-0065"><h3>.github/app/src/App.tsx</h3><p class="meta">Git mode 100644 · 99841acb3e79851c6b22a0bd62e9b2cd1fdf51a5</p><pre>import { useEffect, useMemo, useRef, useState } from &quot;react&quot;;
+<section class="file" id="file-0065"><h3>.github/app/src/App.tsx</h3><p class="meta">Git mode 100644 · 64c5a68b06bf331cbc2df352976a492b82f07ee9</p><pre>import { useEffect, useMemo, useRef, useState } from &quot;react&quot;;
 import { colord, extend } from &quot;colord&quot;;
 import a11yPlugin from &quot;colord/plugins/a11y&quot;;
 import { formatForDisplay, useAppHotkeys, useHotkey } from &quot;@tanstack/react-hotkeys&quot;;
 import { AccentColorPicker, accentPresets } from &quot;./AccentColorPicker&quot;;
 import KeyboardSettings from &quot;./KeyboardSettings&quot;;
-import { Link, Route, Switch, useLocation } from &quot;wouter&quot;;
+import { Link, useLocation } from &quot;wouter&quot;;
 import { motion, AnimatePresence } from &quot;motion/react&quot;;
 import { AnimatedIcon } from &quot;./components/AnimatedIcon&quot;;
 import { Button } from &quot;./components/ui/button&quot;;
 import Graph from &quot;./Graph&quot;;
-import Workbench from &quot;./Workbench&quot;;
+import DockCanvas from &quot;./DockCanvas&quot;;
 import context from &quot;./generated/context.json&quot;;
 
 type View =
@@ -2135,12 +2135,35 @@ function SimplePage({ id, to }: { id: View; to: (p: string) =&gt; void }) {
   const ctx = docs.find((x) =&gt; x.path === &quot;AGENTS.md&quot;);
   if (id === &quot;workspace&quot;)
     return (
-      &lt;div className=&quot;workbench-page&quot;&gt;
+      &lt;div className=&quot;page workspace-board&quot;&gt;
         &lt;PageIntro
           title=&quot;Workspace&quot;
-          detail=&quot;Dockable, resizable panels for interacting with repository-derived context.&quot;
+          detail=&quot;A configurable working surface. Open views with the sidebar or omnibar, then arrange their tabs with Dockview.&quot;
         /&gt;
-        &lt;Workbench dark={document.documentElement.dataset.theme !== &quot;light&quot;} /&gt;
+        &lt;div className=&quot;workspace-board-grid&quot;&gt;
+          &lt;section className=&quot;panel padded&quot;&gt;
+            &lt;p className=&quot;eyebrow&quot;&gt;Layout&lt;/p&gt;
+            &lt;h2&gt;Arrange your workspace&lt;/h2&gt;
+            &lt;p className=&quot;muted&quot;&gt;
+              Drag tabs to create groups, split panels, or float windows.
+              Your arrangement is saved locally in this browser.
+            &lt;/p&gt;
+            &lt;Button variant=&quot;subtle&quot; onClick={() =&gt; to(&quot;/graph&quot;)}&gt;
+              Open graph &lt;AnimatedIcon name=&quot;right&quot; size={15} /&gt;
+            &lt;/Button&gt;
+          &lt;/section&gt;
+          &lt;section className=&quot;panel padded&quot;&gt;
+            &lt;p className=&quot;eyebrow&quot;&gt;Repository context&lt;/p&gt;
+            &lt;h2&gt;{context.name}&lt;/h2&gt;
+            &lt;p className=&quot;muted&quot;&gt;{context.repository}&lt;/p&gt;
+            &lt;p className=&quot;muted&quot;&gt;
+              {context.documents.length} authored source documents · revision {context.revision}
+            &lt;/p&gt;
+            &lt;Button variant=&quot;subtle&quot; onClick={() =&gt; to(&quot;/artifacts&quot;)}&gt;
+              Browse artifacts &lt;AnimatedIcon name=&quot;right&quot; size={15} /&gt;
+            &lt;/Button&gt;
+          &lt;/section&gt;
+        &lt;/div&gt;
       &lt;/div&gt;
     );
   if (id === &quot;graph&quot;)
@@ -2499,25 +2522,22 @@ export default function App() {
           &lt;/nav&gt;
         &lt;/aside&gt;
         &lt;div className=&quot;main-column&quot;&gt;
-          &lt;main className=&quot;page-container&quot;&gt;
-            &lt;Switch&gt;
-              &lt;Route path=&quot;/overview&quot;&gt;
-                &lt;Overview to={go} /&gt;
-              &lt;/Route&gt;
-              &lt;Route path=&quot;/settings&quot;&gt;
-                &lt;Settings prefs={prefs} setPrefs={setPrefs} /&gt;
-              &lt;/Route&gt;
-              {nav
-                .filter((n) =&gt; n.id !== &quot;overview&quot; &amp;&amp; n.id !== &quot;settings&quot;)
-                .map((n) =&gt; (
-                  &lt;Route key={n.id} path={&quot;/&quot; + n.id}&gt;
-                    &lt;SimplePage id={n.id} to={go} /&gt;
-                  &lt;/Route&gt;
-                ))}
-              &lt;Route&gt;
-                &lt;Overview to={go} /&gt;
-              &lt;/Route&gt;
-            &lt;/Switch&gt;
+          &lt;main className=&quot;dock-content&quot;&gt;
+            &lt;DockCanvas
+              route={path}
+              onNavigate={go}
+              dark={
+                prefs.theme === &quot;system&quot;
+                  ? window.matchMedia(&quot;(prefers-color-scheme: dark)&quot;).matches
+                  : prefs.theme === &quot;dark&quot;
+              }
+              renderView={(view) =&gt; {
+                const id = view as View;
+                if (id === &quot;overview&quot;) return &lt;Overview to={go} /&gt;;
+                if (id === &quot;settings&quot;) return &lt;Settings prefs={prefs} setPrefs={setPrefs} /&gt;;
+                return &lt;SimplePage id={id} to={go} /&gt;;
+              }}
+            /&gt;
           &lt;/main&gt;
         &lt;/div&gt;
       &lt;/div&gt;
