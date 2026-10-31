@@ -2662,14 +2662,13 @@ export default function App() {
   );
 }
 </pre></section>
-<section class="file" id="file-0066"><h3>.github/app/src/DockCanvas.tsx</h3><p class="meta">Git mode 100644 · d20e3f661e93a885794c93e11b7a64741060baf8</p><pre>import * as DropdownMenu from &quot;@radix-ui/react-dropdown-menu&quot;;
+<section class="file" id="file-0066"><h3>.github/app/src/DockCanvas.tsx</h3><p class="meta">Git mode 100644 · 620f28aabb8546bf480d13f5f0d69219c3439306</p><pre>import * as DropdownMenu from &quot;@radix-ui/react-dropdown-menu&quot;;
 import {
   createContext,
   useContext,
   useEffect,
   useMemo,
   useRef,
-  useState,
   type ReactNode,
 } from &quot;react&quot;;
 import {
@@ -2701,6 +2700,7 @@ type CanvasView = (typeof ROUTES)[number];
 type PaneContext = {
   render: (view: CanvasView) =&gt; ReactNode;
   onNavigate: (route: string) =&gt; void;
+  resetLayout: () =&gt; void;
 };
 const PaneContext = createContext&lt;PaneContext | null&gt;(null);
 const TITLES: Record&lt;CanvasView, string&gt; = {
@@ -2784,9 +2784,28 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
     workspace?.onNavigate(`/${view}`);
   };
 
+  const splitRight = () =&gt; {
+    const selected =
+      containerApi.panels.find(
+        (panel) =&gt; panel.group.id === group.id &amp;&amp; panel.api.isVisible,
+      ) ?? containerApi.panels.find((panel) =&gt; panel.group.id === group.id);
+    const candidate: unknown = selected?.api.getParameters().view;
+    const view: CanvasView =
+      typeof candidate === &quot;string&quot; &amp;&amp; isView(candidate) ? candidate : &quot;overview&quot;;
+    const id = `split:${view}:${Date.now().toString(36)}:${++tabSequence}`;
+    containerApi.addPanel({
+      id,
+      component: &quot;page&quot;,
+      title: TITLES[view],
+      params: { view },
+      position: { referenceGroup: group.id, direction: &quot;right&quot; },
+    });
+    workspace?.onNavigate(`/${view}`);
+  };
+
   return (
     &lt;div
-      className=&quot;dock-tab-add&quot;
+      className=&quot;dock-header-actions&quot;
       data-dock-group={group.id}
       onPointerDown={(event) =&gt; event.stopPropagation()}
     &gt;
@@ -2831,6 +2850,44 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
           &lt;/DropdownMenu.Content&gt;
         &lt;/DropdownMenu.Portal&gt;
       &lt;/DropdownMenu.Root&gt;
+      &lt;DropdownMenu.Root&gt;
+        &lt;DropdownMenu.Trigger asChild&gt;
+          &lt;button
+            type=&quot;button&quot;
+            className=&quot;dock-more-trigger&quot;
+            aria-label=&quot;More tab actions&quot;
+            title=&quot;More tab actions&quot;
+          &gt;
+            &lt;span className=&quot;dock-more-glyph&quot; aria-hidden=&quot;true&quot;&gt;···&lt;/span&gt;
+          &lt;/button&gt;
+        &lt;/DropdownMenu.Trigger&gt;
+        &lt;DropdownMenu.Portal&gt;
+          &lt;DropdownMenu.Content
+            className=&quot;menu-content dock-more-menu&quot;
+            align=&quot;end&quot;
+            side=&quot;bottom&quot;
+            sideOffset={5}
+            collisionPadding={10}
+            aria-label=&quot;Tab layout actions&quot;
+          &gt;
+            &lt;DropdownMenu.Item
+              className=&quot;menu-item dock-action-item&quot;
+              onSelect={splitRight}
+            &gt;
+              &lt;AnimatedIcon name=&quot;workspace&quot; size={16} /&gt;
+              &lt;span&gt;Split right&lt;/span&gt;
+            &lt;/DropdownMenu.Item&gt;
+            &lt;DropdownMenu.Separator className=&quot;dock-add-separator&quot; /&gt;
+            &lt;DropdownMenu.Item
+              className=&quot;menu-item dock-action-item&quot;
+              onSelect={() =&gt; workspace?.resetLayout()}
+            &gt;
+              &lt;AnimatedIcon name=&quot;overview&quot; size={16} /&gt;
+              &lt;span&gt;Reset layout&lt;/span&gt;
+            &lt;/DropdownMenu.Item&gt;
+          &lt;/DropdownMenu.Content&gt;
+        &lt;/DropdownMenu.Portal&gt;
+      &lt;/DropdownMenu.Root&gt;
     &lt;/div&gt;
   );
 }
@@ -2855,10 +2912,20 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
   const disposables = useRef&lt;Array&lt;{ dispose: () =&gt; void }&gt;&gt;([]);
   const latest = useRef({ route, onNavigate });
   latest.current = { route, onNavigate };
-  const serial = useRef(0);
-  const [count, setCount] = useState(0);
+  const resetLayout = () =&gt; {
+    const api = apiRef.current;
+    if (!api) return;
+    api.clear();
+    try {
+      localStorage.removeItem(LAYOUT_KEY);
+    } catch {
+      /* Browser storage is optional. */
+    }
+    openRoute(api, &quot;overview&quot;);
+    latest.current.onNavigate(&quot;/overview&quot;);
+  };
   const panelContext = useMemo(
-    () =&gt; ({ render: renderView, onNavigate }),
+    () =&gt; ({ render: renderView, onNavigate, resetLayout }),
     [renderView, onNavigate],
   );
 
@@ -2915,7 +2982,6 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
         }
       }),
       api.onDidLayoutChange(() =&gt; {
-        setCount(api.panels.length);
         saveLayout(api);
       }),
     ];
@@ -2929,85 +2995,12 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
       });
     }
     openRoute(api, routeToView(latest.current.route));
-    setCount(api.panels.length);
     saveLayout(api);
-  };
-
-  const splitRight = () =&gt; {
-    const api = apiRef.current;
-    if (!api) return;
-    const active = api.activePanel;
-    const candidate: unknown = active?.api.getParameters().view;
-    const view =
-      typeof candidate === &quot;string&quot; &amp;&amp; isView(candidate) ? candidate : routeToView(route);
-    const id = `split:${view}:${++serial.current}:${Date.now()}`;
-    api.addPanel({
-      id,
-      component: &quot;page&quot;,
-      title: TITLES[view],
-      params: { view },
-      position: active ? { referencePanel: active.id, direction: &quot;right&quot; } : { direction: &quot;right&quot; },
-    });
-    latest.current.onNavigate(`/${view}`);
-  };
-
-  const resetLayout = () =&gt; {
-    const api = apiRef.current;
-    if (!api) return;
-    api.clear();
-    try {
-      localStorage.removeItem(LAYOUT_KEY);
-    } catch {
-      /* unavailable */
-    }
-    openRoute(api, &quot;overview&quot;);
-    latest.current.onNavigate(&quot;/overview&quot;);
   };
 
   return (
     &lt;PaneContext.Provider value={panelContext}&gt;
       &lt;div className=&quot;dock-workspace&quot; data-testid=&quot;dockview-workspace&quot;&gt;
-        &lt;div className=&quot;dock-toolbar&quot;&gt;
-          &lt;div className=&quot;dock-toolbar-title&quot;&gt;
-            &lt;span className=&quot;dock-eyebrow&quot;&gt;WORKSPACE&lt;/span&gt;
-            &lt;span className=&quot;dock-toolbar-divider&quot; aria-hidden=&quot;true&quot;&gt;
-              /
-            &lt;/span&gt;
-            &lt;span&gt;Panels&lt;/span&gt;
-            &lt;span className=&quot;dock-panel-count&quot;&gt;{count}&lt;/span&gt;
-          &lt;/div&gt;
-          &lt;div className=&quot;dock-toolbar-actions&quot;&gt;
-            &lt;button
-              type=&quot;button&quot;
-              className=&quot;dock-toolbar-button&quot;
-              onClick={() =&gt; latest.current.onNavigate(&quot;/graph&quot;)}
-              aria-label=&quot;Open knowledge graph&quot;
-              title=&quot;Open knowledge graph&quot;
-            &gt;
-              &lt;AnimatedIcon name=&quot;graph&quot; size={15} /&gt;
-              &lt;span&gt;Graph&lt;/span&gt;
-            &lt;/button&gt;
-            &lt;button
-              type=&quot;button&quot;
-              className=&quot;dock-toolbar-button&quot;
-              onClick={splitRight}
-              aria-label=&quot;Split active panel right&quot;
-              title=&quot;Split active panel right&quot;
-            &gt;
-              &lt;AnimatedIcon name=&quot;workspace&quot; size={15} /&gt;
-              &lt;span&gt;Split right&lt;/span&gt;
-            &lt;/button&gt;
-            &lt;button
-              type=&quot;button&quot;
-              className=&quot;dock-toolbar-button&quot;
-              onClick={resetLayout}
-              aria-label=&quot;Reset panel layout&quot;
-              title=&quot;Reset panel layout&quot;
-            &gt;
-              Reset layout
-            &lt;/button&gt;
-          &lt;/div&gt;
-        &lt;/div&gt;
         &lt;section className=&quot;dock-grid&quot; aria-label=&quot;Dockview panels&quot;&gt;
           &lt;DockviewReact
             theme={dark ? themeDark : themeLight}
