@@ -250,6 +250,7 @@ export default function DockCanvas({
   const alreadyOpenedRoute = useRef<string | null>(null);
   const disposables = useRef<Array<{ dispose: () => void }>>([]);
   const [empty, setEmpty] = useState(true);
+  const [ready, setReady] = useState(false);
   const latest = useRef({ route, onNavigate });
   latest.current = { route, onNavigate };
   const save = useCallback(
@@ -420,7 +421,7 @@ export default function DockCanvas({
       title: title(view),
       params: { view },
     });
-  }, [route]);
+  }, [route, ready]);
   useEffect(() => {
     const api = apiRef.current;
     if (!api) return;
@@ -512,17 +513,10 @@ export default function DockCanvas({
         if (api.panels.length === 0 && latest.current.route !== "/") latest.current.onNavigate("/");
       }),
     ];
-    const view = viewFromRoute(latest.current.route);
-    if (view && !api.panels.some((panel) => panel.api.getParameters().view === view)) {
-      api.addPanel({
-        id: `route:${view}:${++sequence}`,
-        component: "page",
-        tabComponent: "canvas",
-        title: title(view),
-        params: { view },
-      });
-    }
+    // Route initialization is owned by the route effect after Dockview is ready.
+    // Never instantiate another panel here: this callback may run during layout updates.
     save(api);
+    setReady(true);
   };
 
   return (
