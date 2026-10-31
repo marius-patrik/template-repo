@@ -15,6 +15,14 @@ try {
   await page.locator("#root .app-root").waitFor({ timeout: 15000 });
   await page.locator(".window-titlebar").waitFor();
   await page.locator(".window-statusbar").waitFor();
+  if (await page.locator(".project-header").count()) throw new Error("Redundant project header remains");
+  if (await page.locator(".sidebar-top").count()) throw new Error("Sidebar still reserves space for collapse control");
+  if (await page.locator('.sidebar [href="/settings"]').count()) throw new Error("Settings still appears in sidebar");
+
+  await page.keyboard.press("Control+b");
+  await page.locator(".sidebar.collapsed").waitFor();
+  await page.keyboard.press("Control+b");
+  await page.locator(".sidebar:not(.collapsed)").waitFor();
 
   await page.getByRole("button", { name: "Open navigation tree" }).click();
   await page.getByRole("dialog", { name: "Omnibar navigation tree" }).waitFor();
@@ -22,6 +30,17 @@ try {
 
   await page.getByRole("button", { name: "Settings", exact: true }).first().click();
   await page.getByRole("heading", { name: "Settings", exact: true }).waitFor();
+  await page.getByRole("heading", { name: "Keyboard shortcuts" }).waitFor();
+  await page.getByRole("button", { name: "Choose custom accent color" }).click();
+  await page.getByRole("textbox", { name: "Accent color hex value" }).fill("#dd66cc");
+  await page.waitForFunction(() => getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() === "#dd66cc");
+  await page.keyboard.press("Escape");
+
+  const editSidebar = page.getByRole("button", { name: "Change shortcut for Toggle sidebar" });
+  await editSidebar.click();
+  await page.keyboard.press("Control+Shift+b");
+  await page.waitForFunction(() => (document.querySelector('[data-command="canvas.sidebar.toggle"] kbd')?.textContent ?? "").includes("B"));
+  await page.getByRole("button", { name: "Reset shortcut for Toggle sidebar" }).click();
 
   await page.setViewportSize({ width: 390, height: 844 });
   const overflow = await page.evaluate(
@@ -33,7 +52,7 @@ try {
   await page.locator(".sidebar.mobile-open").waitFor();
 
   if (errors.length) throw new Error(`Browser uncaught errors: ${errors.join("; ")}`);
-  console.log("Canvas Chromium smoke passed: mount, chrome, navigation, omnibar and mobile.");
+  console.log("Canvas Chromium smoke passed: mount, chrome, Ctrl+B, settings, accent picker, keybinding recorder and mobile.");
 } finally {
   await browser.close();
 }
