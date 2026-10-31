@@ -22,14 +22,21 @@ export function useFloatingOmnibar() {
     if (!item || item.id !== event.pointerId) return;
     const width = item.root.offsetWidth;
     const height = item.root.offsetHeight;
-    item.nextX = Math.round(Math.max(8, Math.min(
-      window.innerWidth - Math.min(width, window.innerWidth) - 8,
-      item.x + event.clientX - item.pointerX,
-    )));
-    item.nextY = Math.round(Math.max(8, Math.min(
-      window.innerHeight - height - 8,
-      item.y + event.clientY - item.pointerY,
-    )));
+    item.nextX = Math.round(
+      Math.max(
+        8,
+        Math.min(
+          window.innerWidth - Math.min(width, window.innerWidth) - 8,
+          item.x + event.clientX - item.pointerX,
+        ),
+      ),
+    );
+    item.nextY = Math.round(
+      Math.max(
+        8,
+        Math.min(window.innerHeight - height - 8, item.y + event.clientY - item.pointerY),
+      ),
+    );
     if (!item.frame) {
       item.frame = requestAnimationFrame(() => {
         const active = drag.current;
@@ -51,9 +58,15 @@ export function useFloatingOmnibar() {
     event.preventDefault();
     const prefs = useCanvasConfig.getState().preferences;
     drag.current = {
-      id: event.pointerId, pointerX: event.clientX, pointerY: event.clientY,
-      x: prefs.floatingX, y: prefs.floatingY, nextX: prefs.floatingX, nextY: prefs.floatingY,
-      root, frame: 0,
+      id: event.pointerId,
+      pointerX: event.clientX,
+      pointerY: event.clientY,
+      x: prefs.floatingX,
+      y: prefs.floatingY,
+      nextX: prefs.floatingX,
+      nextY: prefs.floatingY,
+      root,
+      frame: 0,
     };
     document.body.classList.add("cx-dragging");
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -77,9 +90,12 @@ export function useFloatingOmnibar() {
       item.root.style.transform = "";
     }
   }, [setPreferences]);
-  useEffect(() => () => {
-    if (drag.current?.frame) cancelAnimationFrame(drag.current.frame);
-    document.body.classList.remove("cx-dragging");
-  }, []);
+  useEffect(
+    () => () => {
+      if (drag.current?.frame) cancelAnimationFrame(drag.current.frame);
+      document.body.classList.remove("cx-dragging");
+    },
+    [],
+  );
   return { start, update, end };
 }

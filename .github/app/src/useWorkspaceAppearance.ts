@@ -25,7 +25,10 @@ export function useWorkspaceAppearance() {
     root.dataset.accent = "custom";
 
     for (const [key, value] of Object.entries(palette)) {
-      root.style.setProperty(key === "accentForeground" ? "--accent-foreground" : `--${key}`, value);
+      root.style.setProperty(
+        key === "accentForeground" ? "--accent-foreground" : `--${key}`,
+        value,
+      );
     }
 
     const tokens = {
@@ -43,7 +46,10 @@ export function useWorkspaceAppearance() {
       const map = prefs.componentThemes[component];
       const prefix = `--component-${component}-`;
       for (const [target, paletteKey] of Object.entries({
-        bg: map.surface, text: map.text, border: map.border, accent: map.accent,
+        bg: map.surface,
+        text: map.text,
+        border: map.border,
+        accent: map.accent,
       })) {
         if (paletteKey === "inherit") root.style.removeProperty(prefix + target);
         else root.style.setProperty(prefix + target, palette[paletteKey as keyof typeof palette]);

@@ -46,7 +46,7 @@ export default function App() {
 
   useEffect(() => {
     const slug = path.split("?")[0].replace(/^\//, "");
-    const merged = ["overview","projects","agents","graph","roadmap","artifacts","context"];
+    const merged = ["overview", "projects", "agents", "graph", "roadmap", "artifacts", "context"];
     if (merged.includes(slug)) navigate("/canvas", { replace: true });
     else if (slug === "monaco" || slug === "notepad") navigate("/editor", { replace: true });
     else if (slug === "activity" || slug === "workspace") navigate("/", { replace: true });
@@ -98,96 +98,172 @@ export default function App() {
   const statusItems: Segment[] = [
     { id: "navigation", visible: prefs.navigationPosition === "statusbar", node: nav() },
     {
-      id: "snapshot", visible: true,
+      id: "snapshot",
+      visible: true,
       node: <span className="cx-snapshot">{t("Repository snapshot · read-only")}</span>,
     },
     {
-      id: "omnibar", visible: prefs.omnibarPosition === "statusbar",
+      id: "omnibar",
+      visible: prefs.omnibarPosition === "statusbar",
       node: <Omnibar onNavigate={go} />,
     },
     {
-      id: "settings", visible: prefs.settingsPosition === "statusbar",
-      node: <SurfaceMenu kind="settings"><button
-        type="button" className="cx-status-control status-settings" aria-label={t("Settings")}
-        title={t("Settings")} onClick={() => go("/settings")}
-      >{icon("settings", 15)}</button></SurfaceMenu>,
+      id: "settings",
+      visible: prefs.settingsPosition === "statusbar",
+      node: (
+        <SurfaceMenu kind="settings">
+          <button
+            type="button"
+            className="cx-status-control status-settings"
+            aria-label={t("Settings")}
+            title={t("Settings")}
+            onClick={() => go("/settings")}
+          >
+            {icon("settings", 15)}
+          </button>
+        </SurfaceMenu>
+      ),
     },
-    { id: "version", visible: true,
-      node: <span className="cx-status-version">v{appVersion} · {t("Prototype")}</span> },
-    { id: "revision", visible: true,
-      node: <span className="cx-revision">{context.revision}</span> },
+    {
+      id: "version",
+      visible: true,
+      node: (
+        <span className="cx-status-version">
+          v{appVersion} · {t("Prototype")}
+        </span>
+      ),
+    },
+    {
+      id: "revision",
+      visible: true,
+      node: <span className="cx-revision">{context.revision}</span>,
+    },
   ];
 
   return (
     <div className="cx-shell app-root" data-shell="v2">
       <header className="cx-topbar window-titlebar">
         <div className="cx-topbar-start title-left">
-          <button className="cx-icon-button cx-rail-toggle desktop-toggle" type="button"
+          <button
+            className="cx-icon-button cx-rail-toggle desktop-toggle"
+            type="button"
             title={t(expanded ? "Collapse sidebar" : "Expand sidebar")}
             aria-label={t(expanded ? "Collapse sidebar" : "Expand sidebar")}
             onClick={toggleSidebar}
-          >{icon(expanded ? "collapse" : "expand", 17)}</button>
-          <button className="cx-icon-button mobile-toggle" type="button"
-            aria-label={t("Toggle navigation")} onClick={toggleSidebar}>{icon("expand", 17)}</button>
-          <span className="cx-brand-mark" aria-hidden="true">C</span>
+          >
+            {icon(expanded ? "collapse" : "expand", 17)}
+          </button>
+          <button
+            className="cx-icon-button mobile-toggle"
+            type="button"
+            aria-label={t("Toggle navigation")}
+            onClick={toggleSidebar}
+          >
+            {icon("expand", 17)}
+          </button>
+          <span className="cx-brand-mark" aria-hidden="true">
+            C
+          </span>
           <span className="cx-brand-label">Canvas</span>
           <span className="cx-header-rule" aria-hidden="true" />
           {prefs.navigationPosition === "titlebar" && (
-            <CanvasContextMenu actions={navActions}><div className="cx-navigation-slot">{nav()}</div></CanvasContextMenu>
+            <CanvasContextMenu actions={navActions}>
+              <div className="cx-navigation-slot">{nav()}</div>
+            </CanvasContextMenu>
           )}
         </div>
 
         <div className="cx-topbar-center title-center">
-          {prefs.omnibarPosition === "titlebar"
-            ? <SurfaceMenu kind="omnibar"><Omnibar onNavigate={go} /></SurfaceMenu>
-            : <span className="cx-center-label">{context.name}</span>}
+          {prefs.omnibarPosition === "titlebar" ? (
+            <SurfaceMenu kind="omnibar">
+              <Omnibar onNavigate={go} />
+            </SurfaceMenu>
+          ) : (
+            <span className="cx-center-label">{context.name}</span>
+          )}
         </div>
 
         <div className="cx-topbar-end title-actions">
           <NotificationCenter />
           {prefs.settingsPosition === "titlebar" && (
-            <SurfaceMenu kind="settings"><button type="button" className="cx-icon-button"
-              title={t("Settings")} aria-label={t("Settings")}
-              onClick={() => go("/settings")}>{icon("settings", 17)}</button></SurfaceMenu>
+            <SurfaceMenu kind="settings">
+              <button
+                type="button"
+                className="cx-icon-button"
+                title={t("Settings")}
+                aria-label={t("Settings")}
+                onClick={() => go("/settings")}
+              >
+                {icon("settings", 17)}
+              </button>
+            </SurfaceMenu>
           )}
         </div>
       </header>
 
       <div className={`cx-body window-main activity-position-${prefs.activityBarPosition}`}>
         {mobileOpen && (
-          <button type="button" className="cx-mobile-scrim sidebar-scrim"
-            aria-label={t("Close navigation")} onClick={() => setMobileOpen(false)} />
+          <button
+            type="button"
+            className="cx-mobile-scrim sidebar-scrim"
+            aria-label={t("Close navigation")}
+            onClick={() => setMobileOpen(false)}
+          />
         )}
         <div className={`cx-workarea work-area activity-position-${prefs.activityBarPosition}`}>
           {!sidebarVisible && prefs.activityBarPosition !== "hidden" && (
             <ActivityBar
-              current={route} onNavigate={go} onNewTab={newTab}
+              current={route}
+              onNavigate={go}
+              onNewTab={newTab}
               showSettings={prefs.settingsPosition === "activitybar"}
             />
           )}
           <div className={`cx-workspace-row primary-content sidebar-${prefs.sidebarPosition}`}>
             {sidebarVisible && (
               <div className="cx-sidebar-wrap">
-                <aside className={`cx-sidebar sidebar ${mobileOpen ? "mobile-open" : ""}`}
-                  aria-label={t("Main navigation")}>
+                <aside
+                  className={`cx-sidebar sidebar ${mobileOpen ? "mobile-open" : ""}`}
+                  aria-label={t("Main navigation")}
+                >
                   <div className="cx-sidebar-head">
                     <span className="cx-sidebar-overline">{t("Workspace navigation")}</span>
-                    <button type="button" className="cx-icon-button cx-sidebar-dismiss"
-                      title={t("Collapse sidebar")} aria-label={t("Collapse sidebar")}
-                      onClick={toggleSidebar}>{icon("collapse", 16)}</button>
+                    <button
+                      type="button"
+                      className="cx-icon-button cx-sidebar-dismiss"
+                      title={t("Collapse sidebar")}
+                      aria-label={t("Collapse sidebar")}
+                      onClick={toggleSidebar}
+                    >
+                      {icon("collapse", 16)}
+                    </button>
                   </div>
                   {prefs.omnibarPosition === "sidebar" && <Omnibar onNavigate={go} />}
                   <button type="button" className="cx-add-tab sidebar-new-tab" onClick={newTab}>
-                    {icon("plus", 16)}<span>{t("New tab")}</span><span className="cx-add-shortcut">⌘T</span>
+                    {icon("plus", 16)}
+                    <span>{t("New tab")}</span>
+                    <span className="cx-add-shortcut">⌘T</span>
                   </button>
                   <SidebarContents current={route} onNavigate={go} />
                   <div className="cx-sidebar-foot">{context.repository}</div>
                 </aside>
                 {!mobileOpen && (
-                  <CanvasContextMenu actions={[
-                    { label: t("Move sidebar left"), icon: "move", action: () => update({ sidebarPosition: "left" }) },
-                    { label: t("Move sidebar right"), icon: "move", action: () => update({ sidebarPosition: "right" }) },
-                  ]}><SidebarResize /></CanvasContextMenu>
+                  <CanvasContextMenu
+                    actions={[
+                      {
+                        label: t("Move sidebar left"),
+                        icon: "move",
+                        action: () => update({ sidebarPosition: "left" }),
+                      },
+                      {
+                        label: t("Move sidebar right"),
+                        icon: "move",
+                        action: () => update({ sidebarPosition: "right" }),
+                      },
+                    ]}
+                  >
+                    <SidebarResize />
+                  </CanvasContextMenu>
                 )}
               </div>
             )}
@@ -217,34 +293,51 @@ export default function App() {
       </div>
 
       <footer className="cx-statusbar window-statusbar">
-        {(["left","center","right"] as Alignment[]).map((alignment) => {
+        {(["left", "center", "right"] as Alignment[]).map((alignment) => {
           const segments = statusItems.filter(
             (item) => item.visible && prefs.statusAlignment[item.id] === alignment,
           );
-          return <div className={`cx-status-group status-group status-group-${alignment}`}
-            key={alignment}>
-            {segments.map((segment, index) => (
-              <Fragment key={segment.id}>
-                {index > 0 && <span className="cx-status-divider status-delimiter" aria-hidden="true">|</span>}
-                {segment.node}
-              </Fragment>
-            ))}
-          </div>;
+          return (
+            <div
+              className={`cx-status-group status-group status-group-${alignment}`}
+              key={alignment}
+            >
+              {segments.map((segment, index) => (
+                <Fragment key={segment.id}>
+                  {index > 0 && (
+                    <span className="cx-status-divider status-delimiter" aria-hidden="true">
+                      |
+                    </span>
+                  )}
+                  {segment.node}
+                </Fragment>
+              ))}
+            </div>
+          );
         })}
       </footer>
 
       {prefs.omnibarPosition === "floating" && (
-        <Omnibar onNavigate={go} floating={{ left: prefs.floatingX, top: prefs.floatingY }}
-          dragHandle={<button type="button" className="floating-handle"
-            title={t("Drag omnibar")} aria-label={t("Drag omnibar")}
-            onPointerDown={floating.start} onPointerMove={floating.update}
-            onPointerUp={(event) => {
-              if (event.currentTarget.hasPointerCapture(event.pointerId))
-                event.currentTarget.releasePointerCapture(event.pointerId);
-            }}
-            onLostPointerCapture={floating.end}>
-            {icon("drag", 16)}
-          </button>}
+        <Omnibar
+          onNavigate={go}
+          floating={{ left: prefs.floatingX, top: prefs.floatingY }}
+          dragHandle={
+            <button
+              type="button"
+              className="floating-handle"
+              title={t("Drag omnibar")}
+              aria-label={t("Drag omnibar")}
+              onPointerDown={floating.start}
+              onPointerMove={floating.update}
+              onPointerUp={(event) => {
+                if (event.currentTarget.hasPointerCapture(event.pointerId))
+                  event.currentTarget.releasePointerCapture(event.pointerId);
+              }}
+              onLostPointerCapture={floating.end}
+            >
+              {icon("drag", 16)}
+            </button>
+          }
         />
       )}
       {prefs.omnibarPosition === "hidden" && <Omnibar onNavigate={go} fallback />}

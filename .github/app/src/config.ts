@@ -348,8 +348,11 @@ export const useCanvasConfig = create<ConfigState>()(
         if (!old) return saved;
         const preferences = { ...old };
         // Bring previous untouched chrome dimensions to the unified v2 scale.
-        if (previousVersion < 7 &&
-          preferences.titleBarHeight === 24 && preferences.statusBarHeight === 24) {
+        if (
+          previousVersion < 7 &&
+          preferences.titleBarHeight === 24 &&
+          preferences.statusBarHeight === 24
+        ) {
           preferences.titleBarHeight = 32;
           preferences.statusBarHeight = 32;
         }
