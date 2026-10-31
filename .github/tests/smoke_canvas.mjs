@@ -95,16 +95,29 @@ try {
   await resize.focus();
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("ArrowRight");
+  await page.waitForFunction(
+    () => Number(document.querySelector(".sidebar-resizer")?.getAttribute("aria-valuenow")) >= 250,
+  );
+  await page.waitForFunction(
+    () => (document.querySelector(".sidebar")?.getBoundingClientRect().width ?? 0) >= 245,
+  );
   const resizedWidth = await page.locator(".sidebar").evaluate((el) => el.getBoundingClientRect().width);
-  if (resizedWidth < 245) throw new Error("Sidebar keyboard resize failed");
   await page.keyboard.press("Control+b");
   await page.locator(".sidebar.collapsed").waitFor();
   await page.keyboard.press("Control+b");
   await page.locator(".sidebar:not(.collapsed)").waitFor();
+  await page.waitForFunction((expected) =>
+    Math.abs((document.querySelector(".sidebar")?.getBoundingClientRect().width ?? 0) - expected) <= 2,
+    resizedWidth,
+  );
   const restoredWidth = await page.locator(".sidebar").evaluate((el) => el.getBoundingClientRect().width);
   if (Math.abs(restoredWidth - resizedWidth) > 2)
     throw new Error("Sidebar resize width was lost during collapse/expand");
   await page.reload({ waitUntil: "load" });
+  await page.waitForFunction((expected) =>
+    Math.abs((document.querySelector(".sidebar")?.getBoundingClientRect().width ?? 0) - expected) <= 2,
+    resizedWidth,
+  );
   const storedWidth = await page.locator(".sidebar").evaluate((el) => el.getBoundingClientRect().width);
   if (Math.abs(storedWidth - resizedWidth) > 2)
     throw new Error("Sidebar width failed to persist after reload");
