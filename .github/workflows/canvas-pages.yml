@@ -39,6 +39,8 @@ jobs:
           bun install --frozen-lockfile
           bun run context
           bun run typecheck
+          bun run lint
+          bun run format:check
           bun run build
       - name: Check compiled site and standalone HTML
         run: |
