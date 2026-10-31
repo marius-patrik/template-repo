@@ -42,3 +42,15 @@ Pages builds on the feature branch deploy through the `canvas-preview` environme
 - The project route tree lives in the omnibar; the redundant secondary header was retired.
 - Shortcuts are registered centrally with TanStack Hotkeys, defaulting to Mod+B (sidebar) and Mod+K (omnibar), and are editable in Settings. Custom bindings persist only in the current browser.
 - Accent color selection uses react-colorful inside a Radix Popover and validates contrast using colord. The theme state remains local and independent of repository authority.
+
+## Dockview application shell (v0.8)
+
+Dockview now renders every route within one application-level compositor, replacing the
+old nested Workbench instance and fixed page-switching layout. The title bar, omnibar,
+navigation and status bar remain global. The workspace toolbar supports tab navigation,
+splitting the active view, opening the graph and resetting the layout. Drag-and-drop
+rearrangement, group splitting and panel closing are native Dockview interactions.
+
+Wouter hash routes and Dockview tab selection are synchronized. Local layout preferences
+are persisted under `canvas-dockview-layout-v1` and can be reset without changing
+repository data. The build remains a static, read-only repository snapshot.

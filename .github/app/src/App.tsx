@@ -359,7 +359,7 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
       </section>
       <KeyboardSettings />
       <p className="muted settings-note">
-        Canvas v0.7.0 · Prototype. Local UI settings are not authoritative project data.
+        Canvas v0.8.0 · Prototype. Local UI settings are not authoritative project data.
       </p>
     </div>
   );
@@ -563,7 +563,7 @@ export default function App() {
           <span className="snapshot-desktop">Repository snapshot · read-only</span>
           <span className="snapshot-mobile">Read-only snapshot</span>
         </span>
-        <span className="version">Version: 0.7.0 · Prototype</span>
+        <span className="version">Version: 0.8.0 · Prototype</span>
         <span>
           {context.repository} / {context.revision}
         </span>
