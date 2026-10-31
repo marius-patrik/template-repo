@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import ReactFlow, { Background, Controls, type Node, type Edge } from "@xyflow/react";
+import { ReactFlow, Background, Controls, type Node, type Edge } from "@xyflow/react";
 import dagre from "dagre";
 import context from "./generated/context.json";
 
