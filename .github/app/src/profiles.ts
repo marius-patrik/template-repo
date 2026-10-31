@@ -151,7 +151,7 @@ export const useProfiles = create<State>()(
                       ...new Set(
                         value.pinned.flatMap((view): CanvasView[] => {
                           if (typeof view !== "string") return [];
-                          if (view === "monaco") return ["editor"];
+                          if (view === "monaco" || view === "notepad") return ["editor"];
                           if (
                             [
                               "overview",

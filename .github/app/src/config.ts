@@ -5,7 +5,7 @@ import { z } from "zod";
 export const POSITIONS = {
   navigation: ["sidebar", "titlebar", "omnibar", "statusbar", "hidden"],
   omnibar: ["titlebar", "sidebar", "statusbar", "floating", "hidden"],
-  settings: ["titlebar", "activitybar", "statusbar", "tabbar"],
+  settings: ["titlebar", "activitybar", "statusbar", "tabbar", "hidden"],
   activity: ["left", "right", "top", "bottom", "hidden"],
   sidebar: ["left", "right"],
 } as const;
@@ -135,6 +135,43 @@ const skinPalette = {
     },
   },
 } as const;
+export const COMPONENTS = [
+  "titlebar", "statusbar", "sidebar", "activitybar", "tabs", "omnibar",
+  "canvas", "editor", "library", "settings", "menus",
+] as const;
+export type ComponentName = (typeof COMPONENTS)[number];
+export const STATUS_PARTS = ["snapshot", "navigation", "omnibar", "settings", "version", "revision"] as const;
+export type StatusPart = (typeof STATUS_PARTS)[number];
+const sizeChoice = z.enum(["inherit", "small", "normal", "large"]);
+const componentTheme = z.object({
+  surface: z.union([z.literal("inherit"), z.enum(COLOR_KEYS)]),
+  text: z.union([z.literal("inherit"), z.enum(COLOR_KEYS)]),
+  border: z.union([z.literal("inherit"), z.enum(COLOR_KEYS)]),
+  accent: z.union([z.literal("inherit"), z.enum(COLOR_KEYS)]),
+  font: sizeChoice,
+  icon: sizeChoice,
+  spacing: sizeChoice,
+});
+export type ComponentTheme = z.infer<typeof componentTheme>;
+export const defaultComponentTheme: ComponentTheme = {
+  surface: "inherit", text: "inherit", border: "inherit", accent: "inherit",
+  font: "inherit", icon: "inherit", spacing: "inherit",
+};
+export const defaultComponentThemes = Object.fromEntries(
+  COMPONENTS.map((component) => [component, { ...defaultComponentTheme }]),
+) as Record<ComponentName, ComponentTheme>;
+const componentThemesSchema = z.object(Object.fromEntries(COMPONENTS.map(
+  (component) => [component, componentTheme],
+)) as Record<ComponentName, typeof componentTheme>);
+const statusAlign = z.enum(["left", "center", "right"]);
+const statusAlignmentSchema = z.object(Object.fromEntries(STATUS_PARTS.map(
+  (part) => [part, statusAlign],
+)) as Record<StatusPart, typeof statusAlign>);
+export const defaultStatusAlignment: Record<StatusPart, "left" | "center" | "right"> = {
+  snapshot: "left", navigation: "left", omnibar: "center", settings: "right",
+  version: "right", revision: "right",
+};
+
 const schema = z.object({
   theme: z.enum(["dark", "light", "system"]),
   skin: z.enum(["oled", "graphite", "slate", "contrast"]),
@@ -156,6 +193,10 @@ const schema = z.object({
   settingsPosition: z.enum(POSITIONS.settings),
   floatingX: z.number().finite().min(0).max(10000),
   floatingY: z.number().finite().min(0).max(10000),
+  commandPlacement: z.enum(["auto", "down", "up"]),
+  commandBackdropBlur: z.boolean(),
+  statusAlignment: statusAlignmentSchema,
+  componentThemes: componentThemesSchema,
   darkColors: palette,
   lightColors: palette,
 });
@@ -178,6 +219,10 @@ export const defaults: CanvasPreferences = {
   settingsPosition: "titlebar",
   floatingX: 280,
   floatingY: 110,
+  commandPlacement: "auto",
+  commandBackdropBlur: true,
+  statusAlignment: defaultStatusAlignment,
+  componentThemes: defaultComponentThemes,
   darkColors: oledPalette,
   lightColors: lightPalette,
 };
@@ -203,6 +248,10 @@ function validate(source: unknown): CanvasPreferences {
       ...lightPalette,
       ...(record.lightColors && typeof record.lightColors === "object" ? record.lightColors : {}),
     },
+    statusAlignment: { ...defaultStatusAlignment, ...(record.statusAlignment ?? {}) },
+    componentThemes: Object.fromEntries(COMPONENTS.map((key) => [
+      key, { ...defaultComponentTheme, ...(record.componentThemes?.[key] ?? {}) },
+    ])),
   };
   const result = schema.safeParse(data);
   return result.success ? result.data : defaults;
@@ -251,7 +300,7 @@ export const useCanvasConfig = create<ConfigState>()(
     }),
     {
       name: "canvas-config",
-      version: 4,
+      version: 5,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ preferences: state.preferences }),
       migrate: (saved, previousVersion) => {

@@ -16,12 +16,12 @@ try {
   await page.getByTestId("empty-workspace").waitFor();
   await page.locator(".dock-empty-tabbar").waitFor();
   const choices = page.locator(".dock-welcome-options button");
-  if (await choices.count() !== 5) throw new Error("Empty welcome must list every editor and view");
+  if (await choices.count() !== 4) throw new Error("Empty welcome must list every editor and view");
 
   // New tab must be a real Dockview tab displaying the reusable welcome choices.
   await page.locator(".activity-new-tab").click();
   await page.locator('[data-dock-view="new"]').waitFor();
-  if (await page.getByTestId("new-tab-welcome").locator(".dock-welcome-options button").count() !== 5)
+  if (await page.getByTestId("new-tab-welcome").locator(".dock-welcome-options button").count() !== 4)
     throw new Error("New tab must list all tools");
   await page.getByTestId("new-tab-welcome").getByRole("button", { name: "Editor" }).click();
   await page.locator('[data-dock-view="editor"]').waitFor();
@@ -51,16 +51,16 @@ try {
   }
   await page.keyboard.press("Escape");
 
-  await page.locator(".dock-welcome-options").getByRole("button", { name: "Notepad" }).click();
-  await page.locator('[data-dock-view="notepad"]').waitFor();
-  await page.getByTestId("notepad-editor").getByRole("textbox", { name: "Notepad" }).fill("Private Global note");
-  if (!(await page.locator('.canvas-dock-tab[data-canvas-tab="notepad"] .app-icon').count()))
-    throw new Error("Notepad tab icon missing");
+  await page.locator(".dock-welcome-options").getByRole("button", { name: "Editor" }).click();
+  await page.locator('[data-dock-view="editor"]').waitFor();
+  await page.getByTestId("monaco-editor").waitFor();
+  if (!(await page.locator('.canvas-dock-tab[data-canvas-tab="editor"] .app-icon').count()))
+    throw new Error("Editor tab icon missing");
 
-  const tab = page.locator('.canvas-dock-tab[data-canvas-tab="notepad"]').first();
+  const tab = page.locator('.canvas-dock-tab[data-canvas-tab="editor"]').first();
   await tab.click({ button: "right" });
   await page.getByRole("menuitem", { name: "Pin to activity bar" }).click();
-  await page.locator('.activity-bar .activity-button[title="Notepad"]').waitFor();
+  await page.locator('.activity-bar .activity-button[title="Editor"]').waitFor();
 
   await profiles.click();
   await page.getByRole("menuitem", { name: "Study" }).click();
@@ -71,9 +71,9 @@ try {
   await page.locator('[data-dock-view="canvas"]').waitFor();
   await profiles.click();
   await page.getByRole("menuitem", { name: "Global" }).click();
-  await page.locator('[data-dock-view="notepad"]').waitFor();
-  if ((await page.getByTestId("notepad-editor").getByRole("textbox", { name: "Notepad" }).inputValue()) !== "Private Global note")
-    throw new Error("Profile-specific note was not restored");
+  await page.locator('[data-dock-view="editor"]').waitFor();
+  if (!(await page.locator('[data-dock-view="editor"]').count()))
+    throw new Error("Profile-specific Editor was not restored");
 
   // Workspace management.
   await profiles.click();
@@ -135,6 +135,14 @@ try {
     getComputedStyle(document.querySelector(".window-statusbar")).height === "30px"
   );
   await page.getByRole("spinbutton", { name: "Primary sidebar width" }).fill("260");
+  await page.getByRole("combobox", { name: "Settings button position" }).click();
+  await page.getByRole("option", { name: "Statusbar" }).click();
+  await page.locator(".window-statusbar .status-settings").waitFor();
+  await page.getByRole("combobox", { name: "Settings button position" }).click();
+  await page.getByRole("option", { name: "Hidden" }).click();
+  if (await page.locator(".window-statusbar .status-settings").count())
+    throw new Error("Hidden settings button remains visible in the status bar");
+
 
   await page.getByRole("combobox", { name: "Navigation position" }).click();
   await page.getByRole("option", { name: "Sidebar" }).click();
@@ -170,12 +178,16 @@ try {
   await page.mouse.up();
   await page.waitForFunction(() => Number.parseFloat(document.querySelector(".floating-omnibar")?.style.left || "0") > 280);
 
-  // Keep command palette/omnibar, but without breadcrumb path within it.
+  // The live input itself expands into the contextual results panel; no duplicate dialog.
   await page.keyboard.press("Control+k");
-  await page.getByRole("dialog", { name: "Open navigation tree" }).waitFor();
-  if (await page.locator(".palette .palette-root").count())
-    throw new Error("Omnibar still contains the old breadcrumb path");
+  await page.getByRole("combobox", { name: "Do anything" }).focus();
+  await page.getByRole("listbox", { name: "Open navigation tree" }).waitFor();
+  if (await page.locator(".palette, .palette-cover").count())
+    throw new Error("Legacy modal command centre is still mounted");
+  await page.getByRole("combobox", { name: "Do anything" }).fill("canvas");
+  await page.getByRole("option", { name: /Canvas/ }).first().waitFor();
   await page.keyboard.press("Escape");
+  await page.waitForFunction(() => !document.querySelector(".omnibar-results"));
 
   await page.reload({ waitUntil: "load" });
   await page.getByTestId("settings-page").waitFor();

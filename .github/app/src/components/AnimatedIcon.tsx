@@ -81,6 +81,22 @@ const BookshelfIcon = forwardRef<IconHandle, { size?: number }>(function Bookshe
     </svg>
   );
 });
+const DragDotsIcon = forwardRef<IconHandle, { size?: number }>(function DragDotsIcon(
+  { size = 18 }, ref,
+) {
+  const node = useRef<SVGSVGElement>(null);
+  useImperativeHandle(ref, () => ({
+    startAnimation: () => {
+      node.current?.animate([{opacity: .55},{opacity: 1}], {duration: 180});
+    },
+    stopAnimation: () => node.current?.getAnimations().forEach((animation) => { animation.cancel(); }),
+  }));
+  return <svg ref={node} width={size} height={size} viewBox="0 0 24 24"
+    fill="currentColor" aria-hidden="true">
+    {[7, 12, 17].flatMap((cy) => [9,15].map((cx) =>
+      <circle key={`${cx}:${cy}`} cx={cx} cy={cy} r={1.5} />))}
+  </svg>;
+});
 type IconProps = { size?: number; animateOnHover?: boolean; ref?: Ref<IconHandle> };
 const registry = {
   overview: LayoutGridIcon,
@@ -89,7 +105,7 @@ const registry = {
   agents: BotIcon,
   graph: GitForkIcon,
   canvas: GitForkIcon,
-  editor: SquarePenIcon,
+  editor: FilePenLineIcon,
   roadmap: BlocksIcon,
   artifacts: FileTextIcon,
   activity: HistoryIcon,
@@ -118,6 +134,7 @@ const registry = {
   monaco: FileTextIcon,
   bell: BellIcon,
   more: GripHorizontalIcon,
+  drag: DragDotsIcon,
   copy: CopyIcon,
   close: XIcon,
 } satisfies Record<string, ComponentType<{ size?: number }>>;

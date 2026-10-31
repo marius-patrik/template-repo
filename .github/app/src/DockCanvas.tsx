@@ -450,7 +450,7 @@ export default function DockCanvas({
     let migrateEditor = false;
     for (const panel of [...api.panels]) {
       const oldView: unknown = panel.api.getParameters().view;
-      if (oldView === "monaco") {
+      if (oldView === "monaco" || oldView === "notepad") {
         migrateEditor = true;
         panel.api.close();
       } else if (typeof oldView === "string" && legacyRepositoryViews.has(oldView)) {

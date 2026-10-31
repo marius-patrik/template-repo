@@ -2,7 +2,6 @@
 export const VIEWS = [
   { id: "canvas", label: "Canvas" },
   { id: "editor", label: "Editor" },
-  { id: "notepad", label: "Notepad" },
   { id: "library", label: "Library" },
   { id: "settings", label: "Settings" },
 ] as const;
@@ -12,7 +11,7 @@ export function isCanvasView(value: string): value is CanvasView {
 }
 export function viewFromRoute(route: string): CanvasView | null {
   const raw = route.split("?")[0].replace(/^\//, "");
-  if (raw === "monaco") return "editor";
+  if (raw === "monaco" || raw === "notepad") return "editor";
   if (["overview", "projects", "agents", "graph", "roadmap", "artifacts", "context"].includes(raw))
     return "canvas";
   return isCanvasView(raw) ? raw : null;

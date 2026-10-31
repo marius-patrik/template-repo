@@ -1,61 +1,23 @@
-import { useState } from "react";
-import * as Popover from "@radix-ui/react-popover";
-import { HexColorInput, HexColorPicker } from "react-colorful";
+
+
+
 import { useTranslation } from "react-i18next";
 import { CanvasSelect } from "./components/ui/CanvasSelect";
 import { AnimatedIcon } from "./components/AnimatedIcon";
 import {
   COLOR_KEYS,
+  COMPONENTS,
+  STATUS_PARTS,
   POSITIONS,
   SCALES,
   useCanvasConfig,
-  type ColorKey,
   type CanvasPreferences,
 } from "./config";
 import KeyboardSettings from "./KeyboardSettings";
+import ColorEditor from "./ColorEditor";
 
 const readable = (value: string) =>
   value.replace(/([A-Z])/g, " $1").replace(/^(.)/, (char) => char.toUpperCase());
-function TokenColor({
-  name,
-  value,
-  onChange,
-}: {
-  name: ColorKey;
-  value: string;
-  onChange: (next: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const { t } = useTranslation();
-  return (
-    <Popover.Root open={open} onOpenChange={setOpen}>
-      <Popover.Trigger asChild>
-        <button
-          type="button"
-          className="token-color-trigger"
-          aria-label={t("Edit {{name}} color", { name: readable(name) })}
-        >
-          <span className="token-color-preview" style={{ background: value }} />
-          <span>{t(readable(name))}</span>
-          <code>{value.toUpperCase()}</code>
-          <AnimatedIcon name="down" size={13} />
-        </button>
-      </Popover.Trigger>
-      <Popover.Portal>
-        <Popover.Content
-          className="accent-popover token-popover"
-          sideOffset={8}
-          align="end"
-          collisionPadding={12}
-        >
-          <strong>{t(readable(name))}</strong>
-          <HexColorPicker color={value} onChange={onChange} />
-          <HexColorInput color={value} onChange={onChange} prefixed className="accent-hex-input" />
-        </Popover.Content>
-      </Popover.Portal>
-    </Popover.Root>
-  );
-}
 function Choice({
   label,
   value,
@@ -204,7 +166,7 @@ export default function PreferencesPanel() {
         </p>
         <div className="token-grid">
           {COLOR_KEYS.map((key) => (
-            <TokenColor
+            <ColorEditor
               key={key}
               name={key}
               value={colors[key]}
@@ -232,7 +194,7 @@ export default function PreferencesPanel() {
           }
         />
         <Choice
-          label="Settings position"
+          label="Settings button position"
           value={prefs.settingsPosition}
           values={POSITIONS.settings}
           onChange={(value) =>
@@ -277,6 +239,27 @@ export default function PreferencesPanel() {
           }
         />
         <Choice
+          label="Command results position"
+          value={prefs.commandPlacement}
+          values={["auto", "down", "up"]}
+          onChange={(value) => patch("commandPlacement", value as CanvasPreferences["commandPlacement"])}
+        />
+        <label className="setting-row settings-choice">
+          <span>{t("Blur background when command centre is open")}</span>
+          <input type="checkbox" checked={prefs.commandBackdropBlur}
+            onChange={(event) => patch("commandBackdropBlur", event.target.checked)} />
+        </label>
+        <h3>{t("Status bar alignment")}</h3>
+        <p className="muted">{t("Items sharing an alignment are grouped with a separator.")}</p>
+        {STATUS_PARTS.map((part) => <Choice key={part}
+          label={readable(part)}
+          value={prefs.statusAlignment[part]}
+          values={["left", "center", "right"]}
+          onChange={(value) => patch("statusAlignment", {
+            ...prefs.statusAlignment, [part]: value,
+          } as CanvasPreferences["statusAlignment"])}
+        />)}
+        <Choice
           label="Activity bar density"
           value={prefs.activityBarDensity}
           values={["compact", "comfortable"]}
@@ -284,6 +267,36 @@ export default function PreferencesPanel() {
             patch("activityBarDensity", value as CanvasPreferences["activityBarDensity"])
           }
         />
+      </div>
+      <div className="settings-group">
+        <h2>{t("Component token mapping")}</h2>
+        <p className="muted">{t("Override a component's color and scale tokens without changing the global palette. Inherit keeps the global setting.")}</p>
+        <div className="component-token-table" role="table" aria-label={t("Component token mapping")}>
+          {COMPONENTS.map((component) => (
+            <div className="component-token-row" key={component}>
+              <strong>{t(readable(component))}</strong>
+              {(["surface","text","border","accent","font","icon","spacing"] as const).map((field) => (
+                <label key={field} className="component-token-cell">
+                  <span>{t(readable(field))}</span>
+                  <CanvasSelect
+                    label={t(readable(component)) + " · " + t(readable(field))}
+                    value={prefs.componentThemes[component][field]}
+                    options={["inherit", ...(["surface","text","border","accent"].includes(field)
+                      ? COLOR_KEYS : ["small","normal","large"])].map((option) => ({
+                        value: option, label: t(readable(option)),
+                      }))}
+                    onValueChange={(value) => {
+                      patch("componentThemes", {
+                        ...prefs.componentThemes,
+                        [component]: { ...prefs.componentThemes[component], [field]: value },
+                      } as CanvasPreferences["componentThemes"]);
+                    }}
+                  />
+                </label>
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
       <div className="settings-group">
         <h2>{t("Language")}</h2>

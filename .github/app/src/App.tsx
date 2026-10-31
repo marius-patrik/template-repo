@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { Fragment, useEffect, useRef, useState, type CSSProperties } from "react";
 import { useAppHotkeys, useHotkey } from "@tanstack/react-hotkeys";
 import { useTranslation } from "react-i18next";
 import { useCanvasConfig, POSITIONS } from "./config";
 import { useLocation } from "wouter";
-import { motion, AnimatePresence } from "motion/react";
+import { SCALES, COMPONENTS } from "./config";
+import Omnibar from "./Omnibar";
 import { AnimatedIcon } from "./components/AnimatedIcon";
 import { Button } from "./components/ui/button";
 import { CanvasContextMenu } from "./components/ui/ContextMenu";
@@ -12,16 +13,13 @@ import PreferencesPanel from "./PreferencesPanel";
 import { useProfiles } from "./profiles";
 import {
   Navigator,
-  NavigationTree,
-  OmnibarTrigger,
   ActivityBar,
   SidebarContents,
-  Notepad,
   Library,
   SurfaceMenu,
 } from "./ShellComponents";
 import { NotificationCenter, Notifications } from "./notifications";
-import { VIEWS as nav, viewFromRoute } from "./views";
+import { viewFromRoute } from "./views";
 import { version as appVersion } from "../package.json";
 import Canvas from "./Canvas";
 import DockCanvas from "./DockCanvas";
@@ -56,10 +54,6 @@ export default function App() {
     [],
   );
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [paletteOpen, setPaletteOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const [selection, setSelection] = useState(0);
-  const input = useRef<HTMLInputElement>(null);
   const page = viewFromRoute(path);
   // Legacy deep links resolve to the consolidated views instead of recreating removed tabs.
   useEffect(() => {
@@ -71,6 +65,7 @@ export default function App() {
       navigate("/canvas" + (path.includes("?") ? "?" + path.split("?").slice(1).join("?") : ""), {
         replace: true,
       });
+    else if (old === "notepad") navigate("/editor", { replace: true });
     else if (old === "activity" || old === "workspace") navigate("/", { replace: true });
   }, [path, navigate]);
 
@@ -102,6 +97,23 @@ export default function App() {
     root.style.setProperty("--ui-spacing", prefs.spacing + "px");
     root.style.setProperty("--titlebar-height", `${prefs.titleBarHeight}px`);
     root.style.setProperty("--statusbar-height", `${prefs.statusBarHeight}px`);
+    for (const component of COMPONENTS) {
+      const tokens = prefs.componentThemes[component];
+      const prefix = `--component-${component}-`;
+      for (const [target, key] of Object.entries({
+        bg: tokens.surface, text: tokens.text, border: tokens.border, accent: tokens.accent,
+      })) {
+        if (key === "inherit") root.style.removeProperty(prefix + target);
+        else root.style.setProperty(prefix + target, palette[key as keyof typeof palette]);
+      }
+      for (const [target, preset, field] of [
+        ["font", tokens.font, "fontSize"], ["icon", tokens.icon, "iconSize"],
+        ["spacing", tokens.spacing, "spacing"],
+      ] as const) {
+        if (preset === "inherit") root.style.removeProperty(prefix + target);
+        else root.style.setProperty(prefix + target, SCALES[preset][field] + "px");
+      }
+    }
   }, [prefs, dark]);
   useEffect(() => {
     const media = window.matchMedia("(prefers-color-scheme: dark)");
@@ -112,33 +124,10 @@ export default function App() {
   useEffect(() => {
     document.documentElement.lang = i18n.resolvedLanguage?.split("-")[0] ?? "en";
   }, [i18n.resolvedLanguage]);
-  const filtered = useMemo(
-    () =>
-      nav.filter((x) =>
-        (context.name + " " + t(x.label)).toLowerCase().includes(search.toLowerCase()),
-      ),
-    [search, t],
-  );
-  useEffect(() => {
-    if (paletteOpen) requestAnimationFrame(() => input.current?.focus());
-  }, [paletteOpen]);
-  useEffect(() => {
-    if (!paletteOpen) return;
-    const onEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        setPaletteOpen(false);
-      }
-    };
-    window.addEventListener("keydown", onEscape, true);
-    return () => window.removeEventListener("keydown", onEscape, true);
-  }, [paletteOpen]);
   const go = (dest: string) => {
     setRoute(dest);
     navigate(dest);
     setMobileOpen(false);
-    setPaletteOpen(false);
-    setSearch("");
   };
   const switchProfile = (id: string) => {
     const profile = useProfiles.getState().profiles.find((p) => p.id === id);
@@ -155,9 +144,7 @@ export default function App() {
     },
     { ignoreInputs: true },
   );
-  useHotkey(hotkeys["canvas.omnibar.toggle"], () => setPaletteOpen((v) => !v), {
-    ignoreInputs: false,
-  });
+  useHotkey(hotkeys["canvas.omnibar.toggle"], () => window.dispatchEvent(new Event("canvas:omnibar-focus")), { ignoreInputs: false });
   useHotkey(hotkeys["canvas.settings.open"], () => go("/settings"));
   useHotkey(hotkeys["canvas.canvas.open"], () => go("/canvas"));
   useHotkey(hotkeys["canvas.editor.open"], () => go("/editor"));
@@ -199,11 +186,7 @@ export default function App() {
         </div>
         <div className="title-center">
           {prefs.omnibarPosition === "titlebar" ? (
-            <SurfaceMenu kind="omnibar">
-              <div>
-                <OmnibarTrigger open={() => setPaletteOpen(true)} />
-              </div>
-            </SurfaceMenu>
+            <SurfaceMenu kind="omnibar"><Omnibar onNavigate={go} /></SurfaceMenu>
           ) : (
             <strong>Canvas</strong>
           )}
@@ -253,11 +236,7 @@ export default function App() {
                   {(!collapsed || mobileOpen) && (
                     <>
                       {prefs.omnibarPosition === "sidebar" && (
-                        <SurfaceMenu kind="omnibar">
-                          <div className="sidebar-omnibar">
-                            <OmnibarTrigger open={() => setPaletteOpen(true)} />
-                          </div>
-                        </SurfaceMenu>
+                        <SurfaceMenu kind="omnibar"><Omnibar onNavigate={go} /></SurfaceMenu>
                       )}
                       <div className="sidebar-action-row">
                         <button type="button" className="sidebar-new-tab" onClick={() => window.dispatchEvent(new Event("canvas:new-tab"))}>
@@ -366,7 +345,6 @@ export default function App() {
                   renderView={(view) => {
                     if (view === "canvas") return <Canvas />;
                     if (view === "editor") return <Monaco />;
-                    if (view === "notepad") return <Notepad />;
                     if (view === "library") return <Library onNavigate={go} />;
                     if (view === "settings") return <PreferencesPanel />;
                     return null;
@@ -378,163 +356,56 @@ export default function App() {
         </div>
       </div>
       <footer className="window-statusbar">
-        <span className="snapshot-state">
-          <span className="snapshot-desktop">{t("Repository snapshot · read-only")}</span>
-          <span className="snapshot-mobile">{t("Read-only snapshot")}</span>
-        </span>
-        {prefs.navigationPosition === "statusbar" && (
-          <Navigator current={page} onNavigate={go} onProfile={switchProfile} />
-        )}
-        {prefs.omnibarPosition === "statusbar" && (
-          <SurfaceMenu kind="omnibar">
-            <div className="status-omnibar">
-              <OmnibarTrigger open={() => setPaletteOpen(true)} />
-            </div>
-          </SurfaceMenu>
-        )}
-        {prefs.settingsPosition === "statusbar" && (
-          <SurfaceMenu kind="settings">
-            <button
-              type="button"
-              className="status-settings"
-              aria-label={t("Settings")}
-              onClick={() => go("/settings")}
-            >
-              <AnimatedIcon name="settings" size={15} />
-            </button>
-          </SurfaceMenu>
-        )}
-        <span className="version">
-          {t("Version")}: {appVersion} · {t("Prototype")}
-        </span>
-        <span>
-          {context.repository} / {context.revision}
-        </span>
+        {(["left","center","right"] as const).map((alignment) => {
+          const segments = [
+            { id: "snapshot", visible: true, node: <span className="snapshot-state">{t("Repository snapshot · read-only")}</span> },
+            { id: "navigation", visible: prefs.navigationPosition === "statusbar", node: <Navigator current={page} onNavigate={go} onProfile={switchProfile} /> },
+            { id: "omnibar", visible: prefs.omnibarPosition === "statusbar", node: <Omnibar onNavigate={go} /> },
+            { id: "settings", visible: prefs.settingsPosition === "statusbar", node:
+              <SurfaceMenu kind="settings"><button type="button" className="status-settings"
+                aria-label={t("Settings")} title={t("Settings")} onClick={() => go("/settings")}>
+                <AnimatedIcon name="settings" size={16} />
+              </button></SurfaceMenu> },
+            { id: "version", visible: true, node: <span>{t("Version")}: {appVersion} · {t("Prototype")}</span> },
+            { id: "revision", visible: true, node: <span>{context.repository} / {context.revision}</span> },
+          ].filter((segment) => segment.visible && prefs.statusAlignment[segment.id as keyof typeof prefs.statusAlignment] === alignment);
+          return <div className={`status-group status-group-${alignment}`} key={alignment}>
+            {segments.map((segment, index) => <Fragment key={segment.id}>
+              {index > 0 && <span className="status-delimiter" aria-hidden="true">|</span>}
+              {segment.node}
+            </Fragment>)}
+          </div>;
+        })}
       </footer>
       {prefs.omnibarPosition === "floating" && (
-        <div
-          className={`floating-omnibar ${floatingDrag ? "dragging" : ""}`}
-          style={{ left: prefs.floatingX, top: prefs.floatingY }}
-        >
-          <button
-            type="button"
-            className="floating-handle"
-            title={t("Drag omnibar")}
-            aria-label={t("Drag omnibar")}
-            onPointerDown={(event) => {
-              event.preventDefault();
-              floatOrigin.current = {
-                pointerX: event.clientX,
-                pointerY: event.clientY,
-                x: prefs.floatingX,
-                y: prefs.floatingY,
-              };
-              event.currentTarget.setPointerCapture(event.pointerId);
-              setFloatingDrag(true);
-            }}
-            onPointerMove={(event) => {
-              if (!floatingDrag) return;
-              updatePreferences({
-                floatingX: Math.min(
-                  Math.max(0, floatOrigin.current.x + event.clientX - floatOrigin.current.pointerX),
-                  window.innerWidth - 120,
-                ),
-                floatingY: Math.min(
-                  Math.max(0, floatOrigin.current.y + event.clientY - floatOrigin.current.pointerY),
-                  window.innerHeight - 35,
-                ),
-              });
-            }}
-            onPointerUp={(event) => {
-              if (event.currentTarget.hasPointerCapture(event.pointerId))
-                event.currentTarget.releasePointerCapture(event.pointerId);
-            }}
-            onLostPointerCapture={() => setFloatingDrag(false)}
-          >
-            <AnimatedIcon name="move" size={15} />
-          </button>
-          <SurfaceMenu kind="omnibar">
-            <div>
-              <OmnibarTrigger open={() => setPaletteOpen(true)} />
-            </div>
-          </SurfaceMenu>
-        </div>
+          <Omnibar onNavigate={go} floating={{ left: prefs.floatingX, top: prefs.floatingY }} dragHandle={
+            <button type="button" className="floating-handle" title={t("Drag omnibar")}
+              aria-label={t("Drag omnibar")}
+              onPointerDown={(event) => {
+                event.preventDefault();
+                floatOrigin.current = {
+                  pointerX: event.clientX, pointerY: event.clientY,
+                  x: prefs.floatingX, y: prefs.floatingY,
+                };
+                event.currentTarget.setPointerCapture(event.pointerId);
+                setFloatingDrag(true);
+              }}
+              onPointerMove={(event) => {
+                if (!floatingDrag) return;
+                updatePreferences({
+                  floatingX: Math.min(Math.max(0, floatOrigin.current.x + event.clientX - floatOrigin.current.pointerX), window.innerWidth - 120),
+                  floatingY: Math.min(Math.max(0, floatOrigin.current.y + event.clientY - floatOrigin.current.pointerY), window.innerHeight - 35),
+                });
+              }}
+              onPointerUp={(event) => {
+                if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+              }}
+              onLostPointerCapture={() => setFloatingDrag(false)}>
+              <AnimatedIcon name="drag" size={15} />
+            </button>} />
       )}
+      {prefs.omnibarPosition === "hidden" && <Omnibar onNavigate={go} fallback />}
       <Notifications />
-      <AnimatePresence>
-        {paletteOpen && (
-          <motion.div
-            className="palette-cover"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onMouseDown={(e) => {
-              if (e.target === e.currentTarget) setPaletteOpen(false);
-            }}
-          >
-            <motion.div
-              role="dialog"
-              aria-modal="true"
-              aria-label={t("Open navigation tree")}
-              className="palette"
-              initial={{ y: -12, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -8, opacity: 0 }}
-            >
-              <div className="palette-search">
-                {icon("search", 18)}
-                <input
-                  ref={input}
-                  value={search}
-                  aria-label={t("Search pages and commands")}
-                  placeholder={t("Search pages and commands")}
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    setSelection(0);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Escape") {
-                      e.preventDefault();
-                      setPaletteOpen(false);
-                    }
-                    if (e.key === "ArrowDown") {
-                      e.preventDefault();
-                      setSelection((s) => Math.min(s + 1, filtered.length - 1));
-                    }
-                    if (e.key === "ArrowUp") {
-                      e.preventDefault();
-                      setSelection((s) => Math.max(s - 1, 0));
-                    }
-                    if (e.key === "Enter" && filtered[selection]) go("/" + filtered[selection].id);
-                  }}
-                />
-                <kbd>ESC</kbd>
-              </div>
-              <div className="palette-tree">
-                {prefs.navigationPosition === "omnibar" && (
-                  <NavigationTree current={page} onNavigate={go} />
-                )}
-                {filtered.map((n, i) => (
-                  <button
-                    type="button"
-                    key={n.id}
-                    className={"palette-result " + (i === selection ? "focused" : "")}
-                    onMouseEnter={() => setSelection(i)}
-                    onClick={() => go("/" + n.id)}
-                  >
-                    {icon(n.id)}
-                    <span>{t(n.label)}</span>
-                    <small>{context.name}</small>
-                    {icon("right", 13)}
-                  </button>
-                ))}
-                {!filtered.length && <p className="empty-state">{t("No matching routes.")}</p>}
-              </div>
-              <div className="palette-footer">{t("↑ ↓ navigate · ↵ open · Esc dismiss")}</div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
