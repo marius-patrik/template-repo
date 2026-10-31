@@ -576,15 +576,17 @@ body.cx-resizing {
   overflow: hidden;
 }
 .cx-shell .dock-route-page > .monaco-pane {
+  display: grid;
+  grid-template-rows: 42px minmax(0, 1fr);
   height: 100%;
   min-height: 0;
-  display: flex;
-  flex-direction: column;
 }
 .cx-shell .monaco-editor-host {
-  flex: 1;
+  grid-row: 2;
+  width: 100%;
   height: 100%;
   min-height: 0;
+  min-width: 0;
 }
 .cx-shell .monaco-editor-host > section {
   height: 100%;
@@ -1013,7 +1015,10 @@ body.cx-dragging {
 .cx-shell .monaco-toolbar {
   display: flex;
   flex-wrap: nowrap;
-  min-height: 40px;
+  grid-row: 1;
+  height: 42px;
+  min-height: 42px;
+  max-height: 42px;
   padding: calc(var(--ui-spacing) * 0.6) calc(var(--ui-spacing) * 1.4);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
