@@ -1,27 +1,16 @@
-import type { ComponentType } from "react";
+import { useEffect, useRef, type ComponentType, type Ref } from "react";
 import {
-  LayoutGridIcon,
-  BlocksIcon,
-  FolderOpenIcon,
-  BotIcon,
-  GitForkIcon,
-  FileTextIcon,
-  HistoryIcon,
-  SettingsIcon,
-  SearchIcon,
-  PlusIcon,
-  ChevronRightIcon,
-  ChevronDownIcon,
-  PanelLeftCloseIcon,
-  PanelLeftOpenIcon,
-  SunIcon,
-  MoonIcon,
-  CircleCheckIcon,
-  CircleHelpIcon,
-  ArrowRightIcon,
+  LayoutGridIcon, BlocksIcon, FolderOpenIcon, BotIcon, GitForkIcon,
+  FileTextIcon, HistoryIcon, SettingsIcon, SearchIcon, PlusIcon,
+  ChevronRightIcon, ChevronDownIcon, PanelLeftCloseIcon, PanelLeftOpenIcon,
+  SunIcon, MoonIcon, CircleCheckIcon, CircleHelpIcon, ArrowRightIcon,
+  PanelRightOpenIcon, RotateCcwIcon, CodeXmlIcon, BellIcon, EllipsisIcon,
+  CopyIcon, XIcon,
 } from "lucide-animated";
 
-const registry: Record<string, ComponentType<{ size?: number }>> = {
+type IconHandle = { startAnimation: () => void; stopAnimation: () => void };
+type IconProps = { size?: number; animateOnHover?: boolean; ref?: Ref<IconHandle> };
+const registry = {
   overview: LayoutGridIcon,
   workspace: BlocksIcon,
   projects: FolderOpenIcon,
@@ -43,20 +32,45 @@ const registry: Record<string, ComponentType<{ size?: number }>> = {
   check: CircleCheckIcon,
   help: CircleHelpIcon,
   arrow: ArrowRightIcon,
-};
+  split: PanelRightOpenIcon,
+  reset: RotateCcwIcon,
+  code: CodeXmlIcon,
+  monaco: CodeXmlIcon,
+  bell: BellIcon,
+  more: EllipsisIcon,
+  copy: CopyIcon,
+  close: XIcon,
+} satisfies Record<string, ComponentType<{ size?: number }>>;
+
+/** Drive the real lucide-animated motion from the *whole* interactive parent,
+ * not merely the tiny SVG hitbox. Keyboard focus gets the same feedback. */
 export function AnimatedIcon({
-  name,
-  size = 18,
-  className,
+  name, size = 18, className,
 }: {
-  name: string;
-  size?: number;
-  className?: string;
+  name: string; size?: number; className?: string;
 }) {
-  const Icon = registry[name] ?? CircleHelpIcon;
+  const node = useRef<HTMLSpanElement>(null);
+  const animation = useRef<IconHandle>(null);
+  const Icon = (registry[name as keyof typeof registry] ?? CircleHelpIcon) as ComponentType<IconProps>;
+  useEffect(() => {
+    const parent = node.current?.closest("button, a, [role='tab'], [role='menuitem'], [data-animated-icon-trigger]") ?? node.current;
+    if (!parent) return;
+    const start = () => animation.current?.startAnimation();
+    const stop = () => animation.current?.stopAnimation();
+    parent.addEventListener("pointerenter", start);
+    parent.addEventListener("pointerleave", stop);
+    parent.addEventListener("focusin", start);
+    parent.addEventListener("focusout", stop);
+    return () => {
+      parent.removeEventListener("pointerenter", start);
+      parent.removeEventListener("pointerleave", stop);
+      parent.removeEventListener("focusin", start);
+      parent.removeEventListener("focusout", stop);
+    };
+  }, []);
   return (
-    <span className={className ?? "app-icon"} aria-hidden="true">
-      <Icon size={size} />
+    <span ref={node} className={className ?? "app-icon"} aria-hidden="true">
+      <Icon ref={animation} size={size} animateOnHover={false} />
     </span>
   );
 }

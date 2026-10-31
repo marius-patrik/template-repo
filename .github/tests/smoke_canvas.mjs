@@ -24,10 +24,27 @@ try {
   await addTab.click();
   const menu = page.locator(".dock-add-menu");
   await menu.waitFor();
-  if ((await menu.getByRole("menuitem").count()) !== 10)
+  if ((await menu.getByRole("menuitem").count()) !== 11)
     throw new Error("Add-tab dropdown must contain every Canvas view");
   await menu.getByRole("menuitem", { name: "Projects" }).click();
   await page.locator('.dock-grid [data-dock-view="projects"]').waitFor();
+  if (!(await page.locator('.dock-grid .canvas-dock-tab[data-canvas-tab="projects"] .app-icon').count()))
+    throw new Error("A Dockview tab is missing its animated route icon");
+  if (!(await page.locator(".title-navigation").count()))
+    throw new Error("Title-bar breadcrumb dropdowns are missing");
+  const viewSelector = page.getByTestId("breadcrumb-view");
+  await viewSelector.click();
+  await page.getByRole("option", { name: "Monaco" }).click();
+  await page.locator('.dock-grid [data-dock-view="monaco"]').waitFor();
+  await page.locator('[data-testid="monaco-editor"]').waitFor();
+  await page.locator(".monaco-editor-host .monaco-editor").waitFor({ timeout: 20000 });
+  if ((await page.locator('select').count()) !== 0)
+    throw new Error("The application still exposes a native select");
+  const monacoTab = page.locator('.dock-grid .canvas-dock-tab[data-canvas-tab="monaco"]').first();
+  await monacoTab.click({ button: "right" });
+  await page.getByRole("menuitem", { name: "Split right" }).waitFor();
+  await page.keyboard.press("Escape");
+
   await page.waitForFunction(() => location.hash.includes("/projects"));
   await page.locator(".dock-grid .dv-groupview").first().getByRole("button", { name: "Add tab" }).click();
   await page.locator(".dock-add-menu").getByRole("menuitem", { name: "Overview" }).click();
@@ -68,12 +85,26 @@ try {
   if (await page.locator(".sidebar-top").count()) throw new Error("Sidebar still reserves space for collapse control");
   if (await page.locator('.sidebar [href="/settings"]').count()) throw new Error("Settings still appears in sidebar");
 
+  const resize = page.getByRole("separator", { name: "Resize sidebar" });
+  await resize.focus();
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("ArrowRight");
+  const resizedWidth = await page.locator(".sidebar").evaluate((el) => el.getBoundingClientRect().width);
+  if (resizedWidth < 245) throw new Error("Sidebar keyboard resize failed");
   await page.keyboard.press("Control+b");
   await page.locator(".sidebar.collapsed").waitFor();
   await page.keyboard.press("Control+b");
   await page.locator(".sidebar:not(.collapsed)").waitFor();
+  const restoredWidth = await page.locator(".sidebar").evaluate((el) => el.getBoundingClientRect().width);
+  if (Math.abs(restoredWidth - resizedWidth) > 2)
+    throw new Error("Sidebar resize width was lost during collapse/expand");
+  await page.reload({ waitUntil: "load" });
+  const storedWidth = await page.locator(".sidebar").evaluate((el) => el.getBoundingClientRect().width);
+  if (Math.abs(storedWidth - resizedWidth) > 2)
+    throw new Error("Sidebar width failed to persist after reload");
 
-  await page.getByRole("button", { name: "Open navigation tree" }).click();
+
+  await page.getByRole("button", { name: "Search pages and commands" }).click();
   await page.getByRole("dialog", { name: "Open navigation tree" }).waitFor();
   await page.keyboard.press("Escape");
   await page.locator(".palette-cover").waitFor({ state: "hidden" });
@@ -85,17 +116,20 @@ try {
   await page.waitForFunction(() => document.documentElement.dataset.skin === "slate");
   await page.getByRole("group", { name: "Density" }).getByRole("button", { name: "Compact" }).click();
   await page.waitForFunction(() => document.documentElement.dataset.density === "compact");
-  await page.locator("#canvas-language").selectOption("cs");
+  await page.getByTestId("canvas-language").click();
+  await page.getByRole("option", { name: "Čeština" }).click();
   await page.getByRole("heading", { name: "Nastavení", exact: true }).waitFor();
   await page.waitForFunction(() => document.documentElement.lang === "cs");
   await page.reload({ waitUntil: "load" });
   await page.getByRole("heading", { name: "Nastavení", exact: true }).waitFor();
   await page.waitForFunction(() => document.documentElement.dataset.skin === "slate");
   await page.waitForFunction(() => document.documentElement.dataset.density === "compact");
-  await page.locator("#canvas-language").selectOption("es");
+  await page.getByTestId("canvas-language").click();
+  await page.getByRole("option", { name: "Español" }).click();
   await page.getByRole("heading", { name: "Configuración", exact: true }).waitFor();
   await page.waitForFunction(() => document.documentElement.lang === "es");
-  await page.locator("#canvas-language").selectOption("en");
+  await page.getByTestId("canvas-language").click();
+  await page.getByRole("option", { name: "English" }).click();
   await page.getByRole("heading", { name: "Settings", exact: true }).waitFor();
 
   await page.getByRole("button", { name: "Choose custom accent color" }).click();

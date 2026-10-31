@@ -11,7 +11,7 @@
     "resolveJsonModule": true,
     "noEmit": true,
     "allowImportingTsExtensions": true,
-    "types": ["react", "react-dom", "node"]
+    "types": ["react", "react-dom", "node", "@rsbuild/core/types"]
   },
   "include": ["src", "rsbuild.config.ts"]
 }

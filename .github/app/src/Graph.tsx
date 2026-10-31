@@ -5,31 +5,34 @@ import { ReactFlow, Background, Controls, type Node, type Edge } from "@xyflow/r
 import dagre from "dagre";
 import context from "./generated/context.json";
 
-const labels: Record<string, string> = {
-  "AGENTS.md": "Agent context",
-  ".agents/GOAL.md": "Project goal",
-  ".agents/PRD.md": "Requirements",
-  ".agents/ARCHITECTURE.md": "Architecture",
-  ".agents/AGENTS.md": "Agent rules",
-  ".agents/README.md": "Documentation",
-};
+/** Draw edges only when an authored Markdown hyperlink references a tracked path. */
+function relationships() {
+  const tracked = new Set(context.paths.concat(context.documents.map((doc) => doc.path)));
+  return context.documents.flatMap((doc) =>
+    Array.from(doc.content.matchAll(/\]\(([^)#]+)(?:#[^)]*)?\)/g))
+      .map((match) => {
+        try {
+          if (/^[a-z]+:/i.test(match[1])) return null;
+          const url = new URL(match[1], new URL(doc.path, "https://canvas.invalid/"));
+          return decodeURIComponent(url.pathname.replace(/^\//, ""));
+        } catch { return null; }
+      })
+      .filter((target): target is string => !!target && tracked.has(target))
+      .map((target) => [doc.path, target] as const),
+  );
+}
+const displayLabel = (path: string) => path.split("/").at(-1)?.replace(/\.md$/, "") ?? path;
 
 export default function Graph() {
   const { t } = useTranslation();
   const theme = useCanvasConfig((state) => state.preferences.theme);
   const [selected, setSelected] = useState<string | null>(null);
   const { nodes, edges } = useMemo(() => {
-    const present = context.documents.map((doc) => doc.path);
+    const present = [...new Set([...context.documents.map((doc) => doc.path), ...context.paths])];
     const g = new dagre.graphlib.Graph();
     g.setGraph({ rankdir: "LR", ranksep: 92, nodesep: 38, marginx: 35, marginy: 35 });
     g.setDefaultEdgeLabel(() => ({}));
-    const links = [
-      [".agents/GOAL.md", ".agents/PRD.md"],
-      [".agents/PRD.md", ".agents/ARCHITECTURE.md"],
-      [".agents/ARCHITECTURE.md", ".agents/AGENTS.md"],
-      [".agents/AGENTS.md", ".agents/README.md"],
-      ["AGENTS.md", ".agents/GOAL.md"],
-    ].filter(([a, b]) => present.includes(a) && present.includes(b));
+    const links = relationships();
     present.forEach((id) => {
       g.setNode(id, { width: 170, height: 58 });
     });
@@ -42,7 +45,7 @@ export default function Graph() {
       return {
         id,
         position: { x: pos.x - 85, y: pos.y - 29 },
-        data: { label: t(labels[id] ?? id) },
+        data: { label: displayLabel(id) },
         type: "default",
         style: {
           width: 170,
@@ -65,7 +68,7 @@ export default function Graph() {
       style: { stroke: "var(--muted)", strokeWidth: 1.1 },
     }));
     return { nodes, edges };
-  }, [t]);
+  }, []);
   return (
     <section className="graph-pane" aria-label={t("Repository document relationships")}>
       <ReactFlow
@@ -92,7 +95,7 @@ export default function Graph() {
       </ReactFlow>
       {selected && (
         <div className="graph-selected">
-          <strong>{t(labels[selected] || selected)}</strong>
+          <strong>{displayLabel(selected)}</strong>
           <span>{selected}</span>
           <button type="button" aria-label={t("Close selection")} onClick={() => setSelected(null)}>
             ×

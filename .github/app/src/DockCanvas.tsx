@@ -10,6 +10,8 @@ import {
 } from "react";
 import {
   DockviewReact,
+  DockviewDefaultTab,
+  type IDockviewPanelHeaderProps,
   themeDark,
   themeLight,
   type DockviewApi,
@@ -20,51 +22,46 @@ import {
 import { AnimatedIcon } from "./components/AnimatedIcon";
 import { useTranslation } from "react-i18next";
 import i18n from "./i18n";
+import { CanvasContextMenu } from "./components/ui/ContextMenu";
+import { notify } from "./notifications";
+import { VIEWS, VIEW_GROUPS, viewFromRoute, viewLabel, isCanvasView, type CanvasView } from "./views";
 
 const LAYOUT_KEY = "canvas-dockview-layout-v1";
-const ROUTES = [
-  "overview",
-  "workspace",
-  "projects",
-  "agents",
-  "graph",
-  "roadmap",
-  "artifacts",
-  "activity",
-  "context",
-  "settings",
-] as const;
-
-type CanvasView = (typeof ROUTES)[number];
 type PaneContext = {
   render: (view: CanvasView) => ReactNode;
   onNavigate: (route: string) => void;
   resetLayout: () => void;
+  splitPanel: (view: CanvasView, groupId: string) => void;
 };
 const PaneContext = createContext<PaneContext | null>(null);
-const TITLES: Record<CanvasView, string> = {
-  overview: "Overview",
-  workspace: "Workspace",
-  projects: "Projects",
-  agents: "Agents",
-  graph: "Knowledge graph",
-  roadmap: "Roadmap",
-  artifacts: "Artifacts",
-  activity: "Activity",
-  context: "Context",
-  settings: "Settings",
-};
-const isView = (name: string): name is CanvasView => ROUTES.some((view) => view === name);
-const localizedTitle = (view: CanvasView) => i18n.t(TITLES[view]);
-const routeToView = (route: string): CanvasView => {
-  const name = route.split("?")[0].replace(/^\//, "");
-  return isView(name) ? name : "overview";
-};
+const localizedTitle = (view: CanvasView) => i18n.t(viewLabel(view));
+const routeToView = viewFromRoute;
+
+function CanvasTab(props: IDockviewPanelHeaderProps) {
+  const workspace = useContext(PaneContext);
+  const { t } = useTranslation();
+  const raw: unknown = props.api.getParameters().view;
+  const view: CanvasView = typeof raw === "string" && isCanvasView(raw) ? raw : "overview";
+  return (
+    <CanvasContextMenu actions={[
+      { icon: "split", label: t("Split right"), action: () => workspace?.splitPanel(view, props.group.id) },
+      { icon: "close", label: t("Close tab"), action: () => props.api.close() },
+      { type: "separator" },
+      { icon: "reset", label: t("Reset layout"), action: () => workspace?.resetLayout() },
+    ]}>
+      <div className="canvas-dock-tab" data-canvas-tab={view}>
+        <AnimatedIcon name={view} size={14} />
+        <DockviewDefaultTab {...props} />
+      </div>
+    </CanvasContextMenu>
+  );
+}
+const tabComponents = { canvas: CanvasTab };
 
 function DockedPage({ params }: IDockviewPanelProps) {
   const context = useContext(PaneContext);
   const candidate = (params as { view?: string }).view ?? "overview";
-  const view: CanvasView = isView(candidate) ? candidate : "overview";
+  const view: CanvasView = isCanvasView(candidate) ? candidate : "overview";
   return (
     <div className="dock-route-page" data-dock-view={view}>
       {context?.render(view)}
@@ -84,27 +81,17 @@ function openRoute(api: DockviewApi, view: CanvasView) {
   api.addPanel({
     id: `route:${view}`,
     component: "page",
+    tabComponent: "canvas",
     title: localizedTitle(view),
     params: { view },
   });
 }
 
-const TAB_GROUPS: Array<{ label: string; views: CanvasView[] }> = [
-  {
-    label: "Workspace",
-    views: [
-      "overview",
-      "workspace",
-      "projects",
-      "agents",
-      "graph",
-      "roadmap",
-      "artifacts",
-      "activity",
-    ],
-  },
-  { label: "System", views: ["context", "settings"] },
-];
+const TAB_GROUPS = VIEW_GROUPS.map((label) => ({
+  label,
+  views: VIEWS.filter((item) => item.group === label).map((item) => item.id),
+}));
+
 let tabSequence = 0;
 
 function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
@@ -118,11 +105,13 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
     containerApi.addPanel({
       id,
       component: "page",
+      tabComponent: "canvas",
       title: localizedTitle(view),
       params: { view },
       position: { referenceGroup: group.id },
     });
     workspace?.onNavigate(`/${view}`);
+    notify.success(t("Tab opened"));
   };
 
   const splitRight = () => {
@@ -131,16 +120,18 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
       containerApi.panels.find((panel) => panel.group.id === group.id);
     const candidate: unknown = selected?.api.getParameters().view;
     const view: CanvasView =
-      typeof candidate === "string" && isView(candidate) ? candidate : "overview";
+      typeof candidate === "string" && isCanvasView(candidate) ? candidate : "overview";
     const id = `split:${view}:${Date.now().toString(36)}:${++tabSequence}`;
     containerApi.addPanel({
       id,
       component: "page",
+      tabComponent: "canvas",
       title: localizedTitle(view),
       params: { view },
       position: { referenceGroup: group.id, direction: "right" },
     });
     workspace?.onNavigate(`/${view}`);
+    notify.info(t("Panel split to the right"));
   };
 
   return (
@@ -182,7 +173,7 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
                     onSelect={() => addTab(view)}
                   >
                     <AnimatedIcon name={view} size={16} />
-                    <span>{t(TITLES[view])}</span>
+                    <span>{t(viewLabel(view))}</span>
                   </DropdownMenu.Item>
                 ))}
               </DropdownMenu.Group>
@@ -198,9 +189,7 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
             aria-label={t("More tab actions")}
             title={t("More tab actions")}
           >
-            <span className="dock-more-glyph" aria-hidden="true">
-              ···
-            </span>
+            <AnimatedIcon name="more" size={17} />
           </button>
         </DropdownMenu.Trigger>
         <DropdownMenu.Portal>
@@ -213,7 +202,7 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
             aria-label={t("More tab actions")}
           >
             <DropdownMenu.Item className="menu-item dock-action-item" onSelect={splitRight}>
-              <AnimatedIcon name="workspace" size={16} />
+              <AnimatedIcon name="split" size={16} />
               <span>{t("Split right")}</span>
             </DropdownMenu.Item>
             <DropdownMenu.Separator className="dock-add-separator" />
@@ -221,7 +210,7 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
               className="menu-item dock-action-item"
               onSelect={() => workspace?.resetLayout()}
             >
-              <AnimatedIcon name="overview" size={16} />
+              <AnimatedIcon name="reset" size={16} />
               <span>{t("Reset layout")}</span>
             </DropdownMenu.Item>
           </DropdownMenu.Content>
@@ -263,10 +252,25 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
     }
     openRoute(api, "overview");
     latest.current.onNavigate("/overview");
+    notify.success(i18n.t("Layout reset"));
+  }, []);
+  const splitPanel = useCallback((view: CanvasView, groupId: string) => {
+    const api = apiRef.current;
+    if (!api) return;
+    api.addPanel({
+      id: `split:${view}:${Date.now().toString(36)}:${++tabSequence}`,
+      component: "page",
+      tabComponent: "canvas",
+      title: localizedTitle(view),
+      params: { view },
+      position: { referenceGroup: groupId, direction: "right" },
+    });
+    latest.current.onNavigate(`/${view}`);
+    notify.info(i18n.t("Panel split to the right"));
   }, []);
   const panelContext = useMemo(
-    () => ({ render: renderView, onNavigate, resetLayout }),
-    [renderView, onNavigate, resetLayout],
+    () => ({ render: renderView, onNavigate, resetLayout, splitPanel }),
+    [renderView, onNavigate, resetLayout, splitPanel],
   );
 
   useEffect(() => {
@@ -279,8 +283,8 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
     if (!api) return;
     for (const panel of api.panels) {
       const candidate: unknown = panel.api.getParameters().view;
-      if (typeof candidate === "string" && isView(candidate)) {
-        panel.api.setTitle(t(TITLES[candidate]));
+      if (typeof candidate === "string" && isCanvasView(candidate)) {
+        panel.api.setTitle(t(viewLabel(candidate)));
       }
     }
   }, [t]);
@@ -327,7 +331,7 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
       api.onDidActivePanelChange(({ panel, origin }) => {
         if (origin !== "user" || !panel) return;
         const name: unknown = panel.api.getParameters().view;
-        if (typeof name !== "string" || !isView(name)) return;
+        if (typeof name !== "string" || !isCanvasView(name)) return;
         if (routeToView(latest.current.route) !== name) {
           latest.current.onNavigate(`/${name}`);
         }
@@ -341,6 +345,7 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
       api.addPanel({
         id: "route:overview",
         component: "page",
+        tabComponent: "canvas",
         title: localizedTitle("overview"),
         params: { view: "overview" },
       });
@@ -356,6 +361,8 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
           <DockviewReact
             theme={dark ? themeDark : themeLight}
             components={components}
+            tabComponents={tabComponents}
+            defaultTabComponent="canvas"
             rightHeaderActionsComponent={AddTabHeader}
             onReady={onReady}
           />

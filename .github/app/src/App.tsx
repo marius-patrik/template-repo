@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { colord, extend } from "colord";
 import a11yPlugin from "colord/plugins/a11y";
 import { formatForDisplay, useAppHotkeys, useHotkey } from "@tanstack/react-hotkeys";
@@ -10,35 +10,74 @@ import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "motion/react";
 import { AnimatedIcon } from "./components/AnimatedIcon";
 import { Button } from "./components/ui/button";
+import { CanvasSelect } from "./components/ui/CanvasSelect";
+import { CanvasContextMenu } from "./components/ui/ContextMenu";
+import Monaco from "./Monaco";
+import { Notifications, notify } from "./notifications";
+import { VIEWS as nav, VIEW_GROUPS, type CanvasView as View, viewLabel } from "./views";
+import { version as appVersion } from "../package.json";
 import Graph from "./Graph";
 import DockCanvas from "./DockCanvas";
 import context from "./generated/context.json";
 
-type View =
-  | "overview"
-  | "workspace"
-  | "projects"
-  | "agents"
-  | "graph"
-  | "roadmap"
-  | "artifacts"
-  | "activity"
-  | "context"
-  | "settings";
 type Preferences = CanvasPreferences;
 extend([a11yPlugin]);
-const nav: { id: View; label: string; group: string }[] = [
-  { id: "overview", label: "Overview", group: "Workspace" },
-  { id: "workspace", label: "Workspace", group: "Workspace" },
-  { id: "projects", label: "Projects", group: "Workspace" },
-  { id: "agents", label: "Agents", group: "Workspace" },
-  { id: "graph", label: "Knowledge graph", group: "Workspace" },
-  { id: "roadmap", label: "Roadmap", group: "Workspace" },
-  { id: "artifacts", label: "Artifacts", group: "Workspace" },
-  { id: "activity", label: "Activity", group: "Workspace" },
-  { id: "context", label: "Context", group: "System" },
-  { id: "settings", label: "Settings", group: "System" },
-];
+const SIDEBAR_KEY = "canvas-sidebar-width-v1";
+const defaultSidebarWidth = 228;
+const clampSidebar = (value: number) => Math.min(480, Math.max(180, value));
+function storedSidebarWidth() {
+  try {
+    const value = Number(localStorage.getItem(SIDEBAR_KEY));
+    return Number.isFinite(value) && value >= 180 ? clampSidebar(value) : defaultSidebarWidth;
+  } catch {
+    return defaultSidebarWidth;
+  }
+}
+
+function TitleNavigator({
+  current, to,
+}: {
+  current: View;
+  to: (path: string) => void;
+}) {
+  const { t } = useTranslation();
+  const group = nav.find((item) => item.id === current)?.group ?? "Workspace";
+  return (
+    <nav className="title-navigation" aria-label={t("Workspace navigation")}>
+      <CanvasSelect
+        label={t("Section")}
+        value={group}
+        options={VIEW_GROUPS.map((name) => ({ value: name, label: t(name) }))}
+        onValueChange={(next) => {
+          const first = nav.find((item) => item.group === next);
+          if (first) to(`/${first.id}`);
+        }}
+        className="title-section-select"
+        testId="breadcrumb-section"
+      />
+      <AnimatedIcon name="right" size={13} />
+      <CanvasSelect
+        label={t("Repository")}
+        value={context.repository}
+        options={[{ value: context.repository, label: context.name }]}
+        onValueChange={() => {}}
+        className="title-repository-select"
+        testId="breadcrumb-repository"
+      />
+      <AnimatedIcon name="right" size={13} />
+      <CanvasSelect
+        label={t("View")}
+        value={current}
+        options={nav.filter((item) => item.group === group).map((item) => ({
+          value: item.id, label: t(item.label),
+        }))}
+        onValueChange={(next) => to(`/${next}`)}
+        className="title-view-select"
+        testId="breadcrumb-view"
+      />
+    </nav>
+  );
+}
 
 function MarkdownSource({ value }: { value: string }) {
   return <pre className="source-preview">{value}</pre>;
@@ -146,7 +185,7 @@ function SimplePage({ id, to }: { id: View; to: (p: string) => void }) {
       <div className="page workspace-board">
         <PageIntro
           title="Workspace"
-          detail="A configurable working surface. Open views with the sidebar or omnibar, then arrange their tabs with Dockview."
+          detail="A configurable working surface. Open views with the sidebar or title-bar dropdowns, then arrange their tabs with Dockview."
         />
         <div className="workspace-board-grid">
           <section className="panel padded">
@@ -280,6 +319,7 @@ function SimplePage({ id, to }: { id: View; to: (p: string) => void }) {
       </div>
     );
   if (id === "artifacts") return <Artifacts />;
+  if (id === "monaco") return <Monaco />;
   return (
     <div className="page">
       <PageIntro title="Page" detail="Source-backed view." />
@@ -409,24 +449,23 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
         <h2>{t("Language")}</h2>
         <div className="setting-row">
           <label htmlFor="canvas-language">{t("Interface language")}</label>
-          <select
-            id="canvas-language"
-            className="settings-language-select"
-            aria-label={t("Interface language")}
+          <CanvasSelect
+            testId="canvas-language"
+            label={t("Interface language")}
             value={language}
-            onChange={(event) => {
-              void i18n.changeLanguage(event.target.value);
-            }}
-          >
-            <option value="en">English</option>
-            <option value="cs">Čeština</option>
-            <option value="es">Español</option>
-          </select>
+            className="settings-language-select"
+            options={[
+              { value: "en", label: "English" },
+              { value: "cs", label: "Čeština" },
+              { value: "es", label: "Español" },
+            ]}
+            onValueChange={(value) => { void i18n.changeLanguage(value); }}
+          />
         </div>
       </section>
       <KeyboardSettings />
       <p className="muted settings-note">
-        Canvas v0.9.0 · {t("Prototype")}.{" "}
+        Canvas v{appVersion} · {t("Prototype")}.{" "}
         {t("Local UI settings are not authoritative project data.")}
       </p>
     </div>
@@ -443,13 +482,36 @@ export default function App() {
     () => window.matchMedia("(prefers-color-scheme: dark)").matches,
   );
   const [collapsed, setCollapsed] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(storedSidebarWidth);
+  const resizing = useRef(false);
+  useEffect(() => {
+    try { localStorage.setItem(SIDEBAR_KEY, String(sidebarWidth)); } catch { /* optional */ }
+  }, [sidebarWidth]);
+  useEffect(() => {
+    const move = (event: PointerEvent) => {
+      if (resizing.current) setSidebarWidth(clampSidebar(event.clientX));
+    };
+    const end = () => {
+      resizing.current = false;
+      document.body.classList.remove("resizing-sidebar");
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", end);
+    window.addEventListener("pointercancel", end);
+    return () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", end);
+      window.removeEventListener("pointercancel", end);
+      document.body.classList.remove("resizing-sidebar");
+    };
+  }, []);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [selection, setSelection] = useState(0);
   const input = useRef<HTMLInputElement>(null);
   const page: View = nav.find((x) => path.startsWith("/" + x.id))?.id ?? "overview";
-  const title = t(nav.find((x) => x.id === page)?.label ?? "Overview");
+
   useEffect(() => {
     if (path === "/") navigate("/overview", { replace: true });
   }, [path, navigate]);
@@ -537,55 +599,34 @@ export default function App() {
       <div className="window-titlebar">
         <div className="title-left">
           <Button
-            size="icon"
-            className="mobile-toggle"
-            aria-label={t("Toggle navigation")}
+            size="icon" className="mobile-toggle" aria-label={t("Toggle navigation")}
             onClick={() => setMobileOpen((v) => !v)}
-          >
-            {icon("expand")}
-          </Button>
+          >{icon("expand")}</Button>
           <Button
-            size="icon"
-            className="desktop-toggle"
+            size="icon" className="desktop-toggle"
             title={t(collapsed ? "Expand sidebar" : "Collapse sidebar")}
             aria-label={t(collapsed ? "Expand sidebar" : "Collapse sidebar")}
             onClick={() => setCollapsed((value) => !value)}
-          >
-            {icon(collapsed ? "expand" : "collapse")}
-          </Button>
-          <strong>Canvas</strong>
+          >{icon(collapsed ? "expand" : "collapse")}</Button>
+          <TitleNavigator current={page} to={go} />
         </div>
-        <div className="omnibar-area">
-          <button
-            type="button"
-            className="omnibar-trigger"
-            aria-label={t("Open navigation tree")}
-            onClick={() => setPaletteOpen(true)}
-          >
-            {icon("search", 14)}
-            <span className="crumb">{t("Personal workspace")}</span>
-            {icon("right", 12)}
-            <span className="crumb">{context.name}</span>
-            {icon("right", 12)}
-            <strong>{title}</strong>
-            <kbd>
-              {hotkeys["canvas.omnibar.toggle"].hotkey
-                ? formatForDisplay(hotkeys["canvas.omnibar.toggle"].hotkey)
-                : "Unbound"}
-            </kbd>
-          </button>
+        <strong className="title-center">Canvas</strong>
+        <div className="title-actions">
+          <Button
+            size="icon" aria-label={t("Search pages and commands")}
+            title={t("Search pages and commands")} onClick={() => setPaletteOpen(true)}
+          >{icon("search", 17)}</Button>
+          <kbd className="title-search-key">
+            {hotkeys["canvas.omnibar.toggle"].hotkey
+              ? formatForDisplay(hotkeys["canvas.omnibar.toggle"].hotkey)
+              : ""}
+          </kbd>
+          <Button
+            size="icon" aria-label={t("Settings")} title={t("Settings")}
+            onClick={() => go("/settings")} className="title-settings"
+          >{icon("settings")}</Button>
         </div>
-        <Button
-          size="icon"
-          aria-label={t("Settings")}
-          title={t("Settings")}
-          onClick={() => go("/settings")}
-          className="title-settings"
-        >
-          {icon("settings")}
-        </Button>
       </div>
-
       <div className="window-main">
         {mobileOpen && (
           <button
@@ -602,30 +643,69 @@ export default function App() {
             mobileOpen ? "mobile-open" : "",
           ].join(" ")}
           aria-label="Main navigation"
+          style={{ "--sidebar-width": `${sidebarWidth}px` } as CSSProperties}
         >
           <nav className="sidebar-navigation">
-            {["Workspace", "System"].map((group) => (
+            {VIEW_GROUPS.map((group) => (
               <div className="nav-group" key={group}>
                 {(!collapsed || mobileOpen) && <div className="nav-group-label">{t(group)}</div>}
                 {nav
                   .filter((n) => n.group === group && n.id !== "settings")
                   .map((n) => (
-                    <Link
-                      href={"/" + n.id}
-                      key={n.id}
-                      className={"nav-link " + (page === n.id ? "active" : "")}
-                      onClick={() => setMobileOpen(false)}
-                      title={t(n.label)}
-                      aria-current={page === n.id ? "page" : undefined}
-                    >
-                      {icon(n.id)}
-                      {(!collapsed || mobileOpen) && <span>{t(n.label)}</span>}
-                    </Link>
+                    <CanvasContextMenu key={n.id} actions={[
+                      { icon: n.id, label: t("Open") + " " + t(n.label), action: () => go("/" + n.id) },
+                      { icon: "copy", label: t("Copy link"), action: () => {
+                        const url = new URL(window.location.href);
+                        url.hash = "/" + n.id;
+                        void navigator.clipboard.writeText(url.href).then(
+                          () => notify.success(t("Copied to clipboard")),
+                          () => notify.error(t("Clipboard unavailable")),
+                        );
+                      } },
+                    ]}>
+                      <div className="nav-context-row">
+                        <Link
+                          href={"/" + n.id}
+                          className={"nav-link " + (page === n.id ? "active" : "")}
+                          onClick={() => setMobileOpen(false)}
+                          title={t(n.label)}
+                          aria-current={page === n.id ? "page" : undefined}
+                        >
+                          {icon(n.id)}
+                          {(!collapsed || mobileOpen) && <span>{t(n.label)}</span>}
+                        </Link>
+                      </div>
+                    </CanvasContextMenu>
                   ))}
               </div>
             ))}
           </nav>
         </aside>
+        <div
+          className={`sidebar-resizer ${collapsed ? "disabled" : ""}`}
+          role="separator"
+          aria-label={t("Resize sidebar")}
+          aria-orientation="vertical"
+          aria-valuenow={sidebarWidth}
+          aria-valuemin={180}
+          aria-valuemax={480}
+          tabIndex={collapsed ? -1 : 0}
+          onPointerDown={(event) => {
+            if (collapsed || event.button !== 0) return;
+            event.preventDefault();
+            resizing.current = true;
+            document.body.classList.add("resizing-sidebar");
+          }}
+          onDoubleClick={() => setSidebarWidth(defaultSidebarWidth)}
+          onKeyDown={(event) => {
+            if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+              event.preventDefault();
+              setSidebarWidth((width) => clampSidebar(width + (event.key === "ArrowRight" ? 16 : -16)));
+            }
+            if (event.key === "Home") { event.preventDefault(); setSidebarWidth(180); }
+            if (event.key === "End") { event.preventDefault(); setSidebarWidth(480); }
+          }}
+        />
         <div className="main-column">
           <main className="dock-content">
             <DockCanvas
@@ -648,12 +728,13 @@ export default function App() {
           <span className="snapshot-mobile">{t("Read-only snapshot")}</span>
         </span>
         <span className="version">
-          {t("Version")}: 0.9.0 · {t("Prototype")}
+          {t("Version")}: {appVersion} · {t("Prototype")}
         </span>
         <span>
           {context.repository} / {context.revision}
         </span>
       </footer>
+      <Notifications />
       <AnimatePresence>
         {paletteOpen && (
           <motion.div
@@ -705,7 +786,7 @@ export default function App() {
               </div>
               <div className="palette-tree">
                 <div className="palette-root">
-                  Personal workspace {icon("right", 13)} {context.name}
+                  {context.repository} {icon("right", 13)} {t(viewLabel(page))}
                 </div>
                 {filtered.map((n, i) => (
                   <button

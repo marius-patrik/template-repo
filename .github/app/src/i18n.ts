@@ -171,11 +171,53 @@ const english = [
   "Documentation",
   "Close selection",
   "Repository document relationships",
+  "Monaco",
+  "Workspace navigation",
+  "Section",
+  "Repository",
+  "View",
+  "Resize sidebar",
+  "Close tab",
+  "Copy link",
+  "Copied to clipboard",
+  "Clipboard unavailable",
+  "Tab opened",
+  "Panel split to the right",
+  "Layout reset",
+  "Source document",
+  "Unsaved scratch changes",
+  "Local scratch · does not modify the repository",
+  "Scratch changes reverted",
+  "Revert",
+  "Copy",
+  "Open views with the sidebar or title-bar dropdowns, then arrange their tabs with Dockview.",
 ] as const;
 
 const en = Object.fromEntries(english.map((value) => [value, value]));
 
 const cs: Record<string, string> = {
+  "Monaco": "Monaco",
+  "Workspace navigation": "Navigace pracovním prostorem",
+  "Section": "Sekce",
+  "Repository": "Repozitář",
+  "View": "Zobrazení",
+  "Resize sidebar": "Změnit šířku bočního panelu",
+  "Close tab": "Zavřít kartu",
+  "Copy link": "Kopírovat odkaz",
+  "Copied to clipboard": "Zkopírováno do schránky",
+  "Clipboard unavailable": "Schránka není dostupná",
+  "Tab opened": "Karta otevřena",
+  "Panel split to the right": "Panel rozdělen doprava",
+  "Layout reset": "Rozložení obnoveno",
+  "Source document": "Zdrojový dokument",
+  "Unsaved scratch changes": "Neuložené místní změny",
+  "Local scratch · does not modify the repository": "Místní návrh · nemění repozitář",
+  "Scratch changes reverted": "Místní změny vráceny",
+  "Revert": "Vrátit změny",
+  "Copy": "Kopírovat",
+  "Open views with the sidebar or title-bar dropdowns, then arrange their tabs with Dockview.":
+    "Otevírejte pohledy v bočním panelu nebo v rozbalovacích nabídkách záhlaví a uspořádejte je v Dockview.",
+
   "Build source: Git-tracked documents. Revision {{revision}}.":
     "Zdroj sestavení: sledované dokumenty Git. Revize {{revision}}.",
   "{{documents}} authored source documents · revision {{revision}}":
@@ -356,6 +398,28 @@ const cs: Record<string, string> = {
   "Density selection": "Výběr hustoty",
 };
 const es: Record<string, string> = {
+  "Monaco": "Monaco",
+  "Workspace navigation": "Navegación del espacio de trabajo",
+  "Section": "Sección",
+  "Repository": "Repositorio",
+  "View": "Vista",
+  "Resize sidebar": "Cambiar el ancho de la barra lateral",
+  "Close tab": "Cerrar pestaña",
+  "Copy link": "Copiar enlace",
+  "Copied to clipboard": "Copiado al portapapeles",
+  "Clipboard unavailable": "Portapapeles no disponible",
+  "Tab opened": "Pestaña abierta",
+  "Panel split to the right": "Panel dividido a la derecha",
+  "Layout reset": "Diseño restablecido",
+  "Source document": "Documento fuente",
+  "Unsaved scratch changes": "Cambios locales sin guardar",
+  "Local scratch · does not modify the repository": "Borrador local · no modifica el repositorio",
+  "Scratch changes reverted": "Cambios locales revertidos",
+  "Revert": "Revertir",
+  "Copy": "Copiar",
+  "Open views with the sidebar or title-bar dropdowns, then arrange their tabs with Dockview.":
+    "Abre vistas desde la barra lateral o los menús del título y organiza sus pestañas con Dockview.",
+
   "Build source: Git-tracked documents. Revision {{revision}}.":
     "Origen de compilación: documentos versionados en Git. Revisión {{revision}}.",
   "{{documents}} authored source documents · revision {{revision}}":
