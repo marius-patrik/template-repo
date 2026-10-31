@@ -287,7 +287,8 @@ const cs: Record<string, string> = {
   Command: "Command",
   Control: "Control",
   "Navigation alignment": "Zarovnání navigace",
-  "Choose the primary modifier for application shortcuts. Individual bindings can be overridden below.": "Vyberte hlavní modifikátor aplikace. Jednotlivé zkratky lze upravit níže.",
+  "Choose the primary modifier for application shortcuts. Individual bindings can be overridden below.":
+    "Vyberte hlavní modifikátor aplikace. Jednotlivé zkratky lze upravit níže.",
   "Color mode": "Barevný režim",
   Controls: "Ovládání",
   OLED: "OLED",
@@ -576,7 +577,8 @@ const es: Record<string, string> = {
   Command: "Comando",
   Control: "Control",
   "Navigation alignment": "Alineación de la navegación",
-  "Choose the primary modifier for application shortcuts. Individual bindings can be overridden below.": "Elige el modificador principal para los atajos. Puedes personalizar los atajos individuales abajo.",
+  "Choose the primary modifier for application shortcuts. Individual bindings can be overridden below.":
+    "Elige el modificador principal para los atajos. Puedes personalizar los atajos individuales abajo.",
   "Color mode": "Modo de color",
   Controls: "Controles",
   OLED: "OLED",

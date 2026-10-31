@@ -26,10 +26,17 @@ export function hotkeysForModifier(
   mode: CanvasPreferences["modifierKey"],
   custom: CanvasPreferences["customModifier"],
 ) {
-  const prefix = mode === "control" ? "Ctrl" : mode === "command" ? "Meta" : mode === "custom" ? custom : "Mod";
+  const prefix =
+    mode === "control" ? "Ctrl" : mode === "command" ? "Meta" : mode === "custom" ? custom : "Mod";
   return defineAppHotkeys({
-    "canvas.sidebar.toggle": { ...appHotkeys["canvas.sidebar.toggle"], hotkey: `${prefix}+B` as Hotkey },
-    "canvas.omnibar.toggle": { ...appHotkeys["canvas.omnibar.toggle"], hotkey: `${prefix}+K` as Hotkey },
+    "canvas.sidebar.toggle": {
+      ...appHotkeys["canvas.sidebar.toggle"],
+      hotkey: `${prefix}+B` as Hotkey,
+    },
+    "canvas.omnibar.toggle": {
+      ...appHotkeys["canvas.omnibar.toggle"],
+      hotkey: `${prefix}+K` as Hotkey,
+    },
     "canvas.settings.open": appHotkeys["canvas.settings.open"],
     "canvas.canvas.open": appHotkeys["canvas.canvas.open"],
     "canvas.editor.open": appHotkeys["canvas.editor.open"],

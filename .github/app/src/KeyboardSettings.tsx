@@ -114,7 +114,9 @@ export default function KeyboardSettings() {
         <div>
           <h2>{t("Controls")}</h2>
           <p className="muted">
-            {t("Choose the primary modifier for application shortcuts. Individual bindings can be overridden below.")}
+            {t(
+              "Choose the primary modifier for application shortcuts. Individual bindings can be overridden below.",
+            )}
           </p>
         </div>
         <button type="button" className="keybind-reset-all" onClick={resetCustomHotkeys}>
@@ -141,9 +143,12 @@ export default function KeyboardSettings() {
           <CanvasSelect
             label={t("Custom modifier")}
             value={customModifier}
-            options={["Alt", "Shift", "Ctrl+Alt", "Meta+Alt", "Ctrl+Shift", "Meta+Shift"]
-              .map((value) => ({ value, label: value }))}
-            onValueChange={(value) => setPreferences({ customModifier: value as typeof customModifier })}
+            options={["Alt", "Shift", "Ctrl+Alt", "Meta+Alt", "Ctrl+Shift", "Meta+Shift"].map(
+              (value) => ({ value, label: value }),
+            )}
+            onValueChange={(value) =>
+              setPreferences({ customModifier: value as typeof customModifier })
+            }
           />
         </div>
       )}

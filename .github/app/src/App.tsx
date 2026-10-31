@@ -64,8 +64,14 @@ export default function App() {
   const setRoute = useProfiles((state) => state.setRoute);
   const togglePin = useProfiles((state) => state.togglePin);
   const floatOrigin = useRef({
-    pointerX: 0, pointerY: 0, x: 0, y: 0, nextX: 0, nextY: 0,
-    surface: null as HTMLElement | null, frame: 0,
+    pointerX: 0,
+    pointerY: 0,
+    x: 0,
+    y: 0,
+    nextX: 0,
+    nextY: 0,
+    surface: null as HTMLElement | null,
+    frame: 0,
   });
   useEffect(
     () => () => {
@@ -495,10 +501,14 @@ export default function App() {
                 const origin = floatOrigin.current;
                 if (!origin.surface || !event.currentTarget.hasPointerCapture(event.pointerId))
                   return;
-                origin.nextX = Math.max(0, Math.min(window.innerWidth - 120,
-                  origin.x + event.clientX - origin.pointerX));
-                origin.nextY = Math.max(0, Math.min(window.innerHeight - 35,
-                  origin.y + event.clientY - origin.pointerY));
+                origin.nextX = Math.max(
+                  0,
+                  Math.min(window.innerWidth - 120, origin.x + event.clientX - origin.pointerX),
+                );
+                origin.nextY = Math.max(
+                  0,
+                  Math.min(window.innerHeight - 35, origin.y + event.clientY - origin.pointerY),
+                );
                 origin.surface.style.transform = `translate3d(${origin.nextX - origin.x}px, ${origin.nextY - origin.y}px, 0)`;
                 if (!origin.frame) {
                   origin.frame = requestAnimationFrame(() => {

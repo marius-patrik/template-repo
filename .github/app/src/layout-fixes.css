@@ -865,18 +865,20 @@
 .window-statusbar .title-navigation {
   min-height: 0;
   height: var(--statusbar-height);
-  gap: calc(var(--ui-spacing) * .45);
+  gap: calc(var(--ui-spacing) * 0.45);
   max-width: min(40vw, 470px);
   overflow: visible;
 }
 .window-statusbar .title-navigation .canvas-select-trigger {
-  height: max(18px,calc(var(--statusbar-height) - 4px));
+  height: max(18px, calc(var(--statusbar-height) - 4px));
   min-height: 0;
-  padding-inline: calc(var(--ui-spacing) * .65);
-  font-size: calc(var(--app-font-size) * .75);
+  padding-inline: calc(var(--ui-spacing) * 0.65);
+  font-size: calc(var(--app-font-size) * 0.75);
 }
 .window-statusbar .title-navigation .app-icon {
   flex: none;
   color: var(--muted);
 }
-.status-group:has(.title-navigation) { overflow: visible; }
+.status-group:has(.title-navigation) {
+  overflow: visible;
+}

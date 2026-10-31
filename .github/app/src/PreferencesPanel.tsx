@@ -187,10 +187,12 @@ export default function PreferencesPanel() {
             label="Navigation alignment"
             value={prefs.statusAlignment.navigation}
             values={["left", "center", "right"]}
-            onChange={(value) => patch("statusAlignment", {
-              ...prefs.statusAlignment,
-              navigation: value as "left" | "center" | "right",
-            })}
+            onChange={(value) =>
+              patch("statusAlignment", {
+                ...prefs.statusAlignment,
+                navigation: value as "left" | "center" | "right",
+              })
+            }
           />
         )}
         <Choice

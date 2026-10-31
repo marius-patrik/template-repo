@@ -63,7 +63,10 @@ export default function Omnibar({
             ? "down"
             : "up";
     setPlacement(direction);
-    rootRef.current?.style.setProperty("--omnibar-results-max-height", `${Math.max(90, (direction === "down" ? freeDown : freeUp) - 4)}px`);
+    rootRef.current?.style.setProperty(
+      "--omnibar-results-max-height",
+      `${Math.max(90, (direction === "down" ? freeDown : freeUp) - 4)}px`,
+    );
   }, [items.length, prefs.commandPlacement]);
   useLayoutEffect(() => {
     if (open) place();
@@ -165,7 +168,20 @@ export default function Omnibar({
           }
         }}
       />
-      {dragHandle ?? <kbd>{prefs.modifierKey === "command" ? "⌘" : prefs.modifierKey === "control" ? "Ctrl" : prefs.modifierKey === "custom" ? prefs.customModifier : navigator.platform.toLowerCase().includes("mac") ? "⌘" : "Ctrl"}K</kbd>}
+      {dragHandle ?? (
+        <kbd>
+          {prefs.modifierKey === "command"
+            ? "⌘"
+            : prefs.modifierKey === "control"
+              ? "Ctrl"
+              : prefs.modifierKey === "custom"
+                ? prefs.customModifier
+                : navigator.platform.toLowerCase().includes("mac")
+                  ? "⌘"
+                  : "Ctrl"}
+          K
+        </kbd>
+      )}
       {open && options}
       {open &&
         createPortal(

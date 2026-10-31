@@ -359,7 +359,8 @@ export const useCanvasConfig = create<ConfigState>()(
           };
         }
         if (previousVersion < 4 && preferences.skin === "graphite") {
-          const priorDefault = JSON.stringify(preferences.darkColors) === JSON.stringify(darkPalette);
+          const priorDefault =
+            JSON.stringify(preferences.darkColors) === JSON.stringify(darkPalette);
           const previousOled =
             preferences.darkColors?.bg === "#000000" &&
             preferences.darkColors?.surface === "#000000";
