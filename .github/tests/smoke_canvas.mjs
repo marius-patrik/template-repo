@@ -10,10 +10,6 @@ const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 page.setDefaultTimeout(9000);
 const watchdog = setTimeout(() => { console.error("Canvas smoke exceeded hard timeout"); process.exit(1); }, 150000);
 const errors = [];
-const captureReview = async (label, page) => {
-  const image = await page.screenshot({ type: "jpeg", quality: 54, animations: "disabled" });
-  console.log(`CANVAS_REVIEW_${label}_B64=${image.toString("base64")}`);
-};
 page.on("pageerror", (error) => errors.push(error.message));
 
 try {
@@ -21,27 +17,7 @@ try {
   await page.locator("#root .app-root").waitFor({ timeout: 15000 });
   await page.getByTestId("empty-workspace").waitFor();
   await page.locator(".dock-empty-tabbar").waitFor();
-  await captureReview("WELCOME", page);
-  for (const [label, view, width, height] of [
-    ["CANVAS_DIRECT", "Canvas", 1440, 900],
-    ["SETTINGS_DIRECT", "Settings", 1440, 900],
-    ["MOBILE_WELCOME", null, 390, 844],
-    ["MOBILE_CANVAS", "Canvas", 390, 844],
-  ]) {
-    const review = await browser.newPage({ viewport: { width, height }, reducedMotion: "reduce" });
-    review.setDefaultTimeout(9000);
-    try {
-      await review.goto(url, { waitUntil: "load" });
-      await review.getByTestId("empty-workspace").waitFor();
-      if (view) {
-        await review.locator(".dock-welcome-options").getByRole("button", { name: view, exact: true }).click();
-        await review.locator(`[data-dock-view="${view.toLowerCase()}"]`).waitFor();
-      }
-      await captureReview(label, review);
-    } finally {
-      await review.close();
-    }
-  }
+
   await page.locator(".window-statusbar .title-navigation").waitFor();
   if (await page.locator(".window-titlebar .title-navigation").count())
     throw new Error("Navigation should default to bottom-left status bar");
@@ -76,18 +52,6 @@ try {
 
   await page.locator(".dock-welcome-options").getByRole("button", { name: "Editor" }).click();
   await page.locator('[data-dock-view="editor"]').waitFor();
-  console.log("EDITOR_GEOMETRY:", JSON.stringify(await page.evaluate(() =>
-    [".dv-content-container","[data-dock-view='editor']", ".dock-route-page", ".monaco-pane", ".monaco-toolbar", ".monaco-editor-host"]
-      .map((selector) => {
-        const element = document.querySelector(selector);
-        if (!element) return { selector, missing: true };
-        const box = element.getBoundingClientRect();
-        const css = getComputedStyle(element);
-        return { selector, width: box.width, height: box.height,
-          display: css.display, overflow: css.overflow, flex: css.flex, visibility: css.visibility };
-      })
-  )));
-  await captureReview("EDITOR", page);
   await page.getByTestId("monaco-editor").waitFor();
   if (await page.locator(".monaco-source-select > strong").count())
     throw new Error("Editor must not duplicate the tab title");
@@ -164,12 +128,12 @@ try {
   await page.getByTestId("canvas-source").waitFor();
   await page.locator(".canvas-perspectives").getByRole("button", { name: "Overview" }).click();
   await page.locator(".canvas-inspector").getByText("Project identity").waitFor();
-  await captureReview("CANVAS", page);
+
 
   // Settings expose all placement and unified scale controls.
   await page.locator(".title-actions").getByRole("button", { name: "Settings" }).click();
   await page.getByTestId("settings-page").waitFor();
-  await captureReview("SETTINGS", page);
+
   await page.getByRole("combobox", { name: "Modifier key" }).click();
   await page.getByRole("option", { name: "Control", exact: true }).click();
   await page.getByRole("combobox", { name: "Modifier key" }).click();
