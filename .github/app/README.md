@@ -54,3 +54,6 @@ rearrangement, group splitting and panel closing are native Dockview interaction
 Wouter hash routes and Dockview tab selection are synchronized. Local layout preferences
 are persisted under `canvas-dockview-layout-v1` and can be reset without changing
 repository data. The build remains a static, read-only repository snapshot.
+
+The Dockview compositor uses the official dockview-react panel API and keeps layout
+state as UI-only local data; no authored repository file is modified through drag/drop.
