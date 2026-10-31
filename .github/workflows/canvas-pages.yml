@@ -3,7 +3,7 @@ on:
   pull_request:
     branches: [development, main]
   push:
-    branches: [main]
+    branches: [main, 'feat/canvas-react-pages']
     paths:
       - '.github/app/**'
       - '.github/workflows/canvas-pages.yml'
