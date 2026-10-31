@@ -28,7 +28,7 @@ footer{max-width:1180px;padding:22px 24px;margin:auto;color:#687989;font-size:.8
 </style>
 </head>
 <body>
-<header><div class="eyebrow">Repository Canvas · Generated from tracked source</div><h1>template-repo</h1><p>Customize this repository into a well-specified project with a single authoritative requirement source, explicit architecture decisions, reproducible verification and an auditable release path.</p><p>89 source entries · static, read-only view · agent actions modify repository files and regenerate this document</p></header>
+<header><div class="eyebrow">Repository Canvas · Generated from tracked source</div><h1>template-repo</h1><p>Customize this repository into a well-specified project with a single authoritative requirement source, explicit architecture decisions, reproducible verification and an auditable release path.</p><p>90 source entries · static, read-only view · agent actions modify repository files and regenerate this document</p></header>
 <main><p class="hint"><strong>Source of truth:</strong> the Git repository. This HTML has no independent application state, external data feed or editing controls. The generated canvas is excluded from its own input inventory; Git submodules and binary assets are represented by identifiers or checksums, not expanded data.</p>
 
 <div class="layout"><nav class="navigator" aria-label="Repository index"><h2>Repository files</h2><ol>
@@ -105,22 +105,23 @@ footer{max-width:1180px;padding:22px 24px;margin:auto;color:#687989;font-size:.8
 <li><a href="#file-0071">.github/scripts/versioning.py</a></li>
 <li><a href="#file-0072">.github/tests/test_apply_branch_protection.py</a></li>
 <li><a href="#file-0073">.github/tests/test_canvas.py</a></li>
-<li><a href="#file-0074">.github/tests/test_repository_structure.py</a></li>
-<li><a href="#file-0075">.github/tests/test_versioning.py</a></li>
-<li><a href="#file-0076">.github/workflows/canvas-pages.yml</a></li>
-<li><a href="#file-0077">.github/workflows/canvas-sync.yml</a></li>
-<li><a href="#file-0078">.github/workflows/darkfactory-control.yml</a></li>
-<li><a href="#file-0079">.github/workflows/darkfactory.yml</a></li>
-<li><a href="#file-0080">.github/workflows/docs.yml</a></li>
-<li><a href="#file-0081">.github/workflows/keep-development.yml</a></li>
-<li><a href="#file-0082">.github/workflows/main-source.yml</a></li>
-<li><a href="#file-0083">.github/workflows/pr-version.yml</a></li>
-<li><a href="#file-0084">.github/workflows/release.yml</a></li>
-<li><a href="#file-0085">.gitmodules</a></li>
-<li><a href="#file-0086">CONTRIBUTING.md</a></li>
-<li><a href="#file-0087">LICENSE</a></li>
-<li><a href="#file-0088">README.md</a></li>
-<li><a href="#file-0089">repo.dfconfig</a></li>
+<li><a href="#file-0074">.github/tests/test_canvas_web.py</a></li>
+<li><a href="#file-0075">.github/tests/test_repository_structure.py</a></li>
+<li><a href="#file-0076">.github/tests/test_versioning.py</a></li>
+<li><a href="#file-0077">.github/workflows/canvas-pages.yml</a></li>
+<li><a href="#file-0078">.github/workflows/canvas-sync.yml</a></li>
+<li><a href="#file-0079">.github/workflows/darkfactory-control.yml</a></li>
+<li><a href="#file-0080">.github/workflows/darkfactory.yml</a></li>
+<li><a href="#file-0081">.github/workflows/docs.yml</a></li>
+<li><a href="#file-0082">.github/workflows/keep-development.yml</a></li>
+<li><a href="#file-0083">.github/workflows/main-source.yml</a></li>
+<li><a href="#file-0084">.github/workflows/pr-version.yml</a></li>
+<li><a href="#file-0085">.github/workflows/release.yml</a></li>
+<li><a href="#file-0086">.gitmodules</a></li>
+<li><a href="#file-0087">CONTRIBUTING.md</a></li>
+<li><a href="#file-0088">LICENSE</a></li>
+<li><a href="#file-0089">README.md</a></li>
+<li><a href="#file-0090">repo.dfconfig</a></li>
 </ol></nav><div class="files">
 <section class="file" id="file-0001"><h3>.agents/AGENTS.md</h3><p class="meta">Git mode 100644 · fe682dfcf5d2d016885549f7aaf363189f4506a0</p><pre># Agent and contributor rules
 
@@ -2936,7 +2937,57 @@ class CanvasTests(unittest.TestCase):
 if __name__ == &quot;__main__&quot;:
     unittest.main()
 </pre></section>
-<section class="file" id="file-0074"><h3>.github/tests/test_repository_structure.py</h3><p class="meta">Git mode 100644 · 4b6278ed2104d8a08ae08852c989f86974802659</p><pre>&quot;&quot;&quot;Behavior tests for native GitHub layout, independent docs, submodule, tests.&quot;&quot;&quot;
+<section class="file" id="file-0074"><h3>.github/tests/test_canvas_web.py</h3><p class="meta">Git mode 100644 · 3bb0c07f7e1c56abb155d7014c42de01b0cb8d32</p><pre>&quot;&quot;&quot;Validate the build-time source contract without installing frontend packages.&quot;&quot;&quot;
+from __future__ import annotations
+
+import json
+import subprocess
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+APP = ROOT / &quot;.github/app&quot;
+GENERATED = APP / &quot;src/generated/context.json&quot;
+
+class CanvasWebTests(unittest.TestCase):
+    def test_snapshot_uses_real_repository_documents(self):
+        result = subprocess.run(
+            [&quot;node&quot;, str(APP / &quot;scripts/generate-context.mjs&quot;)],
+            cwd=ROOT, capture_output=True, text=True, check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        snapshot = json.loads(GENERATED.read_text(encoding=&quot;utf8&quot;))
+        self.assertEqual(snapshot[&quot;schema&quot;], 1)
+        self.assertGreaterEqual(len(snapshot[&quot;documents&quot;]), 3)
+        self.assertEqual(snapshot[&quot;goal&quot;], (ROOT / &quot;.agents/GOAL.md&quot;).read_text(encoding=&quot;utf8&quot;))
+        self.assertEqual(
+            snapshot[&quot;repository&quot;], &quot;marius-patrik/template-repo&quot;,
+        )
+        self.assertTrue(all(item[&quot;path&quot;].startswith(&quot;.agents/&quot;) or
+                            item[&quot;path&quot;] == &quot;AGENTS.md&quot; for item in snapshot[&quot;documents&quot;]))
+        self.assertEqual(len(snapshot[&quot;paths&quot;]), len(set(snapshot[&quot;paths&quot;])))
+
+    def test_publication_allowlist_never_publishes_archive_files(self):
+        self.test_snapshot_uses_real_repository_documents()
+        snapshot = json.loads(GENERATED.read_text(encoding=&quot;utf8&quot;))
+        for path in snapshot[&quot;paths&quot;]:
+            self.assertNotIn(&quot;/.env&quot;, path)
+            self.assertNotIn(&quot;vehicle/&quot;, path)
+            self.assertNotIn(&quot;evidence/&quot;, path)
+            self.assertNotIn(&quot;private/&quot;, path)
+        self.assertNotIn(&quot;api_key&quot;, json.dumps(snapshot[&quot;paths&quot;]).lower())
+
+    def test_reproducible_snapshot(self):
+        self.test_snapshot_uses_real_repository_documents()
+        before = GENERATED.read_bytes()
+        subprocess.run([&quot;node&quot;, str(APP / &quot;scripts/generate-context.mjs&quot;)],
+                       cwd=ROOT, capture_output=True, check=True)
+        self.assertEqual(GENERATED.read_bytes(), before)
+
+if __name__ == &quot;__main__&quot;:
+    unittest.main()
+</pre></section>
+<section class="file" id="file-0075"><h3>.github/tests/test_repository_structure.py</h3><p class="meta">Git mode 100644 · 4b6278ed2104d8a08ae08852c989f86974802659</p><pre>&quot;&quot;&quot;Behavior tests for native GitHub layout, independent docs, submodule, tests.&quot;&quot;&quot;
 
 from __future__ import annotations
 
@@ -3015,7 +3066,7 @@ class WorkspaceLayoutTests(unittest.TestCase):
 if __name__ == &quot;__main__&quot;:
     unittest.main()
 </pre></section>
-<section class="file" id="file-0075"><h3>.github/tests/test_versioning.py</h3><p class="meta">Git mode 100644 · eaad888bd4979e3f3bd8516220147f206b684d67</p><pre>&quot;&quot;&quot;Behavioral tests of Git tag-only and optional file-driven versions.&quot;&quot;&quot;
+<section class="file" id="file-0076"><h3>.github/tests/test_versioning.py</h3><p class="meta">Git mode 100644 · eaad888bd4979e3f3bd8516220147f206b684d67</p><pre>&quot;&quot;&quot;Behavioral tests of Git tag-only and optional file-driven versions.&quot;&quot;&quot;
 
 from __future__ import annotations
 
@@ -3076,7 +3127,7 @@ class VersioningTests(unittest.TestCase):
 if __name__ == &quot;__main__&quot;:
     unittest.main()
 </pre></section>
-<section class="file" id="file-0076"><h3>.github/workflows/canvas-pages.yml</h3><p class="meta">Git mode 100644 · 1046a90f175133ff1eb838fbf16501aa481e2094</p><pre>name: Canvas — GitHub Pages
+<section class="file" id="file-0077"><h3>.github/workflows/canvas-pages.yml</h3><p class="meta">Git mode 100644 · 1046a90f175133ff1eb838fbf16501aa481e2094</p><pre>name: Canvas — GitHub Pages
 on:
   pull_request:
     branches: [development, main]
@@ -3141,7 +3192,7 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v4
 </pre></section>
-<section class="file" id="file-0077"><h3>.github/workflows/canvas-sync.yml</h3><p class="meta">Git mode 100644 · f17c4d43c66ab1c4767be3ae734ec9ed5dd4880a</p><pre>name: Synchronize repository Canvas
+<section class="file" id="file-0078"><h3>.github/workflows/canvas-sync.yml</h3><p class="meta">Git mode 100644 · f17c4d43c66ab1c4767be3ae734ec9ed5dd4880a</p><pre>name: Synchronize repository Canvas
 on:
   push:
     branches:
@@ -3186,7 +3237,7 @@ jobs:
           git commit -m &quot;docs(canvas): synchronize generated repository view&quot;
           git push origin &quot;HEAD:${GITHUB_REF_NAME}&quot;
 </pre></section>
-<section class="file" id="file-0078"><h3>.github/workflows/darkfactory-control.yml</h3><p class="meta">Git mode 100644 · 75fa15c2604451203799ec160fabea908221cee9</p><pre># df-control-managed: 1
+<section class="file" id="file-0079"><h3>.github/workflows/darkfactory-control.yml</h3><p class="meta">Git mode 100644 · 75fa15c2604451203799ec160fabea908221cee9</p><pre># df-control-managed: 1
 name: DarkFactory Control
 on:
   workflow_call:
@@ -3339,7 +3390,7 @@ jobs:
       pipeline-repo: marius-patrik/DarkFactory
     secrets: inherit
 </pre></section>
-<section class="file" id="file-0079"><h3>.github/workflows/darkfactory.yml</h3><p class="meta">Git mode 100644 · 0573b940cd16a9932acdaeb9f9b0200e0a91e493</p><pre># df-control-bridge: 1
+<section class="file" id="file-0080"><h3>.github/workflows/darkfactory.yml</h3><p class="meta">Git mode 100644 · 0573b940cd16a9932acdaeb9f9b0200e0a91e493</p><pre># df-control-bridge: 1
 # GitHub requires issues, workflow_dispatch and schedules on the default branch.
 # Configuration and executable workflows reside on this repository&#x27;s default branch.
 name: DarkFactory Runtime
@@ -3370,7 +3421,7 @@ jobs:
     uses: ./.github/workflows/darkfactory-control.yml
     secrets: inherit
 </pre></section>
-<section class="file" id="file-0080"><h3>.github/workflows/docs.yml</h3><p class="meta">Git mode 100644 · 09be66ac95b3bf75130e8cecb9ca33cebe0b2e87</p><pre>name: Generated documents
+<section class="file" id="file-0081"><h3>.github/workflows/docs.yml</h3><p class="meta">Git mode 100644 · 09be66ac95b3bf75130e8cecb9ca33cebe0b2e87</p><pre>name: Generated documents
 on:
   pull_request:
     branches: [development, main]
@@ -3393,7 +3444,7 @@ jobs:
       - name: Test source behavior and repository layout
         run: python3 -m unittest discover -s .github/tests -p &#x27;test_*.py&#x27;
 </pre></section>
-<section class="file" id="file-0081"><h3>.github/workflows/keep-development.yml</h3><p class="meta">Git mode 100644 · e0ca712e55a67121efc47a56e32dd751a17c0109</p><pre>name: Keep development branch
+<section class="file" id="file-0082"><h3>.github/workflows/keep-development.yml</h3><p class="meta">Git mode 100644 · e0ca712e55a67121efc47a56e32dd751a17c0109</p><pre>name: Keep development branch
 on:
   delete:
   workflow_run:
@@ -3454,7 +3505,7 @@ jobs:
               core.info(&#x27;Concurrent restoration completed at &#x27; + current.data.object.sha);
             }
 </pre></section>
-<section class="file" id="file-0082"><h3>.github/workflows/main-source.yml</h3><p class="meta">Git mode 100644 · ab63ee227e23d1a329cb15a0da037e27cabe2b43</p><pre>name: Main source policy
+<section class="file" id="file-0083"><h3>.github/workflows/main-source.yml</h3><p class="meta">Git mode 100644 · ab63ee227e23d1a329cb15a0da037e27cabe2b43</p><pre>name: Main source policy
 on:
   pull_request:
     branches: [main]
@@ -3495,7 +3546,7 @@ jobs:
             }
             core.info(&#x27;Authorized main PR: #&#x27; + pr.number + &#x27; from development.&#x27;);
 </pre></section>
-<section class="file" id="file-0083"><h3>.github/workflows/pr-version.yml</h3><p class="meta">Git mode 100644 · 728984d9be66d5b399ac00b5f79b178210f2ecc0</p><pre>name: Bump version on PR
+<section class="file" id="file-0084"><h3>.github/workflows/pr-version.yml</h3><p class="meta">Git mode 100644 · 728984d9be66d5b399ac00b5f79b178210f2ecc0</p><pre>name: Bump version on PR
 on:
   pull_request_target:
     branches: [development, main]
@@ -3586,7 +3637,7 @@ jobs:
             core.info(&#x27;Bumped VERSION to &#x27; + newVersion.trim());
             await dispatchChecks();
 </pre></section>
-<section class="file" id="file-0084"><h3>.github/workflows/release.yml</h3><p class="meta">Git mode 100644 · 5f3ac29dcbf6152e40e1c5fe0b22a3065ad24cfe</p><pre>name: Release main
+<section class="file" id="file-0085"><h3>.github/workflows/release.yml</h3><p class="meta">Git mode 100644 · 5f3ac29dcbf6152e40e1c5fe0b22a3065ad24cfe</p><pre>name: Release main
 on:
   push:
     branches: [main]
@@ -3642,14 +3693,14 @@ jobs:
           fi
           gh release view &quot;$RELEASE_TAG&quot; --json tagName,url
 </pre></section>
-<section class="file" id="file-0085"><h3>.gitmodules</h3><p class="meta">Git mode 100644 · 674a1ce0b95f16d9c0b222911e1be9b2ef0b1ccc</p><pre>[submodule &quot;.darkfactory&quot;]
+<section class="file" id="file-0086"><h3>.gitmodules</h3><p class="meta">Git mode 100644 · 674a1ce0b95f16d9c0b222911e1be9b2ef0b1ccc</p><pre>[submodule &quot;.darkfactory&quot;]
 	path = .darkfactory
 	url = https://github.com/marius-patrik/DarkFactory.git
 	branch = main
 </pre></section>
-<section class="file" id="file-0086"><h3>CONTRIBUTING.md</h3><p class="meta">Git mode 120000 · 41280d2fa808081dc9c5bd47c047fe1ea62e6aae</p><pre>Symbolic link to: .agents/AGENTS.md
+<section class="file" id="file-0087"><h3>CONTRIBUTING.md</h3><p class="meta">Git mode 120000 · 41280d2fa808081dc9c5bd47c047fe1ea62e6aae</p><pre>Symbolic link to: .agents/AGENTS.md
 </pre></section>
-<section class="file" id="file-0087"><h3>LICENSE</h3><p class="meta">Git mode 100644 · f288702d2fa16d3cdf0035b15a9fcbc552cd88e7</p><pre>                    GNU GENERAL PUBLIC LICENSE
+<section class="file" id="file-0088"><h3>LICENSE</h3><p class="meta">Git mode 100644 · f288702d2fa16d3cdf0035b15a9fcbc552cd88e7</p><pre>                    GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
  Copyright (C) 2007 Free Software Foundation, Inc. &lt;https://fsf.org/&gt;
@@ -4324,9 +4375,9 @@ the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 &lt;https://www.gnu.org/licenses/why-not-lgpl.html&gt;.
 </pre></section>
-<section class="file" id="file-0088"><h3>README.md</h3><p class="meta">Git mode 120000 · fa67a2d3e2abc3d138f3534762f958e4fe16fc25</p><pre>Symbolic link to: .agents/README.md
+<section class="file" id="file-0089"><h3>README.md</h3><p class="meta">Git mode 120000 · fa67a2d3e2abc3d138f3534762f958e4fe16fc25</p><pre>Symbolic link to: .agents/README.md
 </pre></section>
-<section class="file" id="file-0089"><h3>repo.dfconfig</h3><p class="meta">Git mode 100644 · dc53ee610d6da1ba8672730abced245644781334</p><pre>{
+<section class="file" id="file-0090"><h3>repo.dfconfig</h3><p class="meta">Git mode 100644 · dc53ee610d6da1ba8672730abced245644781334</p><pre>{
   &quot;repo&quot;: {
     &quot;$comment&quot;: &quot;Starter policy and repository identity. Review and replace project-specific values before installation; declarations do not configure GitHub protection by themselves.&quot;,
     &quot;identity&quot;: {
