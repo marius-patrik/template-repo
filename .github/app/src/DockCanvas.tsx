@@ -390,7 +390,8 @@ export default function DockCanvas({
     // A Dockview state update can render with the old route before wouter commits
     // the close action. Never resurrect that explicitly closed pane.
     if (suppressedRoute.current === route) return;
-    if (suppressedRoute.current && suppressedRoute.current !== route) suppressedRoute.current = null;
+    if (suppressedRoute.current && suppressedRoute.current !== route)
+      suppressedRoute.current = null;
     if (latest.current.route !== route) return;
     const view = viewFromRoute(route);
     if (!api || !view) return;
