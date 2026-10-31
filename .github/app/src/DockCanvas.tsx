@@ -246,6 +246,7 @@ export default function DockCanvas({
   const { t } = useTranslation();
   const hotkeys = useAppHotkeys();
   const apiRef = useRef<DockviewApi | null>(null);
+  const suppressedRoute = useRef<string | null>(null);
   const disposables = useRef<Array<{ dispose: () => void }>>([]);
   const [empty, setEmpty] = useState(true);
   const latest = useRef({ route, onNavigate });
@@ -332,6 +333,7 @@ export default function DockCanvas({
     const selected = remaining.find((item) => item.api.isActive) ?? remaining.at(-1);
     const view = selected?.api.getParameters().view;
     const nextRoute = typeof view === "string" && isCanvasView(view) ? `/${view}` : "/";
+    if (latest.current.route !== nextRoute) suppressedRoute.current = latest.current.route;
     latest.current.route = nextRoute;
     panel.api.close();
     latest.current.onNavigate(nextRoute);
@@ -385,7 +387,10 @@ export default function DockCanvas({
 
   useEffect(() => {
     const api = apiRef.current;
-    // Ignore route effects superseded by an explicit close/new-tab action.
+    // A Dockview state update can render with the old route before wouter commits
+    // the close action. Never resurrect that explicitly closed pane.
+    if (suppressedRoute.current === route) return;
+    if (suppressedRoute.current && suppressedRoute.current !== route) suppressedRoute.current = null;
     if (latest.current.route !== route) return;
     const view = viewFromRoute(route);
     if (!api || !view) return;
