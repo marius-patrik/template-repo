@@ -32,6 +32,28 @@ export default function App() {
   const [collapsed, setCollapsed] = useState(true);
   const resizing = useRef(false);
   const resizeOrigin = useRef({ x: 0, width: 228 });
+  // Pointer capture can be interrupted when dock groups rerender during a resize;
+  // an explicit document-level handler keeps mouse/touch resizing stable.
+  useEffect(() => {
+    const move = (event: PointerEvent) => {
+      if (!resizing.current) return;
+      const current = useCanvasConfig.getState().preferences;
+      const delta = (event.clientX - resizeOrigin.current.x) * (current.sidebarPosition === "right" ? -1 : 1);
+      updatePreferences({ sidebarWidth: Math.min(480, Math.max(180, Math.round(resizeOrigin.current.width + delta))) });
+    };
+    const finish = () => {
+      resizing.current = false;
+      document.body.classList.remove("resizing-sidebar");
+    };
+    window.addEventListener("pointermove", move, true);
+    window.addEventListener("pointerup", finish, true);
+    window.addEventListener("pointercancel", finish, true);
+    return () => {
+      window.removeEventListener("pointermove", move, true);
+      window.removeEventListener("pointerup", finish, true);
+      window.removeEventListener("pointercancel", finish, true);
+    };
+  }, [updatePreferences]);
   const currentProfileId = useProfiles((state) => state.currentId);
   const activeProfile = useProfiles((state) =>
     state.profiles.find((p) => p.id === state.currentId),
