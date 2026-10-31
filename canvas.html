@@ -1636,7 +1636,7 @@ Describe precisely what changed and why.
 src/generated/
 ../../.canvas-dist/
 </pre></section>
-<section class="file" id="file-0055"><h3>.github/app/README.md</h3><p class="meta">Git mode 100644 · da442f058a72ed4ceae3f2349d2cadc72ea5a3ad</p><pre># Canvas Web — repository application
+<section class="file" id="file-0055"><h3>.github/app/README.md</h3><p class="meta">Git mode 100644 · 410467d988fa87f5015b8fe2719329173d62449b</p><pre># Canvas Web — repository application
 
 The first-class Canvas UI is authored in `.github/app`. A deterministic build step reads
 only allowlisted, Git-tracked repository documents and generates `src/generated/context.json`;
@@ -1754,6 +1754,8 @@ routes, commands and source files. New languages should add a resource dictionar
 not fork the UI.
 
 Build checks now verify localized Czech/English labels, the locale persisted across reload, and visual density/skin configuration while retaining existing Dockview and keyboard acceptance tests.
+
+Localization acceptance additionally verifies Spanish, Czech and English Settings language transitions, with no translation of source Markdown. Knowledge-graph labels use the same catalog, and graph light/dark mode follows the appearance preference.
 </pre></section>
 <section class="file" id="file-0056"><h3>.github/app/biome.json</h3><p class="meta">Git mode 100644 · b7e3d5edf47ef879ecb3eabc17772d2817b11c64</p><pre>{
   &quot;$schema&quot;: &quot;https://biomejs.dev/schemas/2.6.4/schema.json&quot;,
