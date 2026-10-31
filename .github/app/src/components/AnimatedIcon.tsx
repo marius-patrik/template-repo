@@ -1,11 +1,30 @@
 import { useEffect, useRef, type ComponentType, type Ref } from "react";
 import {
-  LayoutGridIcon, BlocksIcon, FolderOpenIcon, BotIcon, GitForkIcon,
-  FileTextIcon, HistoryIcon, SettingsIcon, SearchIcon, PlusIcon,
-  ChevronRightIcon, ChevronDownIcon, PanelLeftCloseIcon, PanelLeftOpenIcon,
-  SunIcon, MoonIcon, CircleCheckIcon, CircleHelpIcon, ArrowRightIcon,
-  PanelRightOpenIcon, RotateCcwIcon, BellIcon, GripHorizontalIcon,
-  CopyIcon, XIcon,
+  LayoutGridIcon,
+  BlocksIcon,
+  FolderOpenIcon,
+  BotIcon,
+  GitForkIcon,
+  FileTextIcon,
+  HistoryIcon,
+  SettingsIcon,
+  SearchIcon,
+  PlusIcon,
+  ChevronRightIcon,
+  ChevronDownIcon,
+  PanelLeftCloseIcon,
+  PanelLeftOpenIcon,
+  SunIcon,
+  MoonIcon,
+  CircleCheckIcon,
+  CircleHelpIcon,
+  ArrowRightIcon,
+  PanelRightOpenIcon,
+  RotateCcwIcon,
+  BellIcon,
+  GripHorizontalIcon,
+  CopyIcon,
+  XIcon,
 } from "lucide-animated";
 
 type IconHandle = { startAnimation: () => void; stopAnimation: () => void };
@@ -45,15 +64,23 @@ const registry = {
 /** Drive the real lucide-animated motion from the *whole* interactive parent,
  * not merely the tiny SVG hitbox. Keyboard focus gets the same feedback. */
 export function AnimatedIcon({
-  name, size = 18, className,
+  name,
+  size = 18,
+  className,
 }: {
-  name: string; size?: number; className?: string;
+  name: string;
+  size?: number;
+  className?: string;
 }) {
   const node = useRef<HTMLSpanElement>(null);
   const animation = useRef<IconHandle>(null);
-  const Icon = (registry[name as keyof typeof registry] ?? CircleHelpIcon) as ComponentType<IconProps>;
+  const Icon = (registry[name as keyof typeof registry] ??
+    CircleHelpIcon) as ComponentType<IconProps>;
   useEffect(() => {
-    const parent = node.current?.closest("button, a, [role='tab'], [role='menuitem'], [data-animated-icon-trigger]") ?? node.current;
+    const parent =
+      node.current?.closest(
+        "button, a, [role='tab'], [role='menuitem'], [data-animated-icon-trigger]",
+      ) ?? node.current;
     if (!parent) return;
     const start = () => animation.current?.startAnimation();
     const stop = () => animation.current?.stopAnimation();

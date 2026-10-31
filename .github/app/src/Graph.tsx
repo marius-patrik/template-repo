@@ -15,7 +15,9 @@ function relationships() {
           if (/^[a-z]+:/i.test(match[1])) return null;
           const url = new URL(match[1], new URL(doc.path, "https://canvas.invalid/"));
           return decodeURIComponent(url.pathname.replace(/^\//, ""));
-        } catch { return null; }
+        } catch {
+          return null;
+        }
       })
       .filter((target): target is string => !!target && tracked.has(target))
       .map((target) => [doc.path, target] as const),

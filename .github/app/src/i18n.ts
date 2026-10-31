@@ -196,11 +196,11 @@ const english = [
 const en = Object.fromEntries(english.map((value) => [value, value]));
 
 const cs: Record<string, string> = {
-  "Monaco": "Monaco",
+  Monaco: "Monaco",
   "Workspace navigation": "Navigace pracovním prostorem",
-  "Section": "Sekce",
-  "Repository": "Repozitář",
-  "View": "Zobrazení",
+  Section: "Sekce",
+  Repository: "Repozitář",
+  View: "Zobrazení",
   "Resize sidebar": "Změnit šířku bočního panelu",
   "Close tab": "Zavřít kartu",
   "Copy link": "Kopírovat odkaz",
@@ -213,8 +213,8 @@ const cs: Record<string, string> = {
   "Unsaved scratch changes": "Neuložené místní změny",
   "Local scratch · does not modify the repository": "Místní návrh · nemění repozitář",
   "Scratch changes reverted": "Místní změny vráceny",
-  "Revert": "Vrátit změny",
-  "Copy": "Kopírovat",
+  Revert: "Vrátit změny",
+  Copy: "Kopírovat",
   "Open views with the sidebar or title-bar dropdowns, then arrange their tabs with Dockview.":
     "Otevírejte pohledy v bočním panelu nebo v rozbalovacích nabídkách záhlaví a uspořádejte je v Dockview.",
 
@@ -398,11 +398,11 @@ const cs: Record<string, string> = {
   "Density selection": "Výběr hustoty",
 };
 const es: Record<string, string> = {
-  "Monaco": "Monaco",
+  Monaco: "Monaco",
   "Workspace navigation": "Navegación del espacio de trabajo",
-  "Section": "Sección",
-  "Repository": "Repositorio",
-  "View": "Vista",
+  Section: "Sección",
+  Repository: "Repositorio",
+  View: "Vista",
   "Resize sidebar": "Cambiar el ancho de la barra lateral",
   "Close tab": "Cerrar pestaña",
   "Copy link": "Copiar enlace",
@@ -415,8 +415,8 @@ const es: Record<string, string> = {
   "Unsaved scratch changes": "Cambios locales sin guardar",
   "Local scratch · does not modify the repository": "Borrador local · no modifica el repositorio",
   "Scratch changes reverted": "Cambios locales revertidos",
-  "Revert": "Revertir",
-  "Copy": "Copiar",
+  Revert: "Revertir",
+  Copy: "Copiar",
   "Open views with the sidebar or title-bar dropdowns, then arrange their tabs with Dockview.":
     "Abre vistas desde la barra lateral o los menús del título y organiza sus pestañas con Dockview.",
 

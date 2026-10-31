@@ -34,12 +34,7 @@ function storedSidebarWidth() {
   }
 }
 
-function TitleNavigator({
-  current, to,
-}: {
-  current: View;
-  to: (path: string) => void;
-}) {
+function TitleNavigator({ current, to }: { current: View; to: (path: string) => void }) {
   const { t } = useTranslation();
   const group = nav.find((item) => item.id === current)?.group ?? "Workspace";
   return (
@@ -68,9 +63,12 @@ function TitleNavigator({
       <CanvasSelect
         label={t("View")}
         value={current}
-        options={nav.filter((item) => item.group === group).map((item) => ({
-          value: item.id, label: t(item.label),
-        }))}
+        options={nav
+          .filter((item) => item.group === group)
+          .map((item) => ({
+            value: item.id,
+            label: t(item.label),
+          }))}
         onValueChange={(next) => to(`/${next}`)}
         className="title-view-select"
         testId="breadcrumb-view"
@@ -459,7 +457,9 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
               { value: "cs", label: "Čeština" },
               { value: "es", label: "Español" },
             ]}
-            onValueChange={(value) => { void i18n.changeLanguage(value); }}
+            onValueChange={(value) => {
+              void i18n.changeLanguage(value);
+            }}
           />
         </div>
       </section>
@@ -485,7 +485,11 @@ export default function App() {
   const [sidebarWidth, setSidebarWidth] = useState(storedSidebarWidth);
   const resizing = useRef(false);
   useEffect(() => {
-    try { localStorage.setItem(SIDEBAR_KEY, String(sidebarWidth)); } catch { /* optional */ }
+    try {
+      localStorage.setItem(SIDEBAR_KEY, String(sidebarWidth));
+    } catch {
+      /* optional */
+    }
   }, [sidebarWidth]);
   useEffect(() => {
     const move = (event: PointerEvent) => {
@@ -599,32 +603,48 @@ export default function App() {
       <div className="window-titlebar">
         <div className="title-left">
           <Button
-            size="icon" className="mobile-toggle" aria-label={t("Toggle navigation")}
+            size="icon"
+            className="mobile-toggle"
+            aria-label={t("Toggle navigation")}
             onClick={() => setMobileOpen((v) => !v)}
-          >{icon("expand")}</Button>
+          >
+            {icon("expand")}
+          </Button>
           <Button
-            size="icon" className="desktop-toggle"
+            size="icon"
+            className="desktop-toggle"
             title={t(collapsed ? "Expand sidebar" : "Collapse sidebar")}
             aria-label={t(collapsed ? "Expand sidebar" : "Collapse sidebar")}
             onClick={() => setCollapsed((value) => !value)}
-          >{icon(collapsed ? "expand" : "collapse")}</Button>
+          >
+            {icon(collapsed ? "expand" : "collapse")}
+          </Button>
           <TitleNavigator current={page} to={go} />
         </div>
         <strong className="title-center">Canvas</strong>
         <div className="title-actions">
           <Button
-            size="icon" aria-label={t("Search pages and commands")}
-            title={t("Search pages and commands")} onClick={() => setPaletteOpen(true)}
-          >{icon("search", 17)}</Button>
+            size="icon"
+            aria-label={t("Search pages and commands")}
+            title={t("Search pages and commands")}
+            onClick={() => setPaletteOpen(true)}
+          >
+            {icon("search", 17)}
+          </Button>
           <kbd className="title-search-key">
             {hotkeys["canvas.omnibar.toggle"].hotkey
               ? formatForDisplay(hotkeys["canvas.omnibar.toggle"].hotkey)
               : ""}
           </kbd>
           <Button
-            size="icon" aria-label={t("Settings")} title={t("Settings")}
-            onClick={() => go("/settings")} className="title-settings"
-          >{icon("settings")}</Button>
+            size="icon"
+            aria-label={t("Settings")}
+            title={t("Settings")}
+            onClick={() => go("/settings")}
+            className="title-settings"
+          >
+            {icon("settings")}
+          </Button>
         </div>
       </div>
       <div className="window-main">
@@ -652,17 +672,28 @@ export default function App() {
                 {nav
                   .filter((n) => n.group === group && n.id !== "settings")
                   .map((n) => (
-                    <CanvasContextMenu key={n.id} actions={[
-                      { icon: n.id, label: t("Open") + " " + t(n.label), action: () => go("/" + n.id) },
-                      { icon: "copy", label: t("Copy link"), action: () => {
-                        const url = new URL(window.location.href);
-                        url.hash = "/" + n.id;
-                        void navigator.clipboard.writeText(url.href).then(
-                          () => notify.success(t("Copied to clipboard")),
-                          () => notify.error(t("Clipboard unavailable")),
-                        );
-                      } },
-                    ]}>
+                    <CanvasContextMenu
+                      key={n.id}
+                      actions={[
+                        {
+                          icon: n.id,
+                          label: t("Open") + " " + t(n.label),
+                          action: () => go("/" + n.id),
+                        },
+                        {
+                          icon: "copy",
+                          label: t("Copy link"),
+                          action: () => {
+                            const url = new URL(window.location.href);
+                            url.hash = "/" + n.id;
+                            void navigator.clipboard.writeText(url.href).then(
+                              () => notify.success(t("Copied to clipboard")),
+                              () => notify.error(t("Clipboard unavailable")),
+                            );
+                          },
+                        },
+                      ]}
+                    >
                       <div className="nav-context-row">
                         <Link
                           href={"/" + n.id}
@@ -700,10 +731,18 @@ export default function App() {
           onKeyDown={(event) => {
             if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
               event.preventDefault();
-              setSidebarWidth((width) => clampSidebar(width + (event.key === "ArrowRight" ? 16 : -16)));
+              setSidebarWidth((width) =>
+                clampSidebar(width + (event.key === "ArrowRight" ? 16 : -16)),
+              );
             }
-            if (event.key === "Home") { event.preventDefault(); setSidebarWidth(180); }
-            if (event.key === "End") { event.preventDefault(); setSidebarWidth(480); }
+            if (event.key === "Home") {
+              event.preventDefault();
+              setSidebarWidth(180);
+            }
+            if (event.key === "End") {
+              event.preventDefault();
+              setSidebarWidth(480);
+            }
           }}
         />
         <div className="main-column">

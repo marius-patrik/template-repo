@@ -24,7 +24,14 @@ import { useTranslation } from "react-i18next";
 import i18n from "./i18n";
 import { CanvasContextMenu } from "./components/ui/ContextMenu";
 import { notify } from "./notifications";
-import { VIEWS, VIEW_GROUPS, viewFromRoute, viewLabel, isCanvasView, type CanvasView } from "./views";
+import {
+  VIEWS,
+  VIEW_GROUPS,
+  viewFromRoute,
+  viewLabel,
+  isCanvasView,
+  type CanvasView,
+} from "./views";
 
 const LAYOUT_KEY = "canvas-dockview-layout-v1";
 type PaneContext = {
@@ -43,12 +50,18 @@ function CanvasTab(props: IDockviewPanelHeaderProps) {
   const raw: unknown = props.api.getParameters().view;
   const view: CanvasView = typeof raw === "string" && isCanvasView(raw) ? raw : "overview";
   return (
-    <CanvasContextMenu actions={[
-      { icon: "split", label: t("Split right"), action: () => workspace?.splitPanel(view, props.api.id) },
-      { icon: "close", label: t("Close tab"), action: () => props.api.close() },
-      { type: "separator" },
-      { icon: "reset", label: t("Reset layout"), action: () => workspace?.resetLayout() },
-    ]}>
+    <CanvasContextMenu
+      actions={[
+        {
+          icon: "split",
+          label: t("Split right"),
+          action: () => workspace?.splitPanel(view, props.api.id),
+        },
+        { icon: "close", label: t("Close tab"), action: () => props.api.close() },
+        { type: "separator" },
+        { icon: "reset", label: t("Reset layout"), action: () => workspace?.resetLayout() },
+      ]}
+    >
       <div className="canvas-dock-tab" data-canvas-tab={view}>
         <AnimatedIcon name={view} size={14} />
         <DockviewDefaultTab {...props} />

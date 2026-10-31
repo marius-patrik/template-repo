@@ -23,7 +23,11 @@ self.MonacoEnvironment = {
 loader.config({ monaco });
 
 const languageFor = (path: string) =>
-  path.endsWith(".json") ? "json" : path.endsWith(".ts") || path.endsWith(".tsx") ? "typescript" : "markdown";
+  path.endsWith(".json")
+    ? "json"
+    : path.endsWith(".ts") || path.endsWith(".tsx")
+      ? "typescript"
+      : "markdown";
 
 export default function Monaco() {
   const { t } = useTranslation();
@@ -47,30 +51,48 @@ export default function Monaco() {
             onValueChange={setPath}
             className="monaco-file-select"
           />
-          {path in drafts && <span className="monaco-dirty" title={t("Unsaved scratch changes")}>●</span>}
+          {path in drafts && (
+            <span className="monaco-dirty" title={t("Unsaved scratch changes")}>
+              ●
+            </span>
+          )}
         </div>
         <div className="monaco-actions">
-          <span className="monaco-disclaimer">{t("Local scratch · does not modify the repository")}</span>
-          <button type="button" className="canvas-button canvas-button-ghost" onClick={() => {
-            if (!path) return;
-            setDrafts((prev) => {
-              const next = { ...prev };
-              delete next[path];
-              return next;
-            });
-            notify.info(t("Scratch changes reverted"));
-          }} disabled={!(path in drafts)}>
-            <AnimatedIcon name="reset" size={16} />{t("Revert")}
+          <span className="monaco-disclaimer">
+            {t("Local scratch · does not modify the repository")}
+          </span>
+          <button
+            type="button"
+            className="canvas-button canvas-button-ghost"
+            onClick={() => {
+              if (!path) return;
+              setDrafts((prev) => {
+                const next = { ...prev };
+                delete next[path];
+                return next;
+              });
+              notify.info(t("Scratch changes reverted"));
+            }}
+            disabled={!(path in drafts)}
+          >
+            <AnimatedIcon name="reset" size={16} />
+            {t("Revert")}
           </button>
-          <button type="button" className="canvas-button canvas-button-subtle" onClick={async () => {
-            try {
-              await navigator.clipboard.writeText(value);
-              notify.success(t("Copied to clipboard"));
-            } catch {
-              notify.error(t("Clipboard unavailable"));
-            }
-          }} disabled={!path}>
-            <AnimatedIcon name="copy" size={16} />{t("Copy")}
+          <button
+            type="button"
+            className="canvas-button canvas-button-subtle"
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(value);
+                notify.success(t("Copied to clipboard"));
+              } catch {
+                notify.error(t("Clipboard unavailable"));
+              }
+            }}
+            disabled={!path}
+          >
+            <AnimatedIcon name="copy" size={16} />
+            {t("Copy")}
           </button>
         </div>
       </div>
@@ -83,8 +105,12 @@ export default function Monaco() {
             theme={dark ? "vs-dark" : "light"}
             onChange={(next) => setDrafts((prev) => ({ ...prev, [path]: next ?? "" }))}
             options={{
-              automaticLayout: true, minimap: { enabled: true }, fontSize: 13,
-              scrollBeyondLastLine: false, wordWrap: "on", tabSize: 2,
+              automaticLayout: true,
+              minimap: { enabled: true },
+              fontSize: 13,
+              scrollBeyondLastLine: false,
+              wordWrap: "on",
+              tabSize: 2,
               accessibilitySupport: "auto",
             }}
           />
