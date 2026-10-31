@@ -85,7 +85,8 @@ export default function SidebarResize() {
     [set, side, width],
   );
   useEffect(() => {
-    if (!drag.current) document.documentElement.style.setProperty("--cx-sidebar-width", `${width}px`);
+    if (!drag.current)
+      document.documentElement.style.setProperty("--cx-sidebar-width", `${width}px`);
   }, [width]);
   useEffect(
     () => () => {
