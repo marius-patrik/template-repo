@@ -269,6 +269,7 @@ export default function DockCanvas({
   const add = useCallback((view: CanvasView, groupId?: string) => {
     const api = apiRef.current;
     if (!api) return;
+    alreadyOpenedRoute.current = `/${view}`;
     api.addPanel({
       id: `tab:${view}:${++sequence}`,
       component: "page",
