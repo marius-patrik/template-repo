@@ -57,3 +57,5 @@ repository data. The build remains a static, read-only repository snapshot.
 
 The Dockview compositor uses the official dockview-react panel API and keeps layout
 state as UI-only local data; no authored repository file is modified through drag/drop.
+
+Dockview layout acceptance is checked in Chromium before every Pages publication.
