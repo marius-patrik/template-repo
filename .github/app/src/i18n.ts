@@ -1,0 +1,250 @@
+import i18next from "i18next";
+import LanguageDetector from "i18next-browser-languagedetector";
+import { initReactI18next } from "react-i18next";
+
+export const LANGUAGES = [
+  { code: "en", label: "English", nativeLabel: "English" },
+  { code: "cs", label: "Czech", nativeLabel: "Čeština" },
+  { code: "es", label: "Spanish", nativeLabel: "Español" },
+] as const;
+
+const english = [
+  "Overview","Workspace","Projects","Agents","Knowledge graph","Roadmap","Artifacts","Activity",
+  "Context","Settings","System","Personal workspace","Open navigation tree","Search pages and commands",
+  "No matching routes.","Navigate","Open","Dismiss","Toggle navigation","Close navigation",
+  "Expand sidebar","Collapse sidebar","Repository snapshot · read-only","Read-only snapshot",
+  "Prototype","Version","Appearance","Keyboard shortcuts","Theme","Skin","Density","Accent color",
+  "Text size","Icon size","Language","Comfortable","Compact","Graphite","Slate","High contrast",
+  "Dark","Light","Use system","Custom","Custom accent","Hexadecimal",
+  "Applied immediately to this browser only.","Keyboard shortcuts follow your system:",
+  "Find a command","Search commands and shortcuts","No matching commands.","Reset all",
+  "Unassigned","Edit","Press keys…","Reset","Clear","Open settings","Source repository",
+  "Workspace map","Documentation relationships","Expand","Project identity","Build source",
+  "Current branch","Publication","Static · read-only","Authoritative goal","View original source",
+  "Repository source","Generated from tracked records","Open document","Workspace",
+  "Layout","Arrange your workspace","Open graph","Repository context","Browse artifacts",
+  "Requirements source","Current agent guidance","Available source documents","Build provenance",
+  "Source revision","No documents","Choose custom accent color","Available tabs","Add tab",
+  "More tab actions","Split right","Reset layout","Navigation","Close dialog","No source documents available.",
+  "Theme preset","Visual density","Theme and skinning","Configuration","Reset appearance",
+  "Interface language","Use {{name}} accent","Change shortcut for {{name}}","Reset shortcut for {{name}}",
+  "Clear shortcut for {{name}}","Edit shortcuts locally; changes never modify the repository.",
+  "Drag tabs to create groups, split panels, or float windows. Your arrangement is saved locally in this browser.",
+  "A configurable working surface. Open views with the sidebar or omnibar, then arrange their tabs with Dockview.",
+  "A repository-authored workspace. This view is generated from tracked source at build time, not a live service.",
+  "Repository / {{name}}","{{documents}} source documents · {{records}} documented records",
+  "Repositories available in this compiled snapshot.",
+  "Document links derived from the repository's existing authoring structure.",
+  "Requirements and plans are sourced from the repository rather than simulated task statuses.",
+  "Agent rules are sourced from the generated repository guidance.",
+  "Context authority and repository-authored Markdown.",
+  "The published snapshot does not represent live execution telemetry.",
+  "Built from tracked repository documents. No agent activity or task completion is inferred.",
+  "Source documents embedded during the GitHub Actions build.",
+  "Appearance, keyboard and language preferences are local to this browser.",
+  "Local UI settings are not authoritative project data.",
+  "A preview of skin tokens and spacing, independent from accent color.",
+  "The template currently generates .agents/AGENTS.md from its agent rules. A separate root context file has not been assumed or fabricated.",
+  "No generated PRD is available in this snapshot.",
+  "No agent-rule document is available.",
+  "No source documents available.",
+  "The default interface skin","Cooler neutral surfaces","Stronger panel boundaries",
+  "Reset to defaults","Theme selection","Skin selection","Density selection",
+] as const;
+
+const en = Object.fromEntries(english.map((value) => [value, value]));
+
+const cs: Record<string, string> = {
+  "Overview":"Přehled","Workspace":"Pracovní plocha","Projects":"Projekty","Agents":"Agenti",
+  "Knowledge graph":"Znalostní graf","Roadmap":"Plán","Artifacts":"Artefakty","Activity":"Aktivita",
+  "Context":"Kontext","Settings":"Nastavení","System":"Systém","Personal workspace":"Osobní prostor",
+  "Open navigation tree":"Otevřít navigační strom","Search pages and commands":"Hledat stránky a příkazy",
+  "No matching routes.":"Žádné odpovídající stránky.","Navigate":"Navigovat","Open":"Otevřít","Dismiss":"Zavřít",
+  "Toggle navigation":"Přepnout navigaci","Close navigation":"Zavřít navigaci",
+  "Expand sidebar":"Rozbalit postranní panel","Collapse sidebar":"Sbalit postranní panel",
+  "Repository snapshot · read-only":"Snímek repozitáře · pouze ke čtení",
+  "Read-only snapshot":"Snímek · pouze ke čtení","Prototype":"Prototyp","Version":"Verze",
+  "Appearance":"Vzhled","Keyboard shortcuts":"Klávesové zkratky","Theme":"Režim","Skin":"Vzhledový styl",
+  "Density":"Hustota rozhraní","Accent color":"Barva zvýraznění","Text size":"Velikost textu",
+  "Icon size":"Velikost ikon","Language":"Jazyk","Comfortable":"Pohodlné","Compact":"Kompaktní",
+  "Graphite":"Grafit","Slate":"Břidlice","High contrast":"Vysoký kontrast",
+  "Dark":"Tmavý","Light":"Světlý","Use system":"Podle systému","Custom":"Vlastní",
+  "Custom accent":"Vlastní zvýraznění","Hexadecimal":"Hexadecimální hodnota",
+  "Applied immediately to this browser only.":"Projeví se okamžitě pouze v tomto prohlížeči.",
+  "Find a command":"Vyhledat příkaz","Search commands and shortcuts":"Hledat příkazy a zkratky",
+  "No matching commands.":"Žádné odpovídající příkazy.","Reset all":"Obnovit vše",
+  "Unassigned":"Nepřiřazeno","Edit":"Upravit","Press keys…":"Stiskněte klávesy…",
+  "Reset":"Obnovit","Clear":"Vymazat","Open settings":"Otevřít nastavení",
+  "Source repository":"Zdrojový repozitář","Workspace map":"Mapa prostoru",
+  "Documentation relationships":"Vazby dokumentace","Expand":"Rozbalit",
+  "Project identity":"Identita projektu","Build source":"Zdroj sestavení",
+  "Current branch":"Aktuální větev","Publication":"Publikace",
+  "Static · read-only":"Statické · pouze ke čtení","Authoritative goal":"Závazný cíl",
+  "View original source":"Zobrazit zdroj","Repository source":"Zdroj repozitáře",
+  "Generated from tracked records":"Vytvořeno ze sledovaných záznamů",
+  "Open document":"Otevřít dokument","Layout":"Rozvržení",
+  "Arrange your workspace":"Uspořádejte si pracovní plochu","Open graph":"Otevřít graf",
+  "Repository context":"Kontext repozitáře","Browse artifacts":"Procházet artefakty",
+  "Requirements source":"Zdroj požadavků","Current agent guidance":"Aktuální pokyny pro agenty",
+  "Available source documents":"Dostupné zdrojové dokumenty",
+  "Build provenance":"Původ sestavení","Source revision":"Revize zdroje","No documents":"Žádné dokumenty",
+  "Choose custom accent color":"Vybrat vlastní barvu zvýraznění",
+  "Available tabs":"Dostupné záložky","Add tab":"Přidat záložku",
+  "More tab actions":"Další akce se záložkami","Split right":"Rozdělit doprava",
+  "Reset layout":"Obnovit rozvržení","Navigation":"Navigace",
+  "No source documents available.":"Nejsou dostupné žádné zdrojové dokumenty.",
+  "Theme preset":"Předvolba vzhledu","Visual density":"Hustota zobrazení",
+  "Theme and skinning":"Motivy a vzhledové styly","Configuration":"Konfigurace",
+  "Reset appearance":"Obnovit vzhled","Interface language":"Jazyk rozhraní",
+  "Use {{name}} accent":"Použít zvýraznění {{name}}",
+  "Change shortcut for {{name}}":"Změnit zkratku pro {{name}}",
+  "Reset shortcut for {{name}}":"Obnovit zkratku pro {{name}}",
+  "Clear shortcut for {{name}}":"Vymazat zkratku pro {{name}}",
+  "Edit shortcuts locally; changes never modify the repository.":"Zkratky lze upravovat lokálně; změny nikdy neupravují repozitář.",
+  "Drag tabs to create groups, split panels, or float windows. Your arrangement is saved locally in this browser.":
+    "Přetažením záložek vytvářejte skupiny, rozdělujte panely nebo otevírejte plovoucí okna. Rozvržení se ukládá lokálně.",
+  "A configurable working surface. Open views with the sidebar or omnibar, then arrange their tabs with Dockview.":
+    "Přizpůsobitelná pracovní plocha. Otevírejte pohledy z postranního panelu nebo omnibaru a uspořádejte záložky v Dockview.",
+  "A repository-authored workspace. This view is generated from tracked source at build time, not a live service.":
+    "Pracovní prostor založený na repozitáři. Pohled vzniká ze sledovaných souborů při sestavení; nejde o živou službu.",
+  "Repository / {{name}}":"Repozitář / {{name}}",
+  "{{documents}} source documents · {{records}} documented records":
+    "{{documents}} zdrojových dokumentů · {{records}} zdokumentovaných záznamů",
+  "Repositories available in this compiled snapshot.":"Repozitáře dostupné v tomto sestaveném snímku.",
+  "Document links derived from the repository's existing authoring structure.":
+    "Vazby dokumentů odvozené ze stávající struktury repozitáře.",
+  "Requirements and plans are sourced from the repository rather than simulated task statuses.":
+    "Požadavky a plány pocházejí z repozitáře, nikoli ze simulovaných stavů úloh.",
+  "Agent rules are sourced from the generated repository guidance.":
+    "Pravidla agentů pocházejí z vygenerovaných pokynů repozitáře.",
+  "Context authority and repository-authored Markdown.":"Autorita kontextu a Markdown v repozitáři.",
+  "The published snapshot does not represent live execution telemetry.":
+    "Publikovaný snímek nepředstavuje živou telemetrii.",
+  "Built from tracked repository documents. No agent activity or task completion is inferred.":
+    "Sestaveno ze sledovaných dokumentů. Aktivita agentů ani dokončení úloh se neodhadují.",
+  "Source documents embedded during the GitHub Actions build.":
+    "Zdrojové dokumenty vložené při sestavení pomocí GitHub Actions.",
+  "Appearance, keyboard and language preferences are local to this browser.":
+    "Předvolby vzhledu, klávesnice a jazyka se ukládají pouze v tomto prohlížeči.",
+  "Local UI settings are not authoritative project data.":
+    "Lokální nastavení rozhraní nejsou závaznými projektovými daty.",
+  "A preview of skin tokens and spacing, independent from accent color.":
+    "Náhled stylových tokenů a rozestupů nezávislých na barvě zvýraznění.",
+  "The template currently generates .agents/AGENTS.md from its agent rules. A separate root context file has not been assumed or fabricated.":
+    "Šablona nyní generuje .agents/AGENTS.md z pravidel agentů. Samostatný kořenový kontext nebyl předpokládán ani vytvořen.",
+  "No generated PRD is available in this snapshot.":"V tomto snímku není dostupné PRD.",
+  "No agent-rule document is available.":"Nejsou dostupné pokyny pro agenty.",
+  "The default interface skin":"Výchozí styl rozhraní","Cooler neutral surfaces":"Chladnější neutrální povrchy",
+  "Stronger panel boundaries":"Výraznější hranice panelů",
+  "Reset to defaults":"Obnovit výchozí nastavení",
+  "Theme selection":"Výběr režimu","Skin selection":"Výběr stylu","Density selection":"Výběr hustoty",
+};
+const es: Record<string, string> = {
+  "Overview":"Resumen","Workspace":"Espacio de trabajo","Projects":"Proyectos","Agents":"Agentes",
+  "Knowledge graph":"Grafo de conocimiento","Roadmap":"Hoja de ruta","Artifacts":"Artefactos",
+  "Activity":"Actividad","Context":"Contexto","Settings":"Configuración","System":"Sistema",
+  "Personal workspace":"Espacio personal","Open navigation tree":"Abrir árbol de navegación",
+  "Search pages and commands":"Buscar páginas y comandos","No matching routes.":"No hay rutas coincidentes.",
+  "Navigate":"Navegar","Open":"Abrir","Dismiss":"Cerrar","Toggle navigation":"Alternar navegación",
+  "Close navigation":"Cerrar navegación","Expand sidebar":"Expandir barra lateral",
+  "Collapse sidebar":"Contraer barra lateral","Repository snapshot · read-only":"Instantánea del repositorio · solo lectura",
+  "Read-only snapshot":"Instantánea de solo lectura","Prototype":"Prototipo","Version":"Versión",
+  "Appearance":"Apariencia","Keyboard shortcuts":"Atajos de teclado","Theme":"Tema",
+  "Skin":"Estilo visual","Density":"Densidad","Accent color":"Color de acento",
+  "Text size":"Tamaño del texto","Icon size":"Tamaño de iconos","Language":"Idioma",
+  "Comfortable":"Cómodo","Compact":"Compacto","Graphite":"Grafito","Slate":"Pizarra",
+  "High contrast":"Alto contraste","Dark":"Oscuro","Light":"Claro","Use system":"Usar sistema",
+  "Custom":"Personalizado","Custom accent":"Acento personalizado","Hexadecimal":"Hexadecimal",
+  "Applied immediately to this browser only.":"Se aplica inmediatamente solo a este navegador.",
+  "Find a command":"Buscar comando","Search commands and shortcuts":"Buscar comandos y atajos",
+  "No matching commands.":"No hay comandos coincidentes.","Reset all":"Restablecer todo",
+  "Unassigned":"Sin asignar","Edit":"Editar","Press keys…":"Pulsa las teclas…",
+  "Reset":"Restablecer","Clear":"Borrar","Open settings":"Abrir configuración",
+  "Source repository":"Repositorio de origen","Workspace map":"Mapa del espacio",
+  "Documentation relationships":"Relaciones entre documentos","Expand":"Expandir",
+  "Project identity":"Identidad del proyecto","Build source":"Fuente de compilación",
+  "Current branch":"Rama actual","Publication":"Publicación","Static · read-only":"Estático · solo lectura",
+  "Authoritative goal":"Objetivo principal","View original source":"Ver código fuente",
+  "Repository source":"Fuente del repositorio","Generated from tracked records":"Generado a partir de registros versionados",
+  "Open document":"Abrir documento","Layout":"Diseño",
+  "Arrange your workspace":"Organiza tu espacio de trabajo","Open graph":"Abrir grafo",
+  "Repository context":"Contexto del repositorio","Browse artifacts":"Explorar artefactos",
+  "Requirements source":"Fuente de requisitos","Current agent guidance":"Directrices actuales de agentes",
+  "Available source documents":"Documentos fuente disponibles","Build provenance":"Origen de compilación",
+  "Source revision":"Revisión de origen","No documents":"Sin documentos",
+  "Choose custom accent color":"Elegir color de acento personalizado",
+  "Available tabs":"Pestañas disponibles","Add tab":"Añadir pestaña","More tab actions":"Más acciones de pestañas",
+  "Split right":"Dividir a la derecha","Reset layout":"Restablecer diseño","Navigation":"Navegación",
+  "No source documents available.":"No hay documentos fuente disponibles.",
+  "Theme preset":"Tema predefinido","Visual density":"Densidad visual",
+  "Theme and skinning":"Temas y estilos visuales","Configuration":"Configuración",
+  "Reset appearance":"Restablecer apariencia","Interface language":"Idioma de la interfaz",
+  "Use {{name}} accent":"Usar acento {{name}}",
+  "Change shortcut for {{name}}":"Cambiar atajo de {{name}}",
+  "Reset shortcut for {{name}}":"Restablecer atajo de {{name}}",
+  "Clear shortcut for {{name}}":"Borrar atajo de {{name}}",
+  "Edit shortcuts locally; changes never modify the repository.":
+    "Los atajos se editan localmente; los cambios nunca modifican el repositorio.",
+  "Drag tabs to create groups, split panels, or float windows. Your arrangement is saved locally in this browser.":
+    "Arrastra pestañas para crear grupos, dividir paneles o abrir ventanas flotantes. El diseño se guarda localmente.",
+  "A configurable working surface. Open views with the sidebar or omnibar, then arrange their tabs with Dockview.":
+    "Un espacio configurable. Abre vistas desde la barra lateral o el omnibar y organiza sus pestañas con Dockview.",
+  "A repository-authored workspace. This view is generated from tracked source at build time, not a live service.":
+    "Espacio basado en el repositorio. La vista se genera al compilar desde archivos versionados; no es un servicio en vivo.",
+  "Repository / {{name}}":"Repositorio / {{name}}",
+  "{{documents}} source documents · {{records}} documented records":
+    "{{documents}} documentos fuente · {{records}} registros documentados",
+  "Repositories available in this compiled snapshot.":"Repositorios disponibles en esta instantánea.",
+  "Document links derived from the repository's existing authoring structure.":
+    "Vínculos derivados de la estructura de autoría del repositorio.",
+  "Requirements and plans are sourced from the repository rather than simulated task statuses.":
+    "Los requisitos y planes provienen del repositorio, no de estados de tareas simulados.",
+  "Agent rules are sourced from the generated repository guidance.":
+    "Las reglas de los agentes se obtienen de las directrices del repositorio.",
+  "Context authority and repository-authored Markdown.":"Autoridad del contexto y Markdown del repositorio.",
+  "The published snapshot does not represent live execution telemetry.":
+    "La instantánea publicada no representa telemetría en tiempo real.",
+  "Built from tracked repository documents. No agent activity or task completion is inferred.":
+    "Generado desde documentos versionados. No se infieren actividades ni tareas completadas.",
+  "Source documents embedded during the GitHub Actions build.":
+    "Documentos fuente incluidos durante la compilación de GitHub Actions.",
+  "Appearance, keyboard and language preferences are local to this browser.":
+    "Las preferencias de apariencia, teclado e idioma son locales a este navegador.",
+  "Local UI settings are not authoritative project data.":
+    "Las preferencias locales de la interfaz no son datos oficiales del proyecto.",
+  "A preview of skin tokens and spacing, independent from accent color.":
+    "Vista previa de los tokens de estilo y espaciado, independiente del color de acento.",
+  "The template currently generates .agents/AGENTS.md from its agent rules. A separate root context file has not been assumed or fabricated.":
+    "La plantilla genera .agents/AGENTS.md a partir de reglas de agentes. No se ha supuesto ni inventado otro archivo de contexto raíz.",
+  "No generated PRD is available in this snapshot.":"No hay PRD generado en esta instantánea.",
+  "No agent-rule document is available.":"No hay un documento de reglas de agentes disponible.",
+  "The default interface skin":"El estilo predeterminado","Cooler neutral surfaces":"Superficies neutras más frías",
+  "Stronger panel boundaries":"Bordes de paneles más marcados",
+  "Reset to defaults":"Restablecer valores predeterminados","Theme selection":"Selección de tema",
+  "Skin selection":"Selección de estilo","Density selection":"Selección de densidad",
+};
+
+export const i18n = i18next
+  .use(LanguageDetector)
+  .use(initReactI18next);
+
+void i18n.init({
+  resources: {
+    en: { translation: en },
+    cs: { translation: cs },
+    es: { translation: es },
+  },
+  fallbackLng: "en",
+  supportedLngs: ["en", "cs", "es"],
+  nonExplicitSupportedLngs: true,
+  detection: {
+    order: ["localStorage", "navigator", "htmlTag"],
+    lookupLocalStorage: "canvas-language",
+    caches: ["localStorage"],
+  },
+  interpolation: { escapeValue: false },
+  initImmediate: false,
+  react: { useSuspense: false },
+});
+
+export default i18n;
