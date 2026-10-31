@@ -159,11 +159,34 @@ const english = [
   "Open projects",
   "Open knowledge graph",
   "Reset settings",
+  "Build source: Git-tracked documents. Revision {{revision}}.",
+  "{{documents}} authored source documents · revision {{revision}}",
+  "Root AGENTS.md is not configured",
+  "↑ ↓ navigate · ↵ open · Esc dismiss",
+  "Agent context",
+  "Project goal",
+  "Requirements",
+  "Architecture",
+  "Agent rules",
+  "Documentation",
+  "Close selection",
+  "Repository document relationships",
 ] as const;
 
 const en = Object.fromEntries(english.map((value) => [value, value]));
 
 const cs: Record<string, string> = {
+  "Build source: Git-tracked documents. Revision {{revision}}.":
+    "Zdroj sestavení: sledované dokumenty Git. Revize {{revision}}.",
+  "{{documents}} authored source documents · revision {{revision}}":
+    "{{documents}} zdrojových dokumentů · revize {{revision}}",
+  "Root AGENTS.md is not configured":"Kořenový soubor AGENTS.md není nakonfigurován",
+  "↑ ↓ navigate · ↵ open · Esc dismiss":"↑ ↓ pohyb · ↵ otevřít · Esc zavřít",
+  "Agent context":"Kontext agenta","Project goal":"Cíl projektu",
+  "Requirements":"Požadavky","Architecture":"Architektura",
+  "Agent rules":"Pravidla agentů","Documentation":"Dokumentace",
+  "Close selection":"Zavřít výběr",
+  "Repository document relationships":"Vazby dokumentů repozitáře",
   Neutral: "Neutrální",
   Blue: "Modrá",
   Sage: "Šalvějová",
@@ -330,6 +353,17 @@ const cs: Record<string, string> = {
   "Density selection": "Výběr hustoty",
 };
 const es: Record<string, string> = {
+  "Build source: Git-tracked documents. Revision {{revision}}.":
+    "Origen de compilación: documentos versionados en Git. Revisión {{revision}}.",
+  "{{documents}} authored source documents · revision {{revision}}":
+    "{{documents}} documentos fuente · revisión {{revision}}",
+  "Root AGENTS.md is not configured":"El archivo raíz AGENTS.md no está configurado",
+  "↑ ↓ navigate · ↵ open · Esc dismiss":"↑ ↓ navegar · ↵ abrir · Esc cerrar",
+  "Agent context":"Contexto del agente","Project goal":"Objetivo del proyecto",
+  "Requirements":"Requisitos","Architecture":"Arquitectura",
+  "Agent rules":"Reglas de agentes","Documentation":"Documentación",
+  "Close selection":"Cerrar selección",
+  "Repository document relationships":"Relaciones entre documentos del repositorio",
   Neutral: "Neutro",
   Blue: "Azul",
   Sage: "Salvia",

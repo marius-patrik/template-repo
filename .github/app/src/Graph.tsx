@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useCanvasConfig } from "./config";
 import { ReactFlow, Background, Controls, type Node, type Edge } from "@xyflow/react";
 import dagre from "dagre";
 import context from "./generated/context.json";
@@ -13,6 +15,8 @@ const labels: Record<string, string> = {
 };
 
 export default function Graph() {
+  const { t } = useTranslation();
+  const theme = useCanvasConfig((state) => state.preferences.theme);
   const [selected, setSelected] = useState<string | null>(null);
   const { nodes, edges } = useMemo(() => {
     const present = context.documents.map((doc) => doc.path);
@@ -38,7 +42,7 @@ export default function Graph() {
       return {
         id,
         position: { x: pos.x - 85, y: pos.y - 29 },
-        data: { label: labels[id] ?? id },
+        data: { label: t(labels[id] ?? id) },
         type: "default",
         style: {
           width: 170,
@@ -61,9 +65,9 @@ export default function Graph() {
       style: { stroke: "var(--muted)", strokeWidth: 1.1 },
     }));
     return { nodes, edges };
-  }, []);
+  }, [t]);
   return (
-    <section className="graph-pane" aria-label="Repository document relationships">
+    <section className="graph-pane" aria-label={t("Repository document relationships")}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -72,7 +76,7 @@ export default function Graph() {
         onNodeClick={(_, node) => setSelected(node.id)}
         nodesConnectable={false}
         nodesDraggable={false}
-        colorMode="dark"
+        colorMode={theme === "light" ? "light" : theme === "dark" ? "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"}
         proOptions={{ hideAttribution: true }}
       >
         <Background color="var(--border)" gap={22} size={1} />
@@ -80,9 +84,9 @@ export default function Graph() {
       </ReactFlow>
       {selected && (
         <div className="graph-selected">
-          <strong>{labels[selected] || selected}</strong>
+          <strong>{t(labels[selected] || selected)}</strong>
           <span>{selected}</span>
-          <button type="button" aria-label="Close selection" onClick={() => setSelected(null)}>
+          <button type="button" aria-label={t("Close selection")} onClick={() => setSelected(null)}>
             ×
           </button>
         </div>
