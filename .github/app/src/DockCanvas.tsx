@@ -154,7 +154,9 @@ function WelcomeView({ onChoose }: { onChoose: (view: CanvasView) => void }) {
         {VIEWS.map((item, index) => (
           <button type="button" key={item.id} onClick={() => onChoose(item.id)}>
             <span className="cx-welcome-option-index">0{index + 1}</span>
-            <span className="cx-welcome-option-icon"><AnimatedIcon name={item.id} size={20} /></span>
+            <span className="cx-welcome-option-icon">
+              <AnimatedIcon name={item.id} size={20} />
+            </span>
             <span className="cx-welcome-option-copy">
               <strong>{t(item.label)}</strong>
               <small>{t(descriptions[item.id])}</small>
