@@ -113,7 +113,7 @@ function Artifacts() {
       {doc ? <MarkdownSource value={doc.content}/> : <p className="muted">No source documents available.</p>}</article></div></div>;
 }
 function Settings({prefs,setPrefs}:{prefs:Preferences;setPrefs:(p:Preferences)=>void}) {
-  const options=<T extends string|number>(key:keyof Preferences,values:readonly T[],label:string) =>
+  const options=(key:keyof Preferences,values:readonly (string|number)[],label:string) =>
     <div className="setting-row"><div><strong>{label}</strong></div>
       <div className="segmented">{values.map(v=><button key={String(v)} className={prefs[key]===v?"selected":""}
         onClick={()=>setPrefs({...prefs,[key]:v})}>{String(v)}</button>)}</div></div>;
