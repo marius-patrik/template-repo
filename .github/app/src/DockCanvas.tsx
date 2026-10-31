@@ -326,11 +326,14 @@ export default function DockCanvas({
     const api = apiRef.current;
     const panel = api?.getPanel(panelId);
     if (!api || !panel) return;
+    // Invalidate the old route before closing; a pending effect for the previously
+    // selected tab must not resurrect a panel that the user explicitly closed.
+    latest.current.route = "/";
     panel.api.close();
     const next = api.activePanel?.api.getParameters().view;
-    // Update route synchronously with the close so a pending route effect cannot
-    // recreate the just-closed pane (particularly when replacing the new-tab picker).
-    latest.current.onNavigate(typeof next === "string" && isCanvasView(next) ? `/${next}` : "/");
+    const nextRoute = typeof next === "string" && isCanvasView(next) ? `/${next}` : "/";
+    latest.current.route = nextRoute;
+    latest.current.onNavigate(nextRoute);
   }, []);
   const closeActive = useCallback(() => {
     const active = apiRef.current?.activePanel;
@@ -381,6 +384,8 @@ export default function DockCanvas({
 
   useEffect(() => {
     const api = apiRef.current;
+    // Ignore route effects superseded by an explicit close/new-tab action.
+    if (latest.current.route !== route) return;
     const view = viewFromRoute(route);
     if (!api || !view) return;
     const existing = api.panels.find((panel) => panel.api.getParameters().view === view);
