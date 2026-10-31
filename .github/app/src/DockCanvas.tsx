@@ -394,6 +394,10 @@ export default function DockCanvas({
   useEffect(() => {
     if (!ready) return;
     const api = apiRef.current;
+    console.info("CANVAS_DOCK_ROUTE", JSON.stringify({
+      route, alreadyOpened: alreadyOpenedRoute.current, suppressed: suppressedRoute.current,
+      panels: api?.panels.map((panel) => ({ id: panel.id, params: panel.api.getParameters() })),
+    }));
     // Dockview already created this tab; route changes must not duplicate it.
     if (alreadyOpenedRoute.current === route) {
       alreadyOpenedRoute.current = null;
