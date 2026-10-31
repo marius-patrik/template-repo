@@ -1883,7 +1883,7 @@ for (const script of scripts) {
 }
 console.log(`Canvas DOM boot order valid: #root precedes ${scripts.length} bundled script(s).`);
 </pre></section>
-<section class="file" id="file-0064"><h3>.github/app/src/AccentColorPicker.tsx</h3><p class="meta">Git mode 100644 · 537c22400bb4260257381e00e17b86efc3c4eb50</p><pre>import * as Popover from &quot;@radix-ui/react-popover&quot;;
+<section class="file" id="file-0064"><h3>.github/app/src/AccentColorPicker.tsx</h3><p class="meta">Git mode 100644 · 549c2061c20d82e4391223bb4b901bbc3f695118</p><pre>import * as Popover from &quot;@radix-ui/react-popover&quot;;
 import { colord } from &quot;colord&quot;;
 import { HexColorInput, HexColorPicker } from &quot;react-colorful&quot;;
 import { useState } from &quot;react&quot;;
@@ -1914,7 +1914,7 @@ export function AccentColorPicker({
 
   return (
     &lt;div className=&quot;accent-controls&quot;&gt;
-      &lt;div className=&quot;accent-swatches&quot; aria-label=&quot;Accent color presets&quot;&gt;
+      &lt;div className=&quot;accent-swatches&quot; role=&quot;group&quot; aria-label=&quot;Accent color presets&quot;&gt;
         {accentPresets.map((preset) =&gt; (
           &lt;button
             type=&quot;button&quot;
