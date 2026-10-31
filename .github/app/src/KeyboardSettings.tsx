@@ -20,7 +20,7 @@ function KeybindingRow({ id }: { id: AppHotkeyId }) {
       const collisions = findConflicts(id, binding);
       return (
         collisions.length === 0 ||
-        `Already assigned to ${collisions[0]?.meta?.name ?? "another command"}`
+        t("Already assigned to {{name}}", { name: t(collisions[0]?.meta?.name ?? "Another command") })
       );
     },
     onRecord: (binding) => {
@@ -95,7 +95,7 @@ export default function KeyboardSettings() {
   const items = useAppHotkeyList();
   const { resetCustomHotkeys } = useCustomHotkeys();
   const matching = items.filter(({ appHotkey }) =>
-    [appHotkey.meta?.name ?? "", appHotkey.id, appHotkey.meta?.group ?? ""]
+    [t(appHotkey.meta?.name ?? ""), appHotkey.id, t(appHotkey.meta?.group ?? "")]
       .join(" ")
       .toLowerCase()
       .includes(query.trim().toLowerCase()),
@@ -106,7 +106,7 @@ export default function KeyboardSettings() {
       <div className="keybind-heading">
         <div>
           <h2>{t("Keyboard shortcuts")}</h2>
-          <p className="muted">Shortcuts follow your system: ⌘ on macOS, Ctrl on Windows/Linux.</p>
+          <p className="muted">{t("Shortcuts follow your system: ⌘ on macOS, Ctrl on Windows/Linux.")}</p>
         </div>
         <button type="button" className="keybind-reset-all" onClick={resetCustomHotkeys}>
           {t("Reset all")}
@@ -129,8 +129,7 @@ export default function KeyboardSettings() {
         {matching.length === 0 && <p className="muted">{t("No matching commands.")}</p>}
       </div>
       <p className="keybind-hint">
-        Click Edit and press a shortcut. Escape cancels; Delete clears. Conflicting bindings are
-        rejected.
+        {t("Click Edit and press a shortcut. Escape cancels; Delete clears. Conflicting bindings are rejected.")}
       </p>
     </section>
   );

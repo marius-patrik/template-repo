@@ -50,11 +50,27 @@ const english = [
   "No source documents available.",
   "The default interface skin","Cooler neutral surfaces","Stronger panel boundaries",
   "Reset to defaults","Theme selection","Skin selection","Density selection",
+  "Neutral","Blue","Sage","Violet","Amber","Accent color picker","Accent color hex value",
+  "HEX · RGB opaque","Shortcuts follow your system: ⌘ on macOS, Ctrl on Windows/Linux.",
+  "Click Edit and press a shortcut. Escape cancels; Delete clears. Conflicting bindings are rejected.",
+  "Already assigned to {{name}}","Another command","Toggle sidebar","Open navigation",
+  "Open overview","Open workspace","Open projects","Open knowledge graph",
+  "Reset settings",
 ] as const;
 
 const en = Object.fromEntries(english.map((value) => [value, value]));
 
 const cs: Record<string, string> = {
+  "Neutral":"Neutrální","Blue":"Modrá","Sage":"Šalvějová","Violet":"Fialová","Amber":"Jantarová",
+  "Accent color picker":"Výběr barvy zvýraznění","Accent color hex value":"Hexadecimální barva",
+  "HEX · RGB opaque":"HEX · neprůhledná RGB",
+  "Shortcuts follow your system: ⌘ on macOS, Ctrl on Windows/Linux.":"Zkratky se přizpůsobují systému: ⌘ na macOS, Ctrl na Windows/Linux.",
+  "Click Edit and press a shortcut. Escape cancels; Delete clears. Conflicting bindings are rejected.":"Klikněte na Upravit a stiskněte zkratku. Escape zruší, Delete vymaže. Konflikty se odmítají.",
+  "Already assigned to {{name}}":"Již přiřazeno příkazu {{name}}",
+  "Another command":"Jiný příkaz","Toggle sidebar":"Přepnout postranní panel",
+  "Open navigation":"Otevřít navigaci","Open overview":"Otevřít přehled",
+  "Open workspace":"Otevřít pracovní plochu","Open projects":"Otevřít projekty",
+  "Open knowledge graph":"Otevřít znalostní graf",
   "Overview":"Přehled","Workspace":"Pracovní plocha","Projects":"Projekty","Agents":"Agenti",
   "Knowledge graph":"Znalostní graf","Roadmap":"Plán","Artifacts":"Artefakty","Activity":"Aktivita",
   "Context":"Kontext","Settings":"Nastavení","System":"Systém","Personal workspace":"Osobní prostor",
@@ -140,6 +156,16 @@ const cs: Record<string, string> = {
   "Theme selection":"Výběr režimu","Skin selection":"Výběr stylu","Density selection":"Výběr hustoty",
 };
 const es: Record<string, string> = {
+  "Neutral":"Neutro","Blue":"Azul","Sage":"Salvia","Violet":"Violeta","Amber":"Ámbar",
+  "Accent color picker":"Selector del color de acento","Accent color hex value":"Valor hexadecimal del color de acento",
+  "HEX · RGB opaque":"HEX · RGB opaco",
+  "Shortcuts follow your system: ⌘ on macOS, Ctrl on Windows/Linux.":"Los atajos se adaptan al sistema: ⌘ en macOS, Ctrl en Windows/Linux.",
+  "Click Edit and press a shortcut. Escape cancels; Delete clears. Conflicting bindings are rejected.":"Haz clic en Editar y pulsa un atajo. Escape cancela, Supr borra. Se rechazan los conflictos.",
+  "Already assigned to {{name}}":"Ya asignado a {{name}}",
+  "Another command":"Otro comando","Toggle sidebar":"Alternar barra lateral",
+  "Open navigation":"Abrir navegación","Open overview":"Abrir resumen",
+  "Open workspace":"Abrir espacio de trabajo","Open projects":"Abrir proyectos",
+  "Open knowledge graph":"Abrir grafo de conocimiento",
   "Overview":"Resumen","Workspace":"Espacio de trabajo","Projects":"Proyectos","Agents":"Agentes",
   "Knowledge graph":"Grafo de conocimiento","Roadmap":"Hoja de ruta","Artifacts":"Artefactos",
   "Activity":"Actividad","Context":"Contexto","Settings":"Configuración","System":"Sistema",
