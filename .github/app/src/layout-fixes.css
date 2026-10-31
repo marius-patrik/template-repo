@@ -833,3 +833,29 @@
     max-width: 45vw;
   }
 }
+
+
+/* Share constrained status-bar space without overlapping neighboring groups. */
+.window-statusbar {
+  overflow: hidden;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.status-group {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+.status-group > :not(.status-delimiter) {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.status-group > span:not(.status-delimiter) {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.status-group .status-settings,
+.status-group .status-delimiter {
+  flex: 0 0 auto;
+}
