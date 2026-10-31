@@ -310,16 +310,17 @@ export default function DockCanvas({
     const api = apiRef.current;
     const placeholder = api?.getPanel(panelId);
     if (!api || !placeholder) return;
-    const groupId = placeholder.group.id;
+    // Remove the placeholder before publishing a routed panel. Adding first
+    // can trigger a route synchronization update while both panels are visible,
+    // creating an unintended duplicate Editor tab.
+    placeholder.api.close();
     api.addPanel({
       id: `tab:${view}:${++sequence}`,
       component: "page",
       tabComponent: "canvas",
       title: title(view),
       params: { view },
-      position: { referenceGroup: groupId },
     });
-    placeholder.api.close();
     latest.current.onNavigate(`/${view}`);
     notify.info(i18n.t("Tab opened"));
   }, []);
