@@ -21,6 +21,7 @@ import {
   type IDockviewHeaderActionsProps,
 } from "dockview-react";
 import { useTranslation } from "react-i18next";
+import { useAppHotkeys, useHotkey } from "@tanstack/react-hotkeys";
 import i18n from "./i18n";
 import { AnimatedIcon } from "./components/AnimatedIcon";
 import { CanvasContextMenu } from "./components/ui/ContextMenu";
@@ -35,6 +36,8 @@ type PaneContextValue = {
   add: (view: CanvasView, groupId?: string) => void;
   split: (view: CanvasView, panelId: string) => void;
   reset: () => void;
+  newTab: () => void;
+  choose: (view: CanvasView, panelId: string) => void;
   pin: (view: CanvasView) => void;
   pinned: CanvasView[];
   showSettings: boolean;
@@ -53,23 +56,22 @@ function CanvasTab(props: IDockviewPanelHeaderProps) {
   const shell = useContext(PaneContext);
   const { t } = useTranslation();
   const view = viewFromId(props.api.id);
-  const pinned = shell?.pinned.includes(view) ?? false;
+  const isNew = props.api.getParameters().view === "new";
+  const pinned = !isNew && (shell?.pinned.includes(view) ?? false);
   return (
     <CanvasContextMenu
       actions={[
-        {
-          label: t(pinned ? "Unpin from activity bar" : "Pin to activity bar"),
-          icon: "pin",
-          action: () => shell?.pin(view),
-        },
-        { label: t("Split right"), icon: "split", action: () => shell?.split(view, props.api.id) },
+        ...(!isNew ? [
+          { label: t(pinned ? "Unpin from activity bar" : "Pin to activity bar"), icon: "pin", action: () => shell?.pin(view) },
+          { label: t("Split right"), icon: "split", action: () => shell?.split(view, props.api.id) },
+        ] : []),
         { label: t("Close tab"), icon: "close", action: () => props.api.close() },
         { type: "separator" },
         { label: t("Reset layout"), icon: "reset", action: () => shell?.reset() },
       ]}
     >
-      <div className="canvas-dock-tab" data-canvas-tab={view} data-animated-icon-trigger>
-        <AnimatedIcon name={view} size={14} />
+      <div className="canvas-dock-tab" data-canvas-tab={isNew ? "new" : view} data-animated-icon-trigger>
+        <AnimatedIcon name={isNew ? "plus" : view} size={14} />
         <DockviewDefaultTab {...props} hideClose />
         <button
           type="button"
@@ -88,9 +90,16 @@ function CanvasTab(props: IDockviewPanelHeaderProps) {
     </CanvasContextMenu>
   );
 }
-function Panel({ params }: IDockviewPanelProps) {
+function Panel({ params, api }: IDockviewPanelProps) {
   const shell = useContext(PaneContext);
   const requested = (params as { view?: string }).view ?? "canvas";
+  if (requested === "new") {
+    return (
+      <div className="dock-route-page dock-new-tab" data-dock-view="new">
+        <WelcomeView onChoose={(view) => shell?.choose(view, api.id)} />
+      </div>
+    );
+  }
   const view = isCanvasView(requested) ? requested : "canvas";
   return (
     <div className="dock-route-page" data-dock-view={view}>
@@ -98,44 +107,29 @@ function Panel({ params }: IDockviewPanelProps) {
     </div>
   );
 }
+
+function WelcomeView({ onChoose }: { onChoose: (view: CanvasView) => void }) {
+  const { t } = useTranslation();
+  return (
+    <div className="dock-welcome" data-testid="new-tab-welcome">
+      <p className="eyebrow">{t("Your workspace")}</p>
+      <h1>{t("Start with a tab")}</h1>
+      <p className="muted">{t("Select an editor or a repository view to begin.")}</p>
+      <div className="dock-welcome-options">
+        {VIEWS.map((item) => (
+          <button type="button" key={item.id} onClick={() => onChoose(item.id)}>
+            <AnimatedIcon name={item.id} size={19} />
+            <span>{t(item.label)}</span>
+            <AnimatedIcon name="right" size={14} />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 const components = { page: Panel };
 const tabComponents = { canvas: CanvasTab };
 
-function TabPicker({ add, label }: { add: (view: CanvasView) => void; label: string }) {
-  const { t } = useTranslation();
-  return (
-    <DropdownMenu.Root>
-      <DropdownMenu.Trigger asChild>
-        <button type="button" className="dock-add-trigger" aria-label={label} title={label}>
-          <AnimatedIcon name="plus" size={16} />
-        </button>
-      </DropdownMenu.Trigger>
-      <DropdownMenu.Portal>
-        <DropdownMenu.Content
-          className="menu-content dock-add-menu"
-          align="end"
-          side="bottom"
-          sideOffset={5}
-          collisionPadding={10}
-        >
-          <DropdownMenu.Label className="dock-add-group-label">
-            {t("Available tabs")}
-          </DropdownMenu.Label>
-          {VIEWS.map((item) => (
-            <DropdownMenu.Item
-              key={item.id}
-              className="menu-item dock-add-item"
-              onSelect={() => add(item.id)}
-            >
-              <AnimatedIcon name={item.id} size={16} />
-              <span>{t(item.label)}</span>
-            </DropdownMenu.Item>
-          ))}
-        </DropdownMenu.Content>
-      </DropdownMenu.Portal>
-    </DropdownMenu.Root>
-  );
-}
 function HeaderActions({ containerApi, group }: IDockviewHeaderActionsProps) {
   const shell = useContext(PaneContext);
   const { t } = useTranslation();
@@ -145,7 +139,9 @@ function HeaderActions({ containerApi, group }: IDockviewHeaderActionsProps) {
   const current = active ? viewFromId(active.id) : "canvas";
   return (
     <div className="dock-header-actions" onPointerDown={(event) => event.stopPropagation()}>
-      <TabPicker label={t("Add tab")} add={(view) => shell?.add(view, group.id)} />
+      <button className="dock-add-trigger" type="button" aria-label={t("New tab")} title={t("New tab")} onClick={() => shell?.newTab()}>
+        <AnimatedIcon name="plus" size={16} />
+      </button>
       {shell?.showSettings && (
         <button
           className="dock-add-trigger"
@@ -179,6 +175,13 @@ function HeaderActions({ containerApi, group }: IDockviewHeaderActionsProps) {
               <AnimatedIcon name="split" size={16} />
               <span>{t("Split right")}</span>
             </DropdownMenu.Item>
+            <DropdownMenu.Separator className="dock-add-separator" />
+            {VIEWS.map((item) => (
+              <DropdownMenu.Item className="menu-item dock-action-item" key={item.id} onSelect={() => shell?.add(item.id, group.id)}>
+                <AnimatedIcon name={item.id} size={16} />
+                <span>{t(item.label)}</span>
+              </DropdownMenu.Item>
+            ))}
             <DropdownMenu.Separator className="dock-add-separator" />
             <DropdownMenu.Item
               className="menu-item dock-action-item"
@@ -216,6 +219,7 @@ export default function DockCanvas({
   renderView,
 }: Props) {
   const { t } = useTranslation();
+  const hotkeys = useAppHotkeys();
   const apiRef = useRef<DockviewApi | null>(null);
   const disposables = useRef<Array<{ dispose: () => void }>>([]);
   const [empty, setEmpty] = useState(true);
@@ -264,6 +268,50 @@ export default function DockCanvas({
     latest.current.onNavigate(`/${view}`);
     notify.info(i18n.t("Panel split to the right"));
   }, []);
+  const newTab = useCallback(() => {
+    const api = apiRef.current;
+    if (!api) return;
+    api.addPanel({
+      id: `tab:new:${++sequence}`,
+      component: "page",
+      tabComponent: "canvas",
+      title: i18n.t("New tab"),
+      params: { view: "new" },
+    });
+    latest.current.onNavigate("/");
+  }, []);
+  const choose = useCallback((view: CanvasView, panelId: string) => {
+    const api = apiRef.current;
+    const placeholder = api?.getPanel(panelId);
+    if (!api || !placeholder) return;
+    const groupId = placeholder.group.id;
+    api.addPanel({
+      id: `tab:${view}:${++sequence}`,
+      component: "page",
+      tabComponent: "canvas",
+      title: title(view),
+      params: { view },
+      position: { referenceGroup: groupId },
+    });
+    placeholder.api.close();
+    latest.current.onNavigate(`/${view}`);
+    notify.info(i18n.t("Tab opened"));
+  }, []);
+  const closeActive = useCallback(() => {
+    const api = apiRef.current;
+    if (!api) return;
+    const active = api.activePanel;
+    if (!active) return;
+    active.api.close();
+    const next = api.activePanel?.api.getParameters().view;
+    latest.current.onNavigate(typeof next === "string" && isCanvasView(next) ? `/${next}` : "/");
+  }, []);
+  useHotkey(hotkeys["canvas.tab.new"], newTab, { ignoreInputs: true });
+  useHotkey(hotkeys["canvas.tab.close"], closeActive, { ignoreInputs: true });
+  useEffect(() => {
+    window.addEventListener("canvas:new-tab", newTab);
+    return () => window.removeEventListener("canvas:new-tab", newTab);
+  }, [newTab]);
   const reset = useCallback(() => {
     const api = apiRef.current;
     if (!api) return;
@@ -279,11 +327,13 @@ export default function DockCanvas({
       add,
       split,
       reset,
+      newTab,
+      choose,
       pin: onPin,
       pinned,
       showSettings,
     }),
-    [renderView, onNavigate, add, split, reset, onPin, pinned, showSettings],
+    [renderView, onNavigate, add, split, reset, newTab, choose, onPin, pinned, showSettings],
   );
 
   useEffect(() => {
@@ -426,7 +476,9 @@ export default function DockCanvas({
             <div className="dock-empty-shell" data-testid="empty-workspace">
               <div className="dock-empty-tabbar">
                 <span>{t("No open tabs")}</span>
-                <TabPicker label={t("Add tab")} add={add} />
+                <button className="dock-add-trigger" type="button" aria-label={t("New tab")} title={t("New tab")} onClick={newTab}>
+                  <AnimatedIcon name="plus" size={16} />
+                </button>
                 {showSettings && (
                   <button
                     type="button"
@@ -438,20 +490,7 @@ export default function DockCanvas({
                   </button>
                 )}
               </div>
-              <div className="dock-welcome">
-                <p className="eyebrow">{t("Your workspace")}</p>
-                <h1>{t("Start with a tab")}</h1>
-                <p className="muted">{t("Select an editor or a repository view to begin.")}</p>
-                <div className="dock-welcome-options">
-                  {VIEWS.map((item) => (
-                    <button type="button" key={item.id} onClick={() => add(item.id)}>
-                      <AnimatedIcon name={item.id} size={19} />
-                      <span>{t(item.label)}</span>
-                      <AnimatedIcon name="right" size={14} />
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <WelcomeView onChoose={add} />
             </div>
           )}
         </section>

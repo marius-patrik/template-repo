@@ -114,6 +114,13 @@ function NumberPreference({
     </label>
   );
 }
+const dimensionScale = (value: number, dimension: "fontSize" | "iconSize" | "spacing") =>
+  (Object.keys(SCALES) as Array<keyof typeof SCALES>).reduce((closest, size) =>
+    Math.abs(SCALES[size][dimension] - value) < Math.abs(SCALES[closest][dimension] - value)
+      ? size
+      : closest,
+  "normal" as keyof typeof SCALES);
+
 export default function PreferencesPanel() {
   const { t, i18n } = useTranslation();
   const prefs = useCanvasConfig((state) => state.preferences);
@@ -138,15 +145,15 @@ export default function PreferencesPanel() {
       <div className="settings-group">
         <h2>{t("Appearance")}</h2>
         <Choice
-          label="Theme"
+          label="Color mode"
           value={prefs.theme}
           values={["dark", "light", "system"]}
           onChange={(value) => patch("theme", value as CanvasPreferences["theme"])}
         />
         <Choice
-          label="Skin"
+          label="Theme"
           value={prefs.skin}
-          values={["graphite", "slate", "contrast"]}
+          values={["oled", "graphite", "slate", "contrast"]}
           onChange={(value) => patch("skin", value as CanvasPreferences["skin"])}
         />
         <Choice
@@ -162,33 +169,21 @@ export default function PreferencesPanel() {
           onChange={(value) => setScale(value as keyof typeof SCALES)}
         />
         <fieldset className="settings-subgrid" aria-label={t("Individual scale values")}>
-          <NumberPreference
-            label="Text size"
-            value={prefs.fontSize}
-            min={10}
-            max={26}
-            set={(value) => patch("fontSize", value)}
-          />
-          <NumberPreference
-            label="Icon size"
-            value={prefs.iconSize}
-            min={12}
-            max={32}
-            set={(value) => patch("iconSize", value)}
-          />
+          {(["fontSize", "iconSize", "spacing"] as const).map((dimension) => (
+            <Choice
+              key={dimension}
+              label={dimension === "fontSize" ? "Text size" : dimension === "iconSize" ? "Icon size" : "Spacing"}
+              value={dimensionScale(prefs[dimension], dimension)}
+              values={["small", "normal", "large"]}
+              onChange={(value) => patch(dimension, SCALES[value as keyof typeof SCALES][dimension])}
+            />
+          ))}
           <NumberPreference
             label="Border radius"
             value={prefs.radius}
             min={0}
             max={24}
             set={(value) => patch("radius", value)}
-          />
-          <NumberPreference
-            label="Spacing"
-            value={prefs.spacing}
-            min={2}
-            max={20}
-            set={(value) => patch("spacing", value)}
           />
         </fieldset>
         <h3>
@@ -209,7 +204,7 @@ export default function PreferencesPanel() {
         </div>
       </div>
       <div className="settings-group">
-        <h2>{t("Layout and surfaces")}</h2>
+        <h2>{t("Preferences")}</h2>
         <Choice
           label="Navigation position"
           value={prefs.navigationPosition}
@@ -241,6 +236,20 @@ export default function PreferencesPanel() {
           onChange={(value) =>
             patch("sidebarPosition", value as CanvasPreferences["sidebarPosition"])
           }
+        />
+        <NumberPreference
+          label="Title bar height"
+          value={prefs.titleBarHeight}
+          min={22}
+          max={80}
+          set={(value) => patch("titleBarHeight", value)}
+        />
+        <NumberPreference
+          label="Status bar height"
+          value={prefs.statusBarHeight}
+          min={22}
+          max={80}
+          set={(value) => patch("statusBarHeight", value)}
         />
         <NumberPreference
           label="Primary sidebar width"

@@ -100,6 +100,8 @@ export default function App() {
     root.style.setProperty("--ui-radius", prefs.radius + "px");
     root.style.setProperty("--skin-radius", prefs.radius + "px");
     root.style.setProperty("--ui-spacing", prefs.spacing + "px");
+    root.style.setProperty("--titlebar-height", `${prefs.titleBarHeight}px`);
+    root.style.setProperty("--statusbar-height", `${prefs.statusBarHeight}px`);
   }, [prefs, dark]);
   useEffect(() => {
     const media = window.matchMedia("(prefers-color-scheme: dark)");
@@ -159,7 +161,7 @@ export default function App() {
   useHotkey(hotkeys["canvas.settings.open"], () => go("/settings"));
   useHotkey(hotkeys["canvas.canvas.open"], () => go("/canvas"));
   useHotkey(hotkeys["canvas.editor.open"], () => go("/editor"));
-  const icon = (name: string, size = prefs.iconSize) => <AnimatedIcon name={name} size={size} />;
+  const icon = (name: string, size = 18) => <AnimatedIcon name={name} size={size} />;
   return (
     <div className="app-root">
       <div className="window-titlebar">
@@ -236,6 +238,7 @@ export default function App() {
             <ActivityBar
               current={page}
               onNavigate={go}
+              onNewTab={() => window.dispatchEvent(new Event("canvas:new-tab"))}
               showSettings={prefs.settingsPosition === "activitybar"}
             />
           )}

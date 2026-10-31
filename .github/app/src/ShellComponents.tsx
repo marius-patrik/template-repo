@@ -268,10 +268,12 @@ export function ActivityBar({
   current,
   onNavigate,
   showSettings,
+  onNewTab,
 }: {
   current: CanvasView | null;
   onNavigate: (path: string) => void;
   showSettings: boolean;
+  onNewTab: () => void;
 }) {
   const { t } = useTranslation();
   const prefs = useCanvasConfig((state) => state.preferences);
@@ -288,6 +290,10 @@ export function ActivityBar({
       aria-label={t("Activity bar")}
       data-testid="activity-bar"
     >
+      <button type="button" className="activity-button activity-new-tab" title={t("New tab")} aria-label={t("New tab")} onClick={onNewTab}>
+        <AnimatedIcon name="plus" size={18} />
+      </button>
+      <span className="activity-separator" aria-hidden="true" />
       {entries.map((view) => {
         const actions: ContextAction[] = [
           { label: t("Open"), icon: view, action: () => onNavigate(`/${view}`) },
@@ -313,7 +319,7 @@ export function ActivityBar({
               aria-label={t(viewLabel(view))}
               onClick={() => onNavigate(`/${view}`)}
             >
-              <AnimatedIcon name={view} size={prefs.iconSize} />
+              <AnimatedIcon name={view} size={18} />
             </button>
           </CanvasContextMenu>
         );
@@ -328,7 +334,7 @@ export function ActivityBar({
             aria-label={t("Settings")}
             onClick={() => onNavigate("/settings")}
           >
-            <AnimatedIcon name="settings" size={prefs.iconSize} />
+            <AnimatedIcon name="settings" size={18} />
           </button>
         </SurfaceMenu>
       )}

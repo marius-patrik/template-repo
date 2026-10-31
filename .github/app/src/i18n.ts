@@ -9,6 +9,14 @@ export const LANGUAGES = [
 ] as const;
 
 const english = [
+  "Color mode",
+  "Controls",
+  "OLED",
+  "Title bar height",
+  "Status bar height",
+  "New tab",
+  "Close active tab",
+  "Open new tab",
   "Canvas",
   "Editor",
   "Open Canvas",
@@ -268,6 +276,14 @@ const english = [
 const en = Object.fromEntries(english.map((value) => [value, value]));
 
 const cs: Record<string, string> = {
+  "Color mode": "Barevný režim",
+  Controls: "Ovládání",
+  OLED: "OLED",
+  "Title bar height": "Výška titulního pruhu",
+  "Status bar height": "Výška stavového řádku",
+  "New tab": "Nová karta",
+  "Close active tab": "Zavřít aktivní kartu",
+  "Open new tab": "Otevřít novou kartu",
   Canvas: "Canvas",
   Editor: "Editor",
   "Open Canvas": "Otevřít Canvas",
@@ -543,6 +559,14 @@ const cs: Record<string, string> = {
   "Density selection": "Výběr hustoty",
 };
 const es: Record<string, string> = {
+  "Color mode": "Modo de color",
+  Controls: "Controles",
+  OLED: "OLED",
+  "Title bar height": "Altura de la barra de título",
+  "Status bar height": "Altura de la barra de estado",
+  "New tab": "Pestaña nueva",
+  "Close active tab": "Cerrar pestaña activa",
+  "Open new tab": "Abrir pestaña nueva",
   Canvas: "Canvas",
   Editor: "Editor",
   "Open Canvas": "Abrir Canvas",

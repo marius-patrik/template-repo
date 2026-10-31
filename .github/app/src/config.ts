@@ -51,6 +51,22 @@ export const darkPalette = {
   scrim: "#000000",
   danger: "#eb8f85",
 };
+/** True-black default palette matched to the approved OLED reference. */
+export const oledPalette = {
+  bg: "#000000",
+  surface: "#000000",
+  raised: "#1a1a1d",
+  border: "#373739",
+  text: "#ececef",
+  muted: "#929299",
+  subtle: "#6c6c76",
+  accent: "#0086ff",
+  accentForeground: "#000000",
+  hover: "#0f0f11",
+  shadow: "#0c0b0b",
+  scrim: "#ffffff",
+  danger: "#ff1900",
+};
 export const lightPalette = {
   bg: "#f9f9fa",
   surface: "#ffffff",
@@ -68,6 +84,7 @@ export const lightPalette = {
 };
 /** Skin presets update the same editable tokens; no second palette authority. */
 const skinPalette = {
+  oled: { dark: oledPalette, light: lightPalette },
   graphite: { dark: darkPalette, light: lightPalette },
   slate: {
     dark: {
@@ -120,7 +137,7 @@ const skinPalette = {
 } as const;
 const schema = z.object({
   theme: z.enum(["dark", "light", "system"]),
-  skin: z.enum(["graphite", "slate", "contrast"]),
+  skin: z.enum(["oled", "graphite", "slate", "contrast"]),
   density: z.enum(["comfortable", "compact"]),
   accent: z.string(),
   uiScale: z.enum(["small", "normal", "large"]),
@@ -129,6 +146,8 @@ const schema = z.object({
   radius: z.number().int().min(0).max(24),
   spacing: z.number().int().min(2).max(20),
   sidebarWidth: z.number().int().min(180).max(480),
+  titleBarHeight: z.number().int().min(22).max(80),
+  statusBarHeight: z.number().int().min(22).max(80),
   sidebarPosition: z.enum(POSITIONS.sidebar),
   activityBarPosition: z.enum(POSITIONS.activity),
   activityBarDensity: z.enum(["compact", "comfortable"]),
@@ -143,12 +162,14 @@ const schema = z.object({
 export type CanvasPreferences = z.infer<typeof schema>;
 export const defaults: CanvasPreferences = {
   theme: "dark",
-  skin: "graphite",
+  skin: "oled",
   density: "comfortable",
   accent: "neutral",
   uiScale: "normal",
   ...SCALES.normal,
   sidebarWidth: 228,
+  titleBarHeight: 24,
+  statusBarHeight: 24,
   sidebarPosition: "left",
   activityBarPosition: "left",
   activityBarDensity: "comfortable",
@@ -157,7 +178,7 @@ export const defaults: CanvasPreferences = {
   settingsPosition: "titlebar",
   floatingX: 280,
   floatingY: 110,
-  darkColors: darkPalette,
+  darkColors: oledPalette,
   lightColors: lightPalette,
 };
 function validate(source: unknown): CanvasPreferences {
@@ -175,7 +196,7 @@ function validate(source: unknown): CanvasPreferences {
     sidebarWidth: legacyWidth,
     ...record,
     darkColors: {
-      ...darkPalette,
+      ...oledPalette,
       ...(record.darkColors && typeof record.darkColors === "object" ? record.darkColors : {}),
     },
     lightColors: {
@@ -230,7 +251,7 @@ export const useCanvasConfig = create<ConfigState>()(
     }),
     {
       name: "canvas-config",
-      version: 3,
+      version: 4,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ preferences: state.preferences }),
       migrate: (saved) => saved,

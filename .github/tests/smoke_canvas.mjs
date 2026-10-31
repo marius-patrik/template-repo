@@ -18,6 +18,22 @@ try {
   const choices = page.locator(".dock-welcome-options button");
   if (await choices.count() !== 5) throw new Error("Empty welcome must list every editor and view");
 
+  // New tab must be a real Dockview tab displaying the reusable welcome choices.
+  await page.locator(".activity-new-tab").click();
+  await page.locator('[data-dock-view="new"]').waitFor();
+  if (await page.getByTestId("new-tab-welcome").locator(".dock-welcome-options button").count() !== 5)
+    throw new Error("New tab must list all tools");
+  await page.getByTestId("new-tab-welcome").getByRole("button", { name: "Editor" }).click();
+  await page.locator('[data-dock-view="editor"]').waitFor();
+  await page.locator('.canvas-dock-tab[data-canvas-tab="editor"] .canvas-tab-close').last().click();
+  await page.getByTestId("empty-workspace").waitFor();
+  // OLED is the default dark skin, and selection uses the shared accent.
+  await page.waitForFunction(() =>
+    getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() === "#000000"
+  );
+  if (await page.locator(".activity-new-tab").count() !== 1)
+    throw new Error("Activity bar must expose exactly one new-tab action");
+
   // Profile-first navigation, with independent layouts and notes.
   const profiles = page.getByTestId("profile-select");
   await profiles.click();
@@ -98,8 +114,18 @@ try {
   await page.getByRole("option", { name: "Large" }).click();
   if (!(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--ui-spacing").trim().endsWith("11px"))))
     throw new Error("Scale preset did not synchronize spacing");
-  await page.getByRole("spinbutton", { name: "Spacing" }).fill("12");
-  await page.waitForFunction(() => getComputedStyle(document.documentElement).getPropertyValue("--ui-spacing").trim() === "12px");
+  await page.getByRole("combobox", { name: "Spacing" }).click();
+  await page.getByRole("option", { name: "Small" }).click();
+  await page.waitForFunction(() => getComputedStyle(document.documentElement).getPropertyValue("--ui-spacing").trim() === "6px");
+  await page.getByRole("combobox", { name: "Icon size" }).click();
+  await page.getByRole("option", { name: "Large" }).click();
+  await page.waitForFunction(() => getComputedStyle(document.documentElement).getPropertyValue("--app-icon-size").trim() === "21px");
+  await page.getByRole("spinbutton", { name: "Title bar height" }).fill("35");
+  await page.getByRole("spinbutton", { name: "Status bar height" }).fill("30");
+  await page.waitForFunction(() =>
+    getComputedStyle(document.querySelector(".window-titlebar")).height === "35px" &&
+    getComputedStyle(document.querySelector(".window-statusbar")).height === "30px"
+  );
   await page.getByRole("spinbutton", { name: "Primary sidebar width" }).fill("260");
 
   await page.getByRole("combobox", { name: "Navigation position" }).click();
@@ -142,8 +168,10 @@ try {
   await page.reload({ waitUntil: "load" });
   await page.getByTestId("settings-page").waitFor();
   if (await page.locator('select').count()) throw new Error("Native select remains");
-  if ((await page.getByRole("spinbutton", { name: "Spacing" }).inputValue()) !== "12")
-    throw new Error("Spacing preference was not retained");
+  if (await page.getByRole("combobox", { name: "Spacing" }).textContent() === "")
+    throw new Error("Spacing preference control was not restored");
+  if (await page.getByRole("spinbutton", { name: "Title bar height" }).inputValue() !== "35")
+    throw new Error("Title bar size preference was not retained");
 
   // Notification history and context menus come from actual UI events.
   await page.getByTestId("notification-trigger").click();

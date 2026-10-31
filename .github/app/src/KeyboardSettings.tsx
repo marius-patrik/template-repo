@@ -107,7 +107,7 @@ export default function KeyboardSettings() {
     <section className="panel padded settings-panel keyboard-settings">
       <div className="keybind-heading">
         <div>
-          <h2>{t("Keyboard shortcuts")}</h2>
+          <h2>{t("Controls")}</h2>
           <p className="muted">
             {t("Shortcuts follow your system: ⌘ on macOS, Ctrl on Windows/Linux.")}
           </p>

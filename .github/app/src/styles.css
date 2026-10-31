@@ -10,10 +10,10 @@
 :root {
   color-scheme: dark;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --app-font-size: calc(var(--app-font-size) * 1);
+  --app-font-size: 14px;
   --app-icon-size: 18px;
-  --bg: #0b0b0d;
-  --surface: #141416;
+  --bg: #000000;
+  --surface: #000000;
   --raised: #1a1a1d;
   --border: #2b2b30;
   --text: #ececef;
