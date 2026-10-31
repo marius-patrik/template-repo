@@ -395,7 +395,10 @@ export default function DockCanvas({
     // Dockview already created this tab; route changes must not duplicate it.
     if (alreadyOpenedRoute.current === route) {
       alreadyOpenedRoute.current = null;
-      return;
+      if (api?.panels.some((panel) => panel.api.getParameters().view === viewFromRoute(route)))
+        return;
+    } else if (alreadyOpenedRoute.current) {
+      alreadyOpenedRoute.current = null;
     }
     // A Dockview state update can render with the old route before wouter commits
     // the close action. Never resurrect that explicitly closed pane.
