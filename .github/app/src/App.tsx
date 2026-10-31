@@ -3,6 +3,8 @@ import { colord, extend } from "colord";
 import a11yPlugin from "colord/plugins/a11y";
 import { formatForDisplay, useAppHotkeys, useHotkey } from "@tanstack/react-hotkeys";
 import { AccentColorPicker, accentPresets } from "./AccentColorPicker";
+import { useTranslation } from "react-i18next";
+import { useCanvasConfig, type CanvasPreferences } from "./config";
 import KeyboardSettings from "./KeyboardSettings";
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "motion/react";
@@ -23,9 +25,7 @@ type View =
   | "activity"
   | "context"
   | "settings";
-type Theme = "dark" | "light" | "system";
-type Preferences = { theme: Theme; accent: string; fontSize: number; iconSize: number };
-const defaults: Preferences = { theme: "dark", accent: "neutral", fontSize: 14, iconSize: 18 };
+type Preferences = CanvasPreferences;
 extend([a11yPlugin]);
 const nav: { id: View; label: string; group: string }[] = [
   { id: "overview", label: "Overview", group: "Workspace" },
@@ -40,37 +40,21 @@ const nav: { id: View; label: string; group: string }[] = [
   { id: "settings", label: "Settings", group: "System" },
 ];
 
-function loadPrefs(): Preferences {
-  try {
-    const data = JSON.parse(localStorage.getItem("canvas-preferences") || "null");
-    if (
-      data &&
-      ["dark", "light", "system"].includes(data.theme) &&
-      typeof data.accent === "string" &&
-      (accentPresets.some((preset) => preset.id === data.accent) ||
-        /^#[0-9a-f]{6}$/i.test(data.accent)) &&
-      [13, 14, 15, 16].includes(data.fontSize) &&
-      [16, 18, 20].includes(data.iconSize)
-    )
-      return data;
-  } catch {
-    /* Browser may disable storage */
-  }
-  return defaults;
-}
 function MarkdownSource({ value }: { value: string }) {
   return <pre className="source-preview">{value}</pre>;
 }
 function PageIntro({ title, detail }: { title: string; detail: string }) {
+  const { t } = useTranslation();
   return (
     <header className="page-intro">
-      <p className="eyebrow">Repository / {context.name}</p>
-      <h1>{title}</h1>
-      <p className="muted">{detail}</p>
+      <p className="eyebrow">{t("Repository / {{name}}", { name: context.name })}</p>
+      <h1>{t(title)}</h1>
+      <p className="muted">{t(detail)}</p>
     </header>
   );
 }
 function SourceIndex({ onOpen }: { onOpen: (id: string) => void }) {
+  const { t } = useTranslation();
   return (
     <div className="source-index">
       {context.documents.map((d) => (
@@ -80,7 +64,7 @@ function SourceIndex({ onOpen }: { onOpen: (id: string) => void }) {
             {d.path}
           </span>
           <small>
-            Open document <AnimatedIcon name="right" size={13} />
+            {t("Open document")} <AnimatedIcon name="right" size={13} />
           </small>
         </button>
       ))}
@@ -88,6 +72,7 @@ function SourceIndex({ onOpen }: { onOpen: (id: string) => void }) {
   );
 }
 function Overview({ to }: { to: (p: string) => void }) {
+  const { t } = useTranslation();
   return (
     <div className="page">
       <PageIntro
@@ -98,11 +83,11 @@ function Overview({ to }: { to: (p: string) => void }) {
         <section className="panel overview-primary">
           <div className="panel-heading">
             <div>
-              <p className="eyebrow">Workspace map</p>
-              <h2>Documentation relationships</h2>
+              <p className="eyebrow">{t("Workspace map")}</p>
+              <h2>{t("Documentation relationships")}</h2>
             </div>
             <Button onClick={() => to("/graph")} variant="subtle">
-              Expand <AnimatedIcon name="arrow" size={15} />
+              {t("Expand")} <AnimatedIcon name="arrow" size={15} />
             </Button>
           </div>
           <div className="map-viewport">
@@ -114,30 +99,30 @@ function Overview({ to }: { to: (p: string) => void }) {
         </section>
         <div className="stack">
           <section className="panel padded">
-            <p className="eyebrow">Project identity</p>
+            <p className="eyebrow">{t("Project identity")}</p>
             <h2>{context.repository}</h2>
             <p className="muted">
               Build source: Git-tracked documents. Revision {context.revision}.
             </p>
             <div className="meta-list">
-              <span>Current branch</span>
+              <span>{t("Current branch")}</span>
               <strong>{context.branch}</strong>
-              <span>Publication</span>
-              <strong>Static · read-only</strong>
+              <span>{t("Publication")}</span>
+              <strong>{t("Static · read-only")}</strong>
             </div>
           </section>
           <section className="panel padded">
-            <p className="eyebrow">Authoritative goal</p>
+            <p className="eyebrow">{t("Authoritative goal")}</p>
             <p className="goal-text">{context.goal.replace(/^#.*\n/, "").trim()}</p>
             <Button variant="subtle" onClick={() => to("/context")}>
-              View original source <AnimatedIcon name="right" size={15} />
+              {t("View original source")} <AnimatedIcon name="right" size={15} />
             </Button>
           </section>
         </div>
       </div>
       <div className="section-header">
-        <h2>Repository source</h2>
-        <span>Generated from tracked records</span>
+        <h2>{t("Repository source")}</h2>
+        <span>{t("Generated from tracked records")}</span>
       </div>
       <div className="panel">
         <SourceIndex onOpen={(id) => to("/artifacts?file=" + encodeURIComponent(id))} />
@@ -146,6 +131,7 @@ function Overview({ to }: { to: (p: string) => void }) {
   );
 }
 function SimplePage({ id, to }: { id: View; to: (p: string) => void }) {
+  const { t } = useTranslation();
   const docs = context.documents;
   const prd = docs.find((x) => x.path === ".agents/PRD.md");
   const agents = docs.find((x) => x.path === ".agents/AGENTS.md");
@@ -159,25 +145,25 @@ function SimplePage({ id, to }: { id: View; to: (p: string) => void }) {
         />
         <div className="workspace-board-grid">
           <section className="panel padded">
-            <p className="eyebrow">Layout</p>
-            <h2>Arrange your workspace</h2>
+            <p className="eyebrow">{t("Layout")}</p>
+            <h2>{t("Arrange your workspace")}</h2>
             <p className="muted">
               Drag tabs to create groups, split panels, or float windows. Your arrangement is saved
               locally in this browser.
             </p>
             <Button variant="subtle" onClick={() => to("/graph")}>
-              Open graph <AnimatedIcon name="right" size={15} />
+              {t("Open graph")} <AnimatedIcon name="right" size={15} />
             </Button>
           </section>
           <section className="panel padded">
-            <p className="eyebrow">Repository context</p>
+            <p className="eyebrow">{t("Repository context")}</p>
             <h2>{context.name}</h2>
             <p className="muted">{context.repository}</p>
             <p className="muted">
               {context.documents.length} authored source documents · revision {context.revision}
             </p>
             <Button variant="subtle" onClick={() => to("/artifacts")}>
-              Browse artifacts <AnimatedIcon name="right" size={15} />
+              {t("Browse artifacts")} <AnimatedIcon name="right" size={15} />
             </Button>
           </section>
         </div>
@@ -200,12 +186,12 @@ function SimplePage({ id, to }: { id: View; to: (p: string) => void }) {
       <div className="page">
         <PageIntro title="Projects" detail="Repositories available in this compiled snapshot." />
         <div className="panel padded project-card">
-          <p className="eyebrow">Source repository</p>
+          <p className="eyebrow">{t("Source repository")}</p>
           <h2>{context.name}</h2>
           <p className="muted">{context.repository}</p>
           <p>{context.goal.replace(/^#.*\n/, "").trim()}</p>
           <Button variant="subtle" onClick={() => to("/overview")}>
-            Open workspace <AnimatedIcon name="right" size={15} />
+            {t("Open workspace")} <AnimatedIcon name="right" size={15} />
           </Button>
         </div>
       </div>
@@ -218,7 +204,7 @@ function SimplePage({ id, to }: { id: View; to: (p: string) => void }) {
           detail="Requirements and plans are sourced from the repository rather than simulated task statuses."
         />
         <div className="panel padded">
-          <h2>Requirements source</h2>
+          <h2>{t("Requirements source")}</h2>
           {prd ? (
             <MarkdownSource value={prd.content} />
           ) : (
@@ -235,7 +221,7 @@ function SimplePage({ id, to }: { id: View; to: (p: string) => void }) {
           detail="Agent rules are sourced from the generated repository guidance."
         />
         <div className="panel padded">
-          <h2>Current agent guidance</h2>
+          <h2>{t("Current agent guidance")}</h2>
           {agents ? (
             <MarkdownSource value={agents.content} />
           ) : (
@@ -271,8 +257,8 @@ function SimplePage({ id, to }: { id: View; to: (p: string) => void }) {
           detail="The published snapshot does not represent live execution telemetry."
         />
         <div className="panel padded">
-          <p className="eyebrow">Build provenance</p>
-          <h2>Source revision {context.revision}</h2>
+          <p className="eyebrow">{t("Build provenance")}</p>
+          <h2>{t("Source revision")} {context.revision}</h2>
           <p className="muted">
             Built from tracked repository documents. No agent activity or task completion is
             inferred.
@@ -288,6 +274,7 @@ function SimplePage({ id, to }: { id: View; to: (p: string) => void }) {
   );
 }
 function Artifacts() {
+  const { t } = useTranslation();
   const requested = decodeURIComponent(
     new URLSearchParams(window.location.hash.split("?")[1] || "").get("file") || "",
   );
@@ -307,11 +294,11 @@ function Artifacts() {
           <SourceIndex onOpen={setActive} />
         </div>
         <article className="panel padded artifact-content">
-          <h2>{doc?.path ?? "No documents"}</h2>
+          <h2>{doc?.path ?? t("No documents")}</h2>
           {doc ? (
             <MarkdownSource value={doc.content} />
           ) : (
-            <p className="muted">No source documents available.</p>
+            <p className="muted">{t("No source documents available.")}</p>
           )}
         </article>
       </div>
@@ -319,47 +306,102 @@ function Artifacts() {
   );
 }
 function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Preferences) => void }) {
-  const options = (key: keyof Preferences, values: readonly (string | number)[], label: string) => (
+  const { t, i18n } = useTranslation();
+  const resetPreferences = useCanvasConfig((state) => state.resetPreferences);
+  const language = i18n.resolvedLanguage?.split("-")[0] ?? "en";
+  const options = (
+    key: keyof Preferences,
+    values: readonly (string | number)[],
+    label: string,
+    valueLabel: (value: string | number) => string = (value) => String(value),
+  ) => (
     <div className="setting-row">
-      <div>
-        <strong>{label}</strong>
-      </div>
-      <div className="segmented">
-        {values.map((v) => (
+      <strong>{t(label)}</strong>
+      <div className="segmented" role="group" aria-label={t(label)}>
+        {values.map((value) => (
           <button
             type="button"
-            key={String(v)}
-            className={prefs[key] === v ? "selected" : ""}
-            onClick={() => setPrefs({ ...prefs, [key]: v })}
+            key={String(value)}
+            className={prefs[key] === value ? "selected" : ""}
+            aria-pressed={prefs[key] === value}
+            onClick={() => setPrefs({ ...prefs, [key]: value })}
           >
-            {String(v)}
+            {valueLabel(value)}
           </button>
         ))}
       </div>
     </div>
   );
+
   return (
     <div className="page">
       <PageIntro
-        title="Settings"
-        detail="Appearance and keyboard preferences are local to this browser."
+        title={t("Settings")}
+        detail="Appearance, keyboard and language preferences are local to this browser."
       />
       <section className="panel padded settings-panel">
-        <h2>Appearance</h2>
-        {options("theme", ["dark", "light", "system"] as const, "Theme")}
+        <div className="settings-section-heading">
+          <div>
+            <h2>{t("Theme and skinning")}</h2>
+            <p className="muted">{t("A preview of skin tokens and spacing, independent from accent color.")}</p>
+          </div>
+          <button className="keybind-reset-all" type="button" onClick={resetPreferences}>
+            {t("Reset appearance")}
+          </button>
+        </div>
+        {options("theme", ["dark", "light", "system"] as const, "Theme", (value) =>
+          t(value === "system" ? "Use system" : value === "dark" ? "Dark" : "Light")
+        )}
+        <div className="setting-row skin-setting">
+          <strong>{t("Skin")}</strong>
+          <div className="skin-options" role="group" aria-label={t("Skin selection")}>
+            {(["graphite", "slate", "contrast"] as const).map((skin) => (
+              <button
+                type="button"
+                key={skin}
+                className={`skin-choice ${prefs.skin === skin ? "selected" : ""}`}
+                aria-pressed={prefs.skin === skin}
+                onClick={() => setPrefs({ ...prefs, skin })}
+              >
+                <span className={`skin-preview skin-preview-${skin}`}>
+                  <span /><span /><span />
+                </span>
+                <span>{t(skin === "graphite" ? "Graphite" : skin === "slate" ? "Slate" : "High contrast")}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+        {options("density", ["comfortable", "compact"] as const, "Density", (value) =>
+          t(value === "comfortable" ? "Comfortable" : "Compact")
+        )}
         <div className="setting-row accent-setting">
-          <strong>Accent color</strong>
-          <AccentColorPicker
-            value={prefs.accent}
-            onChange={(accent) => setPrefs({ ...prefs, accent })}
-          />
+          <strong>{t("Accent color")}</strong>
+          <AccentColorPicker value={prefs.accent}
+            onChange={(accent) => setPrefs({ ...prefs, accent })} />
         </div>
         {options("fontSize", [13, 14, 15, 16] as const, "Text size")}
         {options("iconSize", [16, 18, 20] as const, "Icon size")}
       </section>
+      <section className="panel padded settings-panel localization-settings">
+        <h2>{t("Language")}</h2>
+        <div className="setting-row">
+          <label htmlFor="canvas-language">{t("Interface language")}</label>
+          <select
+            id="canvas-language"
+            className="settings-language-select"
+            aria-label={t("Interface language")}
+            value={language}
+            onChange={(event) => { void i18n.changeLanguage(event.target.value); }}
+          >
+            <option value="en">English</option>
+            <option value="cs">Čeština</option>
+            <option value="es">Español</option>
+          </select>
+        </div>
+      </section>
       <KeyboardSettings />
       <p className="muted settings-note">
-        Canvas v0.8.0 · Prototype. Local UI settings are not authoritative project data.
+        Canvas v0.9.0 · {t("Prototype")}. {t("Local UI settings are not authoritative project data.")}
       </p>
     </div>
   );
@@ -367,26 +409,32 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
 export default function App() {
   const [path, navigate] = useLocation();
   const hotkeys = useAppHotkeys();
+  const { t, i18n } = useTranslation();
+  const prefs = useCanvasConfig((state) => state.preferences);
+  const updatePreferences = useCanvasConfig((state) => state.setPreferences);
+  const setPrefs = (next: Preferences) => updatePreferences(next);
+  const [systemDark, setSystemDark] = useState(() => window.matchMedia("(prefers-color-scheme: dark)").matches);
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [selection, setSelection] = useState(0);
-  const [prefs, setPrefs] = useState(loadPrefs);
   const input = useRef<HTMLInputElement>(null);
   const page: View = nav.find((x) => path.startsWith("/" + x.id))?.id ?? "overview";
-  const title = nav.find((x) => x.id === page)?.label ?? "Overview";
+  const title = t(nav.find((x) => x.id === page)?.label ?? "Overview");
   useEffect(() => {
     if (path === "/") navigate("/overview", { replace: true });
   }, [path, navigate]);
   useEffect(() => {
     const resolved =
       prefs.theme === "system"
-        ? window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? systemDark
           ? "dark"
           : "light"
         : prefs.theme;
     document.documentElement.dataset.theme = resolved;
+    document.documentElement.dataset.skin = prefs.skin;
+    document.documentElement.dataset.density = prefs.density;
     document.documentElement.dataset.accent = accentPresets.some(
       (preset) => preset.id === prefs.accent,
     )
@@ -405,18 +453,18 @@ export default function App() {
     }
     document.documentElement.style.setProperty("--app-font-size", prefs.fontSize + "px");
     document.documentElement.style.setProperty("--app-icon-size", prefs.iconSize + "px");
-    try {
-      localStorage.setItem("canvas-preferences", JSON.stringify(prefs));
-    } catch {
-      /* storage may be disabled */
-    }
-  }, [prefs]);
+  }, [prefs, systemDark]);
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const update = () => setSystemDark(media.matches);
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+  useEffect(() => { document.documentElement.lang = i18n.resolvedLanguage?.split("-")[0] ?? "en"; }, [i18n.resolvedLanguage]);
   const filtered = useMemo(
-    () =>
-      nav.filter((x) =>
-        (x.group + " " + context.name + " " + x.label).toLowerCase().includes(search.toLowerCase()),
-      ),
-    [search],
+    () => nav.filter((x) =>
+      (t(x.group) + " " + context.name + " " + t(x.label)).toLowerCase().includes(search.toLowerCase())),
+    [search, t],
   );
   useEffect(() => {
     if (paletteOpen) requestAnimationFrame(() => input.current?.focus());
@@ -462,7 +510,7 @@ export default function App() {
           <Button
             size="icon"
             className="mobile-toggle"
-            aria-label="Toggle navigation"
+            aria-label={t("Toggle navigation")}
             onClick={() => setMobileOpen((v) => !v)}
           >
             {icon("expand")}
@@ -470,8 +518,8 @@ export default function App() {
           <Button
             size="icon"
             className="desktop-toggle"
-            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            title={t(collapsed ? "Expand sidebar" : "Collapse sidebar")}
+            aria-label={t(collapsed ? "Expand sidebar" : "Collapse sidebar")}
             onClick={() => setCollapsed((value) => !value)}
           >
             {icon(collapsed ? "expand" : "collapse")}
@@ -482,11 +530,11 @@ export default function App() {
           <button
             type="button"
             className="omnibar-trigger"
-            aria-label="Open navigation tree"
+            aria-label={t("Open navigation tree")}
             onClick={() => setPaletteOpen(true)}
           >
             {icon("search", 14)}
-            <span className="crumb">Personal workspace</span>
+            <span className="crumb">{t("Personal workspace")}</span>
             {icon("right", 12)}
             <span className="crumb">{context.name}</span>
             {icon("right", 12)}
@@ -500,8 +548,8 @@ export default function App() {
         </div>
         <Button
           size="icon"
-          aria-label="Settings"
-          title="Settings"
+          aria-label={t("Settings")}
+          title={t("Settings")}
           onClick={() => go("/settings")}
           className="title-settings"
         >
@@ -513,7 +561,7 @@ export default function App() {
         {mobileOpen && (
           <button
             type="button"
-            aria-label="Close navigation"
+            aria-label={t("Close navigation")}
             className="sidebar-scrim"
             onClick={() => setMobileOpen(false)}
           />
@@ -529,7 +577,7 @@ export default function App() {
           <nav className="sidebar-navigation">
             {["Workspace", "System"].map((group) => (
               <div className="nav-group" key={group}>
-                {(!collapsed || mobileOpen) && <div className="nav-group-label">{group}</div>}
+                {(!collapsed || mobileOpen) && <div className="nav-group-label">{t(group)}</div>}
                 {nav
                   .filter((n) => n.group === group && n.id !== "settings")
                   .map((n) => (
@@ -538,11 +586,11 @@ export default function App() {
                       key={n.id}
                       className={"nav-link " + (page === n.id ? "active" : "")}
                       onClick={() => setMobileOpen(false)}
-                      title={n.label}
+                      title={t(n.label)}
                       aria-current={page === n.id ? "page" : undefined}
                     >
                       {icon(n.id)}
-                      {(!collapsed || mobileOpen) && <span>{n.label}</span>}
+                      {(!collapsed || mobileOpen) && <span>{t(n.label)}</span>}
                     </Link>
                   ))}
               </div>
@@ -556,7 +604,7 @@ export default function App() {
               onNavigate={go}
               dark={
                 prefs.theme === "system"
-                  ? window.matchMedia("(prefers-color-scheme: dark)").matches
+                  ? systemDark
                   : prefs.theme === "dark"
               }
               renderView={(view) => {
@@ -571,10 +619,10 @@ export default function App() {
       </div>
       <footer className="window-statusbar">
         <span className="snapshot-state">
-          <span className="snapshot-desktop">Repository snapshot · read-only</span>
-          <span className="snapshot-mobile">Read-only snapshot</span>
+          <span className="snapshot-desktop">{t("Repository snapshot · read-only")}</span>
+          <span className="snapshot-mobile">{t("Read-only snapshot")}</span>
         </span>
-        <span className="version">Version: 0.8.0 · Prototype</span>
+        <span className="version">{t("Version")}: 0.9.0 · {t("Prototype")}</span>
         <span>
           {context.repository} / {context.revision}
         </span>
@@ -593,7 +641,7 @@ export default function App() {
             <motion.div
               role="dialog"
               aria-modal="true"
-              aria-label="Omnibar navigation tree"
+              aria-label={t("Open navigation tree")}
               className="palette"
               initial={{ y: -12, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -604,8 +652,8 @@ export default function App() {
                 <input
                   ref={input}
                   value={search}
-                  aria-label="Search routes"
-                  placeholder="Search pages and commands"
+                  aria-label={t("Search pages and commands")}
+                  placeholder={t("Search pages and commands")}
                   onChange={(e) => {
                     setSearch(e.target.value);
                     setSelection(0);
@@ -641,12 +689,12 @@ export default function App() {
                     onClick={() => go("/" + n.id)}
                   >
                     {icon(n.id)}
-                    <span>{n.label}</span>
-                    <small>{n.group}</small>
+                    <span>{t(n.label)}</span>
+                    <small>{t(n.group)}</small>
                     {icon("right", 13)}
                   </button>
                 ))}
-                {!filtered.length && <p className="empty-state">No matching routes.</p>}
+                {!filtered.length && <p className="empty-state">{t("No matching routes.")}</p>}
               </div>
               <div className="palette-footer">↑ ↓ navigate · ↵ open · Esc dismiss</div>
             </motion.div>
