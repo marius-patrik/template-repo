@@ -3062,7 +3062,7 @@ createRoot(root).render(
   &lt;/React.StrictMode&gt;,
 );
 </pre></section>
-<section class="file" id="file-0073"><h3>.github/app/src/styles.css</h3><p class="meta">Git mode 100644 · e88ba1dc65939b114c4e4426a859ad4df5f4e20a</p><pre>@import &quot;tailwindcss&quot;;
+<section class="file" id="file-0073"><h3>.github/app/src/styles.css</h3><p class="meta">Git mode 100644 · b5d2d44e76eccb715144a5fab31a22b219874114</p><pre>@import &quot;tailwindcss&quot;;
 @source &quot;.&quot;;
 :root {
   color-scheme: dark;
@@ -4351,9 +4351,20 @@ kbd {
   }
 }
 
-.accent-swatches { border: 0; margin: 0; padding: 0; min-width: 0; }
-:root[data-accent=&quot;amber&quot;] { --accent: #edbb79; --accent-foreground: #21180d; }
-:root[data-theme=&quot;light&quot;][data-accent=&quot;amber&quot;] { --accent: #9c5113; --accent-foreground: #fff; }
+.accent-swatches {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+:root[data-accent=&quot;amber&quot;] {
+  --accent: #edbb79;
+  --accent-foreground: #21180d;
+}
+:root[data-theme=&quot;light&quot;][data-accent=&quot;amber&quot;] {
+  --accent: #9c5113;
+  --accent-foreground: #fff;
+}
 </pre></section>
 <section class="file" id="file-0074"><h3>.github/app/tsconfig.json</h3><p class="meta">Git mode 100644 · e5facd2ff85a68129ec0d60b7ff7ae93f77376c6</p><pre>{
   &quot;compilerOptions&quot;: {
