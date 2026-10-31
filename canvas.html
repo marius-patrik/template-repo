@@ -3398,7 +3398,7 @@ createRoot(root).render(
   &lt;/React.StrictMode&gt;,
 );
 </pre></section>
-<section class="file" id="file-0073"><h3>.github/app/src/styles.css</h3><p class="meta">Git mode 100644 · f22ac97fc86af1d10ae2589a0dae78ae47c91660</p><pre>@import &quot;tailwindcss&quot;;
+<section class="file" id="file-0073"><h3>.github/app/src/styles.css</h3><p class="meta">Git mode 100644 · fb752c340222006fc6ba3633664f808667299dd6</p><pre>@import &quot;tailwindcss&quot;;
 @source &quot;.&quot;;
 :root {
   color-scheme: dark;
@@ -4908,6 +4908,88 @@ kbd {
   }
   .dock-route-page .full-graph {
     height: 460px;
+  }
+}
+
+/* Per-group Dockview tab creation controls. */
+.dock-tab-add {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 5px;
+  flex: none;
+}
+.dock-add-trigger {
+  width: 25px;
+  height: 25px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid transparent;
+  border-radius: 5px;
+  padding: 0;
+}
+.dock-add-trigger:hover,
+.dock-add-trigger[data-state=&quot;open&quot;] {
+  color: var(--text);
+  background: var(--hover);
+  border-color: var(--border);
+}
+.dock-add-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.dock-add-menu {
+  width: 232px;
+  max-width: calc(100vw - 20px);
+  max-height: min(460px, calc(100dvh - 36px));
+  padding: 5px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  z-index: 150;
+}
+.dock-add-group-label {
+  color: var(--subtle);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 10px 10px 5px;
+  text-transform: uppercase;
+}
+.dock-add-separator {
+  height: 1px;
+  margin: 6px 4px 2px;
+  background: var(--border);
+}
+.dock-add-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+  padding: 7px 10px;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+}
+.dock-add-item .app-icon {
+  color: var(--muted);
+}
+.dock-add-item[data-highlighted] {
+  color: var(--text);
+  background: var(--raised);
+}
+@media (max-width: 700px) {
+  .dock-tab-add {
+    padding: 0 3px;
+  }
+  .dock-add-trigger {
+    width: 29px;
+    height: 29px;
+  }
+  .dock-add-menu {
+    max-height: min(480px, calc(100dvh - 24px));
   }
 }
 </pre></section>
