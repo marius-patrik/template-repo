@@ -26,7 +26,7 @@ try {
   await mobile.goto(url, { waitUntil: "load" });
   await mobile.getByTestId("empty-workspace").waitFor();
   await review("MOBILE_WELCOME", mobile);
-  await mobile.locator(".dock-welcome-options").getByRole("button", { name: "Canvas", exact: true }).click();
+  await mobile.locator(".dock-welcome-options button").first().click();
   await mobile.locator(".cx-overview-scroll").waitFor();
   await review("MOBILE_CANVAS", mobile);
   await mobile.close();
