@@ -3815,7 +3815,14 @@ createRoot(root).render(
   &lt;/React.StrictMode&gt;,
 );
 </pre></section>
-<section class="file" id="file-0075"><h3>.github/app/src/styles.css</h3><p class="meta">Git mode 100644 · 5da01771237591c5867485b86c748658055d1688</p><pre>@import &quot;tailwindcss&quot;;
+<section class="file" id="file-0075"><h3>.github/app/src/styles.css</h3><p class="meta">Git mode 100644 · 637e133ff5caf6f787e230799b97c6e9653e77ab</p><pre>@import &quot;tailwindcss&quot;;
+@theme inline {
+  --color-canvas-background: var(--bg);
+  --color-canvas-surface: var(--surface);
+  --color-canvas-foreground: var(--text);
+  --color-canvas-border: var(--border);
+  --color-canvas-accent: var(--accent);
+}
 @source &quot;.&quot;;
 :root {
   color-scheme: dark;
@@ -5357,6 +5364,206 @@ kbd {
 }
 .dock-action-item[data-highlighted] {
   background: var(--raised);
+}
+
+/* Skin contract: Tailwind semantic colors and Dockview both consume the same tokens. */
+:root {
+  --skin-radius: 10px;
+  --skin-shadow: none;
+}
+:root[data-skin=&quot;slate&quot;][data-theme=&quot;dark&quot;] {
+  --bg: #0b111b;
+  --surface: #141e2d;
+  --raised: #1b2939;
+  --border: #324257;
+  --text: #e6eff9;
+  --muted: #a3b4c8;
+  --subtle: #8498b0;
+  --hover: rgba(164, 197, 241, 0.09);
+  --skin-radius: 7px;
+}
+:root[data-skin=&quot;slate&quot;][data-theme=&quot;light&quot;] {
+  --bg: #f2f6fa;
+  --surface: #fff;
+  --raised: #e7eef6;
+  --border: #c5d3e3;
+  --text: #192c43;
+  --muted: #4c647e;
+  --subtle: #657d95;
+  --hover: rgba(23, 62, 112, 0.065);
+  --skin-radius: 7px;
+}
+:root[data-skin=&quot;contrast&quot;][data-theme=&quot;dark&quot;] {
+  --bg: #070707;
+  --surface: #111111;
+  --raised: #202020;
+  --border: #858585;
+  --text: #fff;
+  --muted: #e0e0e0;
+  --subtle: #bdbdbd;
+  --hover: rgba(255, 255, 255, 0.17);
+  --skin-radius: 2px;
+}
+:root[data-skin=&quot;contrast&quot;][data-theme=&quot;light&quot;] {
+  --bg: #fff;
+  --surface: #fff;
+  --raised: #f0f0f0;
+  --border: #5b5b5b;
+  --text: #111;
+  --muted: #333;
+  --subtle: #454545;
+  --hover: rgba(0, 0, 0, 0.13);
+  --skin-radius: 2px;
+}
+:root[data-skin=&quot;slate&quot;] .panel,
+:root[data-skin=&quot;contrast&quot;] .panel {
+  border-radius: var(--skin-radius);
+}
+:root[data-skin=&quot;slate&quot;] .menu-content,
+:root[data-skin=&quot;contrast&quot;] .menu-content,
+:root[data-skin=&quot;slate&quot;] .omnibar-trigger,
+:root[data-skin=&quot;contrast&quot;] .omnibar-trigger,
+:root[data-skin=&quot;slate&quot;] .nav-link,
+:root[data-skin=&quot;contrast&quot;] .nav-link {
+  border-radius: calc(var(--skin-radius) / 2);
+}
+:root[data-density=&quot;compact&quot;] .nav-link {
+  min-height: 31px;
+}
+:root[data-density=&quot;compact&quot;] .nav-group + .nav-group {
+  margin-top: 12px;
+  padding-top: 9px;
+}
+:root[data-density=&quot;compact&quot;] .page,
+:root[data-density=&quot;compact&quot;] .workbench-page {
+  padding-top: 22px;
+}
+:root[data-density=&quot;compact&quot;] .padded {
+  padding: 16px;
+}
+:root[data-density=&quot;compact&quot;] .doc-row {
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+:root[data-density=&quot;compact&quot;] .setting-row {
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+:root[data-density=&quot;compact&quot;] .dock-grid .dockview-theme-dark,
+:root[data-density=&quot;compact&quot;] .dock-grid .dockview-theme-light {
+  --dv-tabs-and-actions-container-height: 29px;
+}
+.settings-section-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 15px;
+}
+.settings-section-heading h2 {
+  margin: 0 0 6px;
+}
+.settings-section-heading p {
+  font-size: 11px;
+  line-height: 1.6;
+  margin: 0 0 12px;
+}
+.skin-setting {
+  align-items: flex-start;
+}
+.skin-options {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.skin-choice {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-width: 94px;
+  padding: 7px;
+  display: grid;
+  gap: 7px;
+  justify-items: stretch;
+  color: var(--text);
+  background: var(--surface);
+  text-align: left;
+  font-size: 11px;
+}
+.skin-choice.selected {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.skin-preview {
+  display: flex;
+  align-items: center;
+  height: 42px;
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.skin-preview &gt; span {
+  border-radius: 2px;
+  display: block;
+  height: 100%;
+  flex: 1;
+}
+.skin-preview &gt; span:first-child {
+  flex: 0 0 15px;
+}
+.skin-preview-graphite {
+  background: #0b0b0d;
+  border-color: #343438;
+}
+.skin-preview-graphite &gt; span {
+  background: #202024;
+}
+.skin-preview-slate {
+  background: #0b111b;
+  border-color: #324257;
+}
+.skin-preview-slate &gt; span {
+  background: #26374a;
+}
+.skin-preview-contrast {
+  background: #050505;
+  border-color: #eee;
+}
+.skin-preview-contrast &gt; span {
+  background: #545454;
+}
+.localization-settings {
+  margin: 16px 0;
+}
+.localization-settings h2 {
+  margin: 0;
+}
+.localization-settings .setting-row {
+  border: 0;
+}
+.settings-language-select {
+  width: min(220px, 100%);
+  height: 35px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--raised);
+  color: var(--text);
+  padding: 0 10px;
+  font: inherit;
+  font-size: 12px;
+}
+@media (max-width: 700px) {
+  .settings-section-heading,
+  .skin-setting {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .skin-options {
+    justify-content: flex-start;
+  }
+  .skin-choice {
+    flex: 1;
+  }
 }
 </pre></section>
 <section class="file" id="file-0076"><h3>.github/app/tsconfig.json</h3><p class="meta">Git mode 100644 · e5facd2ff85a68129ec0d60b7ff7ae93f77376c6</p><pre>{
