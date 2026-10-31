@@ -860,3 +860,23 @@
 .status-group .status-delimiter {
   flex: 0 0 auto;
 }
+
+/* Compact breadcrumb navigation fits inside the status strip by default. */
+.window-statusbar .title-navigation {
+  min-height: 0;
+  height: var(--statusbar-height);
+  gap: calc(var(--ui-spacing) * .45);
+  max-width: min(40vw, 470px);
+  overflow: visible;
+}
+.window-statusbar .title-navigation .canvas-select-trigger {
+  height: max(18px,calc(var(--statusbar-height) - 4px));
+  min-height: 0;
+  padding-inline: calc(var(--ui-spacing) * .65);
+  font-size: calc(var(--app-font-size) * .75);
+}
+.window-statusbar .title-navigation .app-icon {
+  flex: none;
+  color: var(--muted);
+}
+.status-group:has(.title-navigation) { overflow: visible; }

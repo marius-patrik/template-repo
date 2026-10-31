@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useMemo } from "react";
+import { useCanvasConfig } from "./config";
 import { HotkeysProvider } from "@tanstack/react-hotkeys";
 import type { CustomHotkeys } from "@tanstack/react-hotkeys";
-import { appHotkeys } from "./commands";
+import { hotkeysForModifier } from "./commands";
 import { createRoot } from "react-dom/client";
 import { Router } from "wouter";
 import { useHashLocation } from "wouter/use-hash-location";
@@ -24,9 +25,16 @@ function loadHotkeys(): CustomHotkeys {
   }
 }
 
-createRoot(root).render(
-  <React.StrictMode>
+function AppProviders() {
+  const modifier = useCanvasConfig((state) => state.preferences.modifierKey);
+  const customModifier = useCanvasConfig((state) => state.preferences.customModifier);
+  const appHotkeys = useMemo(
+    () => hotkeysForModifier(modifier, customModifier),
+    [modifier, customModifier],
+  );
+  return (
     <HotkeysProvider
+      key={modifier + ":" + customModifier}
       appHotkeys={appHotkeys}
       customHotkeys={loadHotkeys()}
       onCustomHotkeysChange={(hotkeys) => {
@@ -41,5 +49,11 @@ createRoot(root).render(
         <App />
       </Router>
     </HotkeysProvider>
+  );
+}
+
+createRoot(root).render(
+  <React.StrictMode>
+    <AppProviders />
   </React.StrictMode>,
 );

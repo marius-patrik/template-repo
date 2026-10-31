@@ -15,6 +15,9 @@ try {
   await page.locator("#root .app-root").waitFor({ timeout: 15000 });
   await page.getByTestId("empty-workspace").waitFor();
   await page.locator(".dock-empty-tabbar").waitFor();
+  await page.locator(".window-statusbar .title-navigation").waitFor();
+  if (await page.locator(".window-titlebar .title-navigation").count())
+    throw new Error("Navigation should default to bottom-left status bar");
   const choices = page.locator(".dock-welcome-options button");
   if (await choices.count() !== 4) throw new Error("Empty welcome must list every editor and view");
 
@@ -47,6 +50,8 @@ try {
   await page.locator(".dock-welcome-options").getByRole("button", { name: "Editor" }).click();
   await page.locator('[data-dock-view="editor"]').waitFor();
   await page.getByTestId("monaco-editor").waitFor();
+  if (await page.locator(".monaco-source-select > strong").count())
+    throw new Error("Editor must not duplicate the tab title");
   // Selection should be a neutral raised surface with a restrained accent marker,
   // not a saturated fill or blue labels throughout the shell.
   const selectedTabColors = await page.locator('.dv-tab[aria-selected="true"]').evaluate((element) => {
@@ -124,6 +129,13 @@ try {
   // Settings expose all placement and unified scale controls.
   await page.locator(".title-actions").getByRole("button", { name: "Settings" }).click();
   await page.getByTestId("settings-page").waitFor();
+  await page.getByRole("combobox", { name: "Modifier key" }).click();
+  await page.getByRole("option", { name: "Control", exact: true }).click();
+  await page.getByRole("combobox", { name: "Modifier key" }).click();
+  await page.getByRole("option", { name: "Custom", exact: true }).click();
+  await page.getByRole("combobox", { name: "Custom modifier" }).waitFor();
+  await page.getByRole("combobox", { name: "Modifier key" }).click();
+  await page.getByRole("option", { name: "Control", exact: true }).click();
   await page.getByRole("combobox", { name: "UI scale" }).click();
   await page.getByRole("option", { name: "Large" }).click();
   if (!(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--ui-spacing").trim().endsWith("11px"))))
@@ -192,6 +204,23 @@ try {
     throw new Error("Legacy modal command centre is still mounted");
   await page.getByRole("combobox", { name: "Do anything" }).fill("canvas");
   await page.getByRole("option", { name: /Canvas/ }).first().waitFor();
+  const sameSurface = await page.evaluate(() => {
+    const omnibar = document.querySelector(".floating-omnibar");
+    const results = document.querySelector(".omnibar-results");
+    return !!omnibar && !!results && omnibar.contains(results);
+  });
+  if (!sameSurface) throw new Error("Command results must be a child of the omnibar itself");
+  const resultBeforeDrag = await page.locator(".omnibar-results").boundingBox();
+  const dragOpen = await floatingHandle.boundingBox();
+  if (!resultBeforeDrag || !dragOpen) throw new Error("Floating command centre is missing");
+  await page.mouse.move(dragOpen.x + 6, dragOpen.y + dragOpen.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(dragOpen.x + 66, dragOpen.y + dragOpen.height / 2 + 48, { steps: 5 });
+  await page.mouse.up();
+  await page.waitForTimeout(100);
+  const resultAfterDrag = await page.locator(".omnibar-results").boundingBox();
+  if (!resultAfterDrag || resultAfterDrag.x < resultBeforeDrag.x + 25)
+    throw new Error("Open command results did not move with the floating omnibar");
   await page.keyboard.press("Escape");
   await page.waitForFunction(() => !document.querySelector(".omnibar-results"));
 

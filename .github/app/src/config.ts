@@ -195,7 +195,7 @@ const statusAlignmentSchema = z.object(
   >,
 );
 export const defaultStatusAlignment: Record<StatusPart, "left" | "center" | "right"> = {
-  snapshot: "left",
+  snapshot: "center",
   navigation: "left",
   omnibar: "center",
   settings: "right",
@@ -220,6 +220,8 @@ const schema = z.object({
   activityBarPosition: z.enum(POSITIONS.activity),
   activityBarDensity: z.enum(["compact", "comfortable"]),
   navigationPosition: z.enum(POSITIONS.navigation),
+  modifierKey: z.enum(["system", "control", "command", "custom"]),
+  customModifier: z.enum(["Alt", "Shift", "Ctrl+Alt", "Meta+Alt", "Ctrl+Shift", "Meta+Shift"]),
   omnibarPosition: z.enum(POSITIONS.omnibar),
   settingsPosition: z.enum(POSITIONS.settings),
   floatingX: z.number().finite().min(0).max(10000),
@@ -245,7 +247,9 @@ export const defaults: CanvasPreferences = {
   sidebarPosition: "left",
   activityBarPosition: "left",
   activityBarDensity: "comfortable",
-  navigationPosition: "titlebar",
+  navigationPosition: "statusbar",
+  modifierKey: "system",
+  customModifier: "Alt",
   omnibarPosition: "titlebar",
   settingsPosition: "titlebar",
   floatingX: 280,
@@ -334,26 +338,37 @@ export const useCanvasConfig = create<ConfigState>()(
     }),
     {
       name: "canvas-config",
-      version: 5,
+      version: 6,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ preferences: state.preferences }),
       migrate: (saved, previousVersion) => {
-        if (previousVersion >= 4 || !saved || typeof saved !== "object") return saved;
+        if (!saved || typeof saved !== "object") return saved;
         const record = saved as { preferences?: Partial<CanvasPreferences> };
-        const prefs = record.preferences;
-        if (!prefs || prefs.skin !== "graphite") return saved;
-        const priorDefault = JSON.stringify(prefs.darkColors) === JSON.stringify(darkPalette);
-        const previousOled =
-          prefs.darkColors?.bg === "#000000" && prefs.darkColors?.surface === "#000000";
-        if (!priorDefault && !previousOled) return saved;
-        return {
-          ...record,
-          preferences: {
-            ...prefs,
-            skin: "oled",
-            ...(priorDefault ? { darkColors: oledPalette } : {}),
-          },
-        };
+        const old = record.preferences;
+        if (!old) return saved;
+        const preferences = { ...old };
+        // Existing default installations used titlebar navigation; move that
+        // placement to the new default while retaining all other placements.
+        if (previousVersion < 6 && preferences.navigationPosition === "titlebar")
+          preferences.navigationPosition = "statusbar";
+        if (previousVersion < 6 && preferences.statusAlignment) {
+          preferences.statusAlignment = {
+            ...preferences.statusAlignment,
+            snapshot: "center",
+            navigation: "left",
+          };
+        }
+        if (previousVersion < 4 && preferences.skin === "graphite") {
+          const priorDefault = JSON.stringify(preferences.darkColors) === JSON.stringify(darkPalette);
+          const previousOled =
+            preferences.darkColors?.bg === "#000000" &&
+            preferences.darkColors?.surface === "#000000";
+          if (priorDefault || previousOled) {
+            preferences.skin = "oled";
+            if (priorDefault) preferences.darkColors = oledPalette;
+          }
+        }
+        return { ...record, preferences };
       },
       merge: (saved, current) => {
         const record =

@@ -7,7 +7,6 @@ import { VIEWS, type CanvasView } from "./views";
 import context from "./generated/context.json";
 
 type Placement = "up" | "down";
-type Rect = { left: number; top: number; width: number; height: number };
 export default function Omnibar({
   onNavigate,
   dragHandle,
@@ -27,7 +26,6 @@ export default function Omnibar({
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(0);
   const [placement, setPlacement] = useState<Placement>("down");
-  const [rect, setRect] = useState<Rect>({ left: 0, top: 0, width: 340, height: 30 });
   const items = VIEWS.filter((view) =>
     (view.label + " " + context.name).toLowerCase().includes(query.toLowerCase().trim()),
   );
@@ -65,7 +63,7 @@ export default function Omnibar({
             ? "down"
             : "up";
     setPlacement(direction);
-    setRect({ left: bounds.left, top: bounds.top, width: bounds.width, height: bounds.height });
+    rootRef.current?.style.setProperty("--omnibar-results-max-height", `${Math.max(90, (direction === "down" ? freeDown : freeUp) - 4)}px`);
   }, [items.length, prefs.commandPlacement]);
   useLayoutEffect(() => {
     if (open) place();
@@ -75,11 +73,13 @@ export default function Omnibar({
     const update = () => place();
     window.addEventListener("resize", update);
     window.addEventListener("scroll", update, true);
+    window.addEventListener("canvas:omnibar-reposition", update);
     const observer = new ResizeObserver(update);
     if (rootRef.current) observer.observe(rootRef.current);
     return () => {
       window.removeEventListener("resize", update);
       window.removeEventListener("scroll", update, true);
+      window.removeEventListener("canvas:omnibar-reposition", update);
       observer.disconnect();
     };
   }, [open, place]);
@@ -104,16 +104,6 @@ export default function Omnibar({
       role="listbox"
       id="canvas-omnibar-results"
       aria-label={t("Open navigation tree")}
-      style={{
-        left: Math.max(8, Math.min(rect.left, window.innerWidth - Math.max(rect.width, 250) - 8)),
-        width: Math.max(250, Math.min(rect.width, window.innerWidth - 16)),
-        top: placement === "down" ? rect.top + rect.height : undefined,
-        bottom: placement === "up" ? window.innerHeight - rect.top : undefined,
-        maxHeight:
-          placement === "down"
-            ? Math.max(90, window.innerHeight - rect.top - rect.height - 10)
-            : Math.max(90, rect.top - 10),
-      }}
     >
       <div className="omnibar-results-list">
         {items.map((item, index) => (
@@ -175,17 +165,15 @@ export default function Omnibar({
           }
         }}
       />
-      {dragHandle ?? <kbd>⌘K</kbd>}
+      {dragHandle ?? <kbd>{prefs.modifierKey === "command" ? "⌘" : prefs.modifierKey === "control" ? "Ctrl" : prefs.modifierKey === "custom" ? prefs.customModifier : navigator.platform.toLowerCase().includes("mac") ? "⌘" : "Ctrl"}K</kbd>}
+      {open && options}
       {open &&
         createPortal(
-          <>
-            <div
-              className={`omnibar-backdrop ${prefs.commandBackdropBlur ? "blurred" : ""}`}
-              aria-hidden="true"
-              onPointerDown={dismiss}
-            />
-            {options}
-          </>,
+          <div
+            className={`omnibar-backdrop ${prefs.commandBackdropBlur ? "blurred" : ""}`}
+            aria-hidden="true"
+            onPointerDown={dismiss}
+          />,
           document.body,
         )}
     </div>

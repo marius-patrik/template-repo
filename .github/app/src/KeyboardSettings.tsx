@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useCanvasConfig } from "./config";
+import { CanvasSelect } from "./components/ui/CanvasSelect";
 import { useTranslation } from "react-i18next";
 import {
   formatForDisplay,
@@ -96,6 +98,9 @@ export default function KeyboardSettings() {
   const [query, setQuery] = useState("");
   const items = useAppHotkeyList();
   const { resetCustomHotkeys } = useCustomHotkeys();
+  const modifierKey = useCanvasConfig((state) => state.preferences.modifierKey);
+  const customModifier = useCanvasConfig((state) => state.preferences.customModifier);
+  const setPreferences = useCanvasConfig((state) => state.setPreferences);
   const matching = items.filter(({ appHotkey }) =>
     [t(appHotkey.meta?.name ?? ""), appHotkey.id, t(appHotkey.meta?.group ?? "")]
       .join(" ")
@@ -109,13 +114,39 @@ export default function KeyboardSettings() {
         <div>
           <h2>{t("Controls")}</h2>
           <p className="muted">
-            {t("Shortcuts follow your system: ⌘ on macOS, Ctrl on Windows/Linux.")}
+            {t("Choose the primary modifier for application shortcuts. Individual bindings can be overridden below.")}
           </p>
         </div>
         <button type="button" className="keybind-reset-all" onClick={resetCustomHotkeys}>
           {t("Reset all")}
         </button>
       </div>
+      <div className="modifier-preferences setting-row">
+        <span>{t("Modifier key")}</span>
+        <CanvasSelect
+          label={t("Modifier key")}
+          value={modifierKey}
+          options={[
+            { value: "system", label: t("System") },
+            { value: "control", label: t("Control") },
+            { value: "command", label: t("Command") },
+            { value: "custom", label: t("Custom") },
+          ]}
+          onValueChange={(value) => setPreferences({ modifierKey: value as typeof modifierKey })}
+        />
+      </div>
+      {modifierKey === "custom" && (
+        <div className="modifier-preferences setting-row">
+          <span>{t("Custom modifier")}</span>
+          <CanvasSelect
+            label={t("Custom modifier")}
+            value={customModifier}
+            options={["Alt", "Shift", "Ctrl+Alt", "Meta+Alt", "Ctrl+Shift", "Meta+Shift"]
+              .map((value) => ({ value, label: value }))}
+            onValueChange={(value) => setPreferences({ customModifier: value as typeof customModifier })}
+          />
+        </div>
+      )}
       <label className="keybind-search-label" htmlFor="canvas-shortcut-filter">
         {t("Find a command")}
       </label>

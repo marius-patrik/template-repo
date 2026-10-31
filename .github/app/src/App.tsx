@@ -63,8 +63,10 @@ export default function App() {
   );
   const setRoute = useProfiles((state) => state.setRoute);
   const togglePin = useProfiles((state) => state.togglePin);
-  const [floatingDrag, setFloatingDrag] = useState(false);
-  const floatOrigin = useRef({ pointerX: 0, pointerY: 0, x: 0, y: 0 });
+  const floatOrigin = useRef({
+    pointerX: 0, pointerY: 0, x: 0, y: 0, nextX: 0, nextY: 0,
+    surface: null as HTMLElement | null, frame: 0,
+  });
   useEffect(
     () => () => {
       document.body.classList.remove("resizing-sidebar");
@@ -394,14 +396,14 @@ export default function App() {
         {(["left", "center", "right"] as const).map((alignment) => {
           const segments = [
             {
-              id: "snapshot",
-              visible: true,
-              node: <span className="snapshot-state">{t("Repository snapshot · read-only")}</span>,
-            },
-            {
               id: "navigation",
               visible: prefs.navigationPosition === "statusbar",
               node: <Navigator current={page} onNavigate={go} onProfile={switchProfile} />,
+            },
+            {
+              id: "snapshot",
+              visible: true,
+              node: <span className="snapshot-state">{t("Repository snapshot · read-only")}</span>,
             },
             {
               id: "omnibar",
@@ -475,40 +477,55 @@ export default function App() {
               title={t("Drag omnibar")}
               aria-label={t("Drag omnibar")}
               onPointerDown={(event) => {
+                if (event.button !== 0) return;
                 event.preventDefault();
-                floatOrigin.current = {
-                  pointerX: event.clientX,
-                  pointerY: event.clientY,
-                  x: prefs.floatingX,
-                  y: prefs.floatingY,
-                };
+                const surface = event.currentTarget.closest<HTMLElement>(".omnibar-shell");
+                if (!surface) return;
+                const origin = floatOrigin.current;
+                origin.pointerX = event.clientX;
+                origin.pointerY = event.clientY;
+                origin.x = prefs.floatingX;
+                origin.y = prefs.floatingY;
+                origin.nextX = origin.x;
+                origin.nextY = origin.y;
+                origin.surface = surface;
                 event.currentTarget.setPointerCapture(event.pointerId);
-                setFloatingDrag(true);
               }}
               onPointerMove={(event) => {
-                if (!floatingDrag) return;
-                updatePreferences({
-                  floatingX: Math.min(
-                    Math.max(
-                      0,
-                      floatOrigin.current.x + event.clientX - floatOrigin.current.pointerX,
-                    ),
-                    window.innerWidth - 120,
-                  ),
-                  floatingY: Math.min(
-                    Math.max(
-                      0,
-                      floatOrigin.current.y + event.clientY - floatOrigin.current.pointerY,
-                    ),
-                    window.innerHeight - 35,
-                  ),
-                });
+                const origin = floatOrigin.current;
+                if (!origin.surface || !event.currentTarget.hasPointerCapture(event.pointerId))
+                  return;
+                origin.nextX = Math.max(0, Math.min(window.innerWidth - 120,
+                  origin.x + event.clientX - origin.pointerX));
+                origin.nextY = Math.max(0, Math.min(window.innerHeight - 35,
+                  origin.y + event.clientY - origin.pointerY));
+                origin.surface.style.transform = `translate3d(${origin.nextX - origin.x}px, ${origin.nextY - origin.y}px, 0)`;
+                if (!origin.frame) {
+                  origin.frame = requestAnimationFrame(() => {
+                    origin.frame = 0;
+                    window.dispatchEvent(new Event("canvas:omnibar-reposition"));
+                  });
+                }
               }}
               onPointerUp={(event) => {
                 if (event.currentTarget.hasPointerCapture(event.pointerId))
                   event.currentTarget.releasePointerCapture(event.pointerId);
               }}
-              onLostPointerCapture={() => setFloatingDrag(false)}
+              onLostPointerCapture={() => {
+                const origin = floatOrigin.current;
+                const surface = origin.surface;
+                origin.surface = null;
+                if (!surface) return;
+                if (origin.frame) cancelAnimationFrame(origin.frame);
+                origin.frame = 0;
+                if (origin.nextX !== origin.x || origin.nextY !== origin.y) {
+                  updatePreferences({ floatingX: origin.nextX, floatingY: origin.nextY });
+                  requestAnimationFrame(() => {
+                    surface.style.transform = "";
+                    window.dispatchEvent(new Event("canvas:omnibar-reposition"));
+                  });
+                } else surface.style.transform = "";
+              }}
             >
               <AnimatedIcon name="drag" size={15} />
             </button>

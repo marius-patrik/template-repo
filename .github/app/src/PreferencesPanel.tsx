@@ -182,6 +182,17 @@ export default function PreferencesPanel() {
             patch("navigationPosition", value as CanvasPreferences["navigationPosition"])
           }
         />
+        {prefs.navigationPosition === "statusbar" && (
+          <Choice
+            label="Navigation alignment"
+            value={prefs.statusAlignment.navigation}
+            values={["left", "center", "right"]}
+            onChange={(value) => patch("statusAlignment", {
+              ...prefs.statusAlignment,
+              navigation: value as "left" | "center" | "right",
+            })}
+          />
+        )}
         <Choice
           label="Omnibar position"
           value={prefs.omnibarPosition}
@@ -253,7 +264,7 @@ export default function PreferencesPanel() {
         </label>
         <h3>{t("Status bar alignment")}</h3>
         <p className="muted">{t("Items sharing an alignment are grouped with a separator.")}</p>
-        {STATUS_PARTS.map((part) => (
+        {STATUS_PARTS.filter((part) => part !== "navigation").map((part) => (
           <Choice
             key={part}
             label={readable(part)}
