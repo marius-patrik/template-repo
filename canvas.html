@@ -2066,7 +2066,7 @@ export function AccentColorPicker({
   );
 }
 </pre></section>
-<section class="file" id="file-0065"><h3>.github/app/src/App.tsx</h3><p class="meta">Git mode 100644 · 1fc024bfc59f459cff07b2549013a8206b36c973</p><pre>import { useEffect, useMemo, useRef, useState } from &quot;react&quot;;
+<section class="file" id="file-0065"><h3>.github/app/src/App.tsx</h3><p class="meta">Git mode 100644 · 52ed48e2ecb87b1f51fd9907ba53733246456e12</p><pre>import { useEffect, useMemo, useRef, useState } from &quot;react&quot;;
 import { colord, extend } from &quot;colord&quot;;
 import a11yPlugin from &quot;colord/plugins/a11y&quot;;
 import { formatForDisplay, useAppHotkeys, useHotkey } from &quot;@tanstack/react-hotkeys&quot;;
@@ -2165,7 +2165,7 @@ function Overview({ to }: { to: (p: string) =&gt; void }) {
             {t(&quot;{{documents}} source documents · {{records}} documented records&quot;, {
               documents: context.documents.length,
               records: context.paths.length,
-            })
+            })}
           &lt;/div&gt;
         &lt;/section&gt;
         &lt;div className=&quot;stack&quot;&gt;
