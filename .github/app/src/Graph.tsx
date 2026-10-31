@@ -63,7 +63,7 @@ export default function Graph() {
     return { nodes, edges };
   }, []);
   return (
-    <div className="graph-pane" role="region" aria-label="Repository document relationships">
+    <section className="graph-pane" aria-label="Repository document relationships">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -87,6 +87,6 @@ export default function Graph() {
           </button>
         </div>
       )}
-    </div>
+    </section>
   );
 }
