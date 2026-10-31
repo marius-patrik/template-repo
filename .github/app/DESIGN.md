@@ -1,4 +1,4 @@
-# Canvas interface v2 — rebuild plan and acceptance contract
+# Canvas interface v3 — rebuild plan and acceptance contract
 
 Status: implemented candidate, unmerged. The implementation may still evolve during visual review.
 
@@ -19,19 +19,37 @@ The interface is responsive, accessible, keyboard reachable, and usable without 
 
 ## Ownership boundaries
 
-| Owner                       | Concern                                                      |
-| --------------------------- | ------------------------------------------------------------ |
-| `App.tsx`                   | composition and routing only                                 |
-| `useWorkspaceAppearance.ts` | preferences → CSS tokens, no other token writer              |
-| `useFloatingOmnibar.ts`     | rAF pointer movement, persistence on release                 |
-| `SidebarResize.tsx`         | pointer/keyboard width interaction                           |
-| `Omnibar.tsx`               | a single input, result list, focus, collision placement      |
-| `DockCanvas.tsx`            | actual tabs, splits, close and serialized layouts            |
-| `interface.css`             | application shell, tabs, command surface and settings chrome |
-| `polish.css`                | Canvas document/graph content styles                         |
-| `styles.css`                | legacy content primitives until those views are migrated     |
+- `App.tsx`: application composition and routing.
+- `useWorkspaceAppearance.ts`: preferences to CSS tokens; no second token writer.
+- `useFloatingOmnibar.ts`: rAF drag movement, persistence on release.
+- `SidebarResize.tsx`: isolated pointer and keyboard sidebar resizing.
+- `Omnibar.tsx`: single input, command results, focus, and collision placement.
+- `DockCanvas.tsx`: Dockview tabs, splits, persisted layouts, and the welcome view.
+- `Canvas.tsx`: factual repository overview, document browser, and focused graph.
+- `interface.css`: application shell, tabs, command surface and chrome.
+- `canvas-content.css`: Canvas overview, source reader, graph, and inspector.
+- `preferences-content.css`: settings navigation, controls, and token layout.
+- `welcome-content.css`: new-tab launcher and responsive welcome styling.
+- `styles.css`: legacy content primitives outside the rebuilt surfaces.
 
-The obsolete `layout-fixes.css` is no longer imported by the application. Source can be deleted once content parity is visually accepted.
+The former `layout-fixes.css` and `polish.css` files have been removed from
+the application. New design changes should alter the owning component, never
+add a last-in-cascade override file.
+
+## Content hierarchy
+
+1. A new tab offers a deliberate tool launcher rather than an empty dashboard.
+2. Canvas initially displays the source-backed project goal and relevant source
+   documents, then progressively exposes a document explorer or knowledge graph.
+3. The graph shows a bounded neighborhood of selected source domains and real
+   Markdown links. It must not shrink the entire repository into unreadable nodes.
+4. Source documents render as readable text with a dedicated search/list region;
+   the context inspector is factual and never displays invented live telemetry.
+5. Settings has a discoverable section rail and retains editable global and
+   per-component design tokens.
+6. Mobile keeps navigable tool modes and footer breadcrumbs without horizontal
+   viewport overflow.
+
 
 ## Must remain functional
 
