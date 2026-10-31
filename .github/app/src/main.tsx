@@ -27,7 +27,11 @@ createRoot(root).render(
       appHotkeys={appHotkeys}
       customHotkeys={loadHotkeys()}
       onCustomHotkeysChange={(hotkeys) => {
-        try { localStorage.setItem("canvas-hotkeys", JSON.stringify(hotkeys)); } catch { /* private mode */ }
+        try {
+          localStorage.setItem("canvas-hotkeys", JSON.stringify(hotkeys));
+        } catch {
+          /* private mode */
+        }
       }}
     >
       <Router hook={useHashLocation}>

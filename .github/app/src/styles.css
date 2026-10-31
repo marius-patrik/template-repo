@@ -1076,7 +1076,9 @@ kbd {
   outline: 1px solid var(--border);
   display: inline-grid;
   place-items: center;
-  transition: outline-color 0.16s, transform 0.16s;
+  transition:
+    outline-color 0.16s,
+    transform 0.16s;
 }
 .accent-swatch:hover {
   transform: translateY(-1px);

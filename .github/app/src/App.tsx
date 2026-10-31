@@ -47,7 +47,8 @@ function loadPrefs(): Preferences {
       data &&
       ["dark", "light", "system"].includes(data.theme) &&
       typeof data.accent === "string" &&
-      (accentPresets.some((preset) => preset.id === data.accent) || /^#[0-9a-f]{6}$/i.test(data.accent)) &&
+      (accentPresets.some((preset) => preset.id === data.accent) ||
+        /^#[0-9a-f]{6}$/i.test(data.accent)) &&
       [13, 14, 15, 16].includes(data.fontSize) &&
       [16, 18, 20].includes(data.iconSize)
     )
@@ -325,7 +326,10 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
         {options("theme", ["dark", "light", "system"] as const, "Theme")}
         <div className="setting-row accent-setting">
           <strong>Accent color</strong>
-          <AccentColorPicker value={prefs.accent} onChange={(accent) => setPrefs({ ...prefs, accent })} />
+          <AccentColorPicker
+            value={prefs.accent}
+            onChange={(accent) => setPrefs({ ...prefs, accent })}
+          />
         </div>
         {options("fontSize", [13, 14, 15, 16] as const, "Text size")}
         {options("iconSize", [16, 18, 20] as const, "Icon size")}
@@ -360,11 +364,18 @@ export default function App() {
           : "light"
         : prefs.theme;
     document.documentElement.dataset.theme = resolved;
-    document.documentElement.dataset.accent = accentPresets.some((preset) => preset.id === prefs.accent) ? prefs.accent : "custom";
+    document.documentElement.dataset.accent = accentPresets.some(
+      (preset) => preset.id === prefs.accent,
+    )
+      ? prefs.accent
+      : "custom";
     if (/^#[0-9a-f]{6}$/i.test(prefs.accent) && colord(prefs.accent).isValid()) {
       const color = colord(prefs.accent);
       document.documentElement.style.setProperty("--accent", color.toHex());
-      document.documentElement.style.setProperty("--accent-foreground", color.contrast("#ffffff") >= color.contrast("#111113") ? "#ffffff" : "#111113");
+      document.documentElement.style.setProperty(
+        "--accent-foreground",
+        color.contrast("#ffffff") >= color.contrast("#111113") ? "#ffffff" : "#111113",
+      );
     } else {
       document.documentElement.style.removeProperty("--accent");
       document.documentElement.style.removeProperty("--accent-foreground");
@@ -393,11 +404,17 @@ export default function App() {
     setPaletteOpen(false);
     setSearch("");
   };
-  useHotkey(hotkeys["canvas.sidebar.toggle"], () => {
-    if (window.matchMedia("(max-width: 700px)").matches) setMobileOpen((v) => !v);
-    else setCollapsed((v) => !v);
-  }, { ignoreInputs: true });
-  useHotkey(hotkeys["canvas.omnibar.toggle"], () => setPaletteOpen((v) => !v), { ignoreInputs: false });
+  useHotkey(
+    hotkeys["canvas.sidebar.toggle"],
+    () => {
+      if (window.matchMedia("(max-width: 700px)").matches) setMobileOpen((v) => !v);
+      else setCollapsed((v) => !v);
+    },
+    { ignoreInputs: true },
+  );
+  useHotkey(hotkeys["canvas.omnibar.toggle"], () => setPaletteOpen((v) => !v), {
+    ignoreInputs: false,
+  });
   useHotkey(hotkeys["canvas.settings.open"], () => go("/settings"));
   useHotkey(hotkeys["canvas.overview.open"], () => go("/overview"));
   useHotkey(hotkeys["canvas.workspace.open"], () => go("/workspace"));
@@ -440,7 +457,11 @@ export default function App() {
             <span className="crumb">{context.name}</span>
             {icon("right", 12)}
             <strong>{title}</strong>
-            <kbd>{hotkeys["canvas.omnibar.toggle"].hotkey ? formatForDisplay(hotkeys["canvas.omnibar.toggle"].hotkey) : "Unbound"}</kbd>
+            <kbd>
+              {hotkeys["canvas.omnibar.toggle"].hotkey
+                ? formatForDisplay(hotkeys["canvas.omnibar.toggle"].hotkey)
+                : "Unbound"}
+            </kbd>
           </button>
         </div>
         <Button
@@ -559,8 +580,11 @@ export default function App() {
                     setSelection(0);
                   }}
                   onKeyDown={(e) => {
-                    if (e.key === "Escape") { e.preventDefault(); setPaletteOpen(false); }
-                if (e.key === "ArrowDown") {
+                    if (e.key === "Escape") {
+                      e.preventDefault();
+                      setPaletteOpen(false);
+                    }
+                    if (e.key === "ArrowDown") {
                       e.preventDefault();
                       setSelection((s) => Math.min(s + 1, filtered.length - 1));
                     }

@@ -22,7 +22,7 @@ export function AccentColorPicker({
   const custom = value.startsWith("#");
   const current = custom
     ? value
-    : accentPresets.find((preset) => preset.id === value)?.hex ?? "#81adf1";
+    : (accentPresets.find((preset) => preset.id === value)?.hex ?? "#81adf1");
   const update = (color: string) => {
     if (colord(color).isValid()) onChange(colord(color).toHex());
   };
