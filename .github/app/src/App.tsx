@@ -563,7 +563,10 @@ export default function App() {
                       const sign = prefs.sidebarPosition === "left" ? 1 : -1;
                       const delta = (event.clientX - resizeOrigin.current.x) * sign;
                       updatePreferences({
-                        sidebarWidth: Math.min(480, Math.max(180, Math.round(resizeOrigin.current.width + delta))),
+                        sidebarWidth: Math.min(
+                          480,
+                          Math.max(180, Math.round(resizeOrigin.current.width + delta)),
+                        ),
                       });
                     }}
                     onLostPointerCapture={() => {

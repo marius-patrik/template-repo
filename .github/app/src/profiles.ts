@@ -12,7 +12,15 @@ export type Profile = {
   drafts: Record<string, string>;
 };
 const initialProfiles: Profile[] = ["Global", "Study", "Health", "Code", "Design", "Finance"].map(
-  (name) => ({ id: name.toLowerCase(), name, route: "/", pinned: [], note: "", selectedDocument: "", drafts: {} }),
+  (name) => ({
+    id: name.toLowerCase(),
+    name,
+    route: "/",
+    pinned: [],
+    note: "",
+    selectedDocument: "",
+    drafts: {},
+  }),
 );
 type State = {
   profiles: Profile[];
@@ -40,7 +48,10 @@ export const useProfiles = create<State>()(
         if (!name || get().profiles.length >= 50) return null;
         const id = crypto.randomUUID();
         set((state) => ({
-          profiles: [...state.profiles, { id, name, route: "/", pinned: [], note: "", selectedDocument: "", drafts: {} }],
+          profiles: [
+            ...state.profiles,
+            { id, name, route: "/", pinned: [], note: "", selectedDocument: "", drafts: {} },
+          ],
           currentId: id,
         }));
         return id;
@@ -58,8 +69,11 @@ export const useProfiles = create<State>()(
           const profiles = state.profiles.filter((p) => p.id !== id);
           return { profiles, currentId: state.currentId === id ? profiles[0].id : state.currentId };
         });
-        try { localStorage.removeItem(`canvas-dockview-layout-v2-${id}`); }
-        catch { /* Browsers may deny storage access. */ }
+        try {
+          localStorage.removeItem(`canvas-dockview-layout-v2-${id}`);
+        } catch {
+          /* Browsers may deny storage access. */
+        }
       },
       setRoute: (route) =>
         set((state) => ({
@@ -141,15 +155,20 @@ export const useProfiles = create<State>()(
                       .slice(0, 20)
                   : [],
                 note: typeof value.note === "string" ? value.note.slice(0, 100000) : "",
-                selectedDocument: typeof value.selectedDocument === "string"
-                  ? value.selectedDocument.slice(0, 300) : "",
-                drafts: value.drafts && typeof value.drafts === "object" &&
-                  !Array.isArray(value.drafts)
-                  ? Object.fromEntries(
-                    Object.entries(value.drafts).filter(
-                      ([path, content]) => path.length <= 300 && typeof content === "string",
-                    ).slice(0, 64),
-                  ) : {},
+                selectedDocument:
+                  typeof value.selectedDocument === "string"
+                    ? value.selectedDocument.slice(0, 300)
+                    : "",
+                drafts:
+                  value.drafts && typeof value.drafts === "object" && !Array.isArray(value.drafts)
+                    ? Object.fromEntries(
+                        Object.entries(value.drafts)
+                          .filter(
+                            ([path, content]) => path.length <= 300 && typeof content === "string",
+                          )
+                          .slice(0, 64),
+                      )
+                    : {},
               }))
           : [];
         if (!profiles.length) return current;

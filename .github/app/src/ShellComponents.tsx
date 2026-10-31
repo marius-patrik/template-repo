@@ -280,8 +280,16 @@ export function ActivityBar({
   );
   const togglePin = useProfiles((state) => state.togglePin);
   const shortcuts: CanvasView[] = [
-    "overview", "projects", "agents", "graph", "roadmap",
-    "artifacts", "activity", "context", "notepad", "library",
+    "overview",
+    "projects",
+    "agents",
+    "graph",
+    "roadmap",
+    "artifacts",
+    "activity",
+    "context",
+    "notepad",
+    "library",
   ];
   const entries = [...new Set([...shortcuts, ...pinned])];
   return (

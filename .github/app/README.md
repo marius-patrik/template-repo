@@ -35,13 +35,13 @@ editor.
 
 ### Configurable application surfaces
 
-| Surface | Allowed placements |
-| --- | --- |
-| Navigation | Sidebar, title bar, omnibar, status bar, hidden |
+| Surface         | Allowed placements                                         |
+| --------------- | ---------------------------------------------------------- |
+| Navigation      | Sidebar, title bar, omnibar, status bar, hidden            |
 | Omnibar trigger | Title bar, sidebar, status bar, floating draggable, hidden |
-| Settings access | Title bar, activity bar, status bar, tab bar |
-| Activity bar | Left, right, top, bottom, hidden |
-| Primary sidebar | Left, right |
+| Settings access | Title bar, activity bar, status bar, tab bar               |
+| Activity bar    | Left, right, top, bottom, hidden                           |
+| Primary sidebar | Left, right                                                |
 
 The omnibar is still the **Mod+K command/search UI**, not a permanent breadcrumb.
 The title-bar breadcrumb is independent. Context menus on interactive surfaces
@@ -59,11 +59,11 @@ palettes, including the shared **border** color; Graphite, Slate and Contrast
 are starting palettes. UI scale presets adjust **font size, icon size, border
 radius and spacing together**:
 
-| Preset | Text | Icon | Radius | Spacing |
-| --- | ---: | ---: | ---: | ---: |
-| Small | 12 px | 15 px | 4 px | 6 px |
-| Normal | 14 px | 18 px | 8 px | 8 px |
-| Large | 16 px | 21 px | 12 px | 11 px |
+| Preset |  Text |  Icon | Radius | Spacing |
+| ------ | ----: | ----: | -----: | ------: |
+| Small  | 12 px | 15 px |   4 px |    6 px |
+| Normal | 14 px | 18 px |   8 px |    8 px |
+| Large  | 16 px | 21 px |  12 px |   11 px |
 
 Each dimension is separately editable after selecting a preset. Layout uses
 `--ui-spacing`, `--ui-radius`, `--app-font-size` and the unified palette
