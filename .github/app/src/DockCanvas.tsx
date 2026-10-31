@@ -47,8 +47,10 @@ const routeToView = viewFromRoute;
 function CanvasTab(props: IDockviewPanelHeaderProps) {
   const workspace = useContext(PaneContext);
   const { t } = useTranslation();
-  const raw: unknown = props.api.getParameters().view;
-  const view: CanvasView = typeof raw === "string" && isCanvasView(raw) ? raw : "overview";
+  // Dockview tab header APIs may not expose the panel's initial parameters.
+  // Every Canvas panel has a canonical route/ tab/ split ID containing its view.
+  const name = props.api.id.split(":")[1] ?? "";
+  const view: CanvasView = isCanvasView(name) ? name : "overview";
   return (
     <CanvasContextMenu
       actions={[
