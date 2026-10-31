@@ -2665,7 +2665,7 @@ export default function App() {
   );
 }
 </pre></section>
-<section class="file" id="file-0066"><h3>.github/app/src/DockCanvas.tsx</h3><p class="meta">Git mode 100644 · 4bff45a984f2b0ca2ffeda86d748e7f8daa39984</p><pre>import * as DropdownMenu from &quot;@radix-ui/react-dropdown-menu&quot;;
+<section class="file" id="file-0066"><h3>.github/app/src/DockCanvas.tsx</h3><p class="meta">Git mode 100644 · d9cddd9db501f35802d78074a9b400e23b8def42</p><pre>import * as DropdownMenu from &quot;@radix-ui/react-dropdown-menu&quot;;
 import {
   createContext,
   useCallback,
@@ -2790,9 +2790,8 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
 
   const splitRight = () =&gt; {
     const selected =
-      containerApi.panels.find(
-        (panel) =&gt; panel.group.id === group.id &amp;&amp; panel.api.isVisible,
-      ) ?? containerApi.panels.find((panel) =&gt; panel.group.id === group.id);
+      containerApi.panels.find((panel) =&gt; panel.group.id === group.id &amp;&amp; panel.api.isVisible) ??
+      containerApi.panels.find((panel) =&gt; panel.group.id === group.id);
     const candidate: unknown = selected?.api.getParameters().view;
     const view: CanvasView =
       typeof candidate === &quot;string&quot; &amp;&amp; isView(candidate) ? candidate : &quot;overview&quot;;
@@ -2862,7 +2861,9 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
             aria-label=&quot;More tab actions&quot;
             title=&quot;More tab actions&quot;
           &gt;
-            &lt;span className=&quot;dock-more-glyph&quot; aria-hidden=&quot;true&quot;&gt;···&lt;/span&gt;
+            &lt;span className=&quot;dock-more-glyph&quot; aria-hidden=&quot;true&quot;&gt;
+              ···
+            &lt;/span&gt;
           &lt;/button&gt;
         &lt;/DropdownMenu.Trigger&gt;
         &lt;DropdownMenu.Portal&gt;
@@ -2874,10 +2875,7 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
             collisionPadding={10}
             aria-label=&quot;Tab layout actions&quot;
           &gt;
-            &lt;DropdownMenu.Item
-              className=&quot;menu-item dock-action-item&quot;
-              onSelect={splitRight}
-            &gt;
+            &lt;DropdownMenu.Item className=&quot;menu-item dock-action-item&quot; onSelect={splitRight}&gt;
               &lt;AnimatedIcon name=&quot;workspace&quot; size={16} /&gt;
               &lt;span&gt;Split right&lt;/span&gt;
             &lt;/DropdownMenu.Item&gt;
