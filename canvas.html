@@ -1774,13 +1774,13 @@ Pages builds on the feature branch deploy through the `canvas-preview` environme
 </pre></section>
 <section class="file" id="file-0060"><h3>.github/app/postcss.config.mjs</h3><p class="meta">Git mode 100644 · a9b5c43d12ca5dd106ede4e9cec451f4ede60fef</p><pre>export default { plugins: { &quot;@tailwindcss/postcss&quot;: {} } };
 </pre></section>
-<section class="file" id="file-0061"><h3>.github/app/rsbuild.config.ts</h3><p class="meta">Git mode 100644 · 81aee724aa4e15ed9248762caf13763dd90130b8</p><pre>import { defineConfig } from &quot;@rsbuild/core&quot;;
+<section class="file" id="file-0061"><h3>.github/app/rsbuild.config.ts</h3><p class="meta">Git mode 100644 · fb5b81b2a7a2623c08fe7b884757393aa191af33</p><pre>import { defineConfig } from &quot;@rsbuild/core&quot;;
 import { pluginReact } from &quot;@rsbuild/plugin-react&quot;;
 
 export default defineConfig({
   plugins: [pluginReact()],
   source: { entry: { index: &quot;./src/main.tsx&quot; } },
-  html: { template: &quot;./index.html&quot;, title: &quot;Canvas · Repository Workspace&quot; },
+  html: { template: &quot;./index.html&quot;, title: &quot;Canvas · Repository Workspace&quot;, inject: &quot;body&quot; },
   output: {
     distPath: { root: &quot;../../.canvas-dist&quot; },
     assetPrefix: &quot;./&quot;,
