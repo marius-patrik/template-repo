@@ -5264,7 +5264,7 @@ if __name__ == &quot;__main__&quot;:
         print(f&quot;error: {error}&quot;, file=sys.stderr)
         sys.exit(1)
 </pre></section>
-<section class="file" id="file-0079"><h3>.github/tests/smoke_canvas.mjs</h3><p class="meta">Git mode 100644 · 39b1794987501af55aa90de63cde404295f5ceb2</p><pre>import { createRequire } from &quot;node:module&quot;;
+<section class="file" id="file-0079"><h3>.github/tests/smoke_canvas.mjs</h3><p class="meta">Git mode 100644 · 7b40055bfb9aa716db16d2c9ee7bb8a62bde9f6d</p><pre>import { createRequire } from &quot;node:module&quot;;
 import { resolve } from &quot;node:path&quot;;
 import { pathToFileURL } from &quot;node:url&quot;;
 
@@ -5296,7 +5296,7 @@ try {
   await page.getByRole(&quot;button&quot;, { name: &quot;Open knowledge graph&quot; }).click();
   await page.locator(&#x27;.dock-grid [data-dock-view=&quot;graph&quot;]&#x27;).waitFor();
   await page.waitForFunction(() =&gt; location.hash.includes(&quot;/graph&quot;));
-  await page.locator(&#x27;.sidebar a[href=&quot;/overview&quot;]&#x27;).click();
+  await page.locator(&#x27;.sidebar .nav-link[title=&quot;Overview&quot;]&#x27;).click();
   await page.locator(&#x27;.dock-grid [data-dock-view=&quot;overview&quot;]&#x27;).first().waitFor();
   await page.waitForFunction(() =&gt; location.hash.includes(&quot;/overview&quot;));
   if (await page.locator(&quot;.sidebar-footer&quot;).count()) throw new Error(&quot;Redundant sidebar snapshot footer remains&quot;);
