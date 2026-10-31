@@ -2015,7 +2015,7 @@ export function AccentColorPicker({
   );
 }
 </pre></section>
-<section class="file" id="file-0065"><h3>.github/app/src/App.tsx</h3><p class="meta">Git mode 100644 · b27869fe21abfae90e49ab775bcf4fdcd61787be</p><pre>import { useEffect, useMemo, useRef, useState } from &quot;react&quot;;
+<section class="file" id="file-0065"><h3>.github/app/src/App.tsx</h3><p class="meta">Git mode 100644 · bc699d144fa5b801816de49e86ffe24ff4116027</p><pre>import { useEffect, useMemo, useRef, useState } from &quot;react&quot;;
 import { colord, extend } from &quot;colord&quot;;
 import a11yPlugin from &quot;colord/plugins/a11y&quot;;
 import { formatForDisplay, useAppHotkeys, useHotkey } from &quot;@tanstack/react-hotkeys&quot;;
@@ -2334,7 +2334,7 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
   ) =&gt; (
     &lt;div className=&quot;setting-row&quot;&gt;
       &lt;strong&gt;{t(label)}&lt;/strong&gt;
-      &lt;div className=&quot;segmented&quot; role=&quot;group&quot; aria-label={t(label)}&gt;
+      &lt;fieldset className=&quot;segmented&quot; aria-label={t(label)}&gt;
         {values.map((value) =&gt; (
           &lt;button
             type=&quot;button&quot;
@@ -2346,7 +2346,7 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
             {valueLabel(value)}
           &lt;/button&gt;
         ))}
-      &lt;/div&gt;
+      &lt;/fieldset&gt;
     &lt;/div&gt;
   );
 
@@ -2371,7 +2371,7 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
         )}
         &lt;div className=&quot;setting-row skin-setting&quot;&gt;
           &lt;strong&gt;{t(&quot;Skin&quot;)}&lt;/strong&gt;
-          &lt;div className=&quot;skin-options&quot; role=&quot;group&quot; aria-label={t(&quot;Skin selection&quot;)}&gt;
+          &lt;fieldset className=&quot;skin-options&quot; aria-label={t(&quot;Skin selection&quot;)}&gt;
             {([&quot;graphite&quot;, &quot;slate&quot;, &quot;contrast&quot;] as const).map((skin) =&gt; (
               &lt;button
                 type=&quot;button&quot;
@@ -2386,7 +2386,7 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
                 &lt;span&gt;{t(skin === &quot;graphite&quot; ? &quot;Graphite&quot; : skin === &quot;slate&quot; ? &quot;Slate&quot; : &quot;High contrast&quot;)}&lt;/span&gt;
               &lt;/button&gt;
             ))}
-          &lt;/div&gt;
+          &lt;/fieldset&gt;
         &lt;/div&gt;
         {options(&quot;density&quot;, [&quot;comfortable&quot;, &quot;compact&quot;] as const, &quot;Density&quot;, (value) =&gt;
           t(value === &quot;comfortable&quot; ? &quot;Comfortable&quot; : &quot;Compact&quot;)
@@ -2722,7 +2722,7 @@ export default function App() {
   );
 }
 </pre></section>
-<section class="file" id="file-0066"><h3>.github/app/src/DockCanvas.tsx</h3><p class="meta">Git mode 100644 · 205cd0eade1c2c7bcb39387cd9b1164d80c5643b</p><pre>import * as DropdownMenu from &quot;@radix-ui/react-dropdown-menu&quot;;
+<section class="file" id="file-0066"><h3>.github/app/src/DockCanvas.tsx</h3><p class="meta">Git mode 100644 · cbe2752c9dde5b8bab1a6e960afced70aee02b22</p><pre>import * as DropdownMenu from &quot;@radix-ui/react-dropdown-menu&quot;;
 import {
   createContext,
   useCallback,
@@ -2971,7 +2971,7 @@ type Props = {
 };
 
 export default function DockCanvas({ route, dark, onNavigate, renderView }: Props) {
-  const { i18n: translation } = useTranslation();
+  const { t } = useTranslation();
   const apiRef = useRef&lt;DockviewApi | null&gt;(null);
   const disposables = useRef&lt;Array&lt;{ dispose: () =&gt; void }&gt;&gt;([]);
   const latest = useRef({ route, onNavigate });
@@ -3004,10 +3004,10 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
     for (const panel of api.panels) {
       const candidate: unknown = panel.api.getParameters().view;
       if (typeof candidate === &quot;string&quot; &amp;&amp; isView(candidate)) {
-        panel.api.setTitle(localizedTitle(candidate));
+        panel.api.setTitle(t(TITLES[candidate]));
       }
     }
-  }, [translation.resolvedLanguage]);
+  }, [t]);
 
   useEffect(
     () =&gt; () =&gt; {
