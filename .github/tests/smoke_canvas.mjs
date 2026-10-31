@@ -29,7 +29,12 @@ try {
   await menu.getByRole("menuitem", { name: "Projects" }).click();
   await page.locator('.dock-grid [data-dock-view="projects"]').waitFor();
   if (!(await page.locator('.dock-grid .canvas-dock-tab[data-canvas-tab="projects"] .app-icon').count()))
-    throw new Error("A Dockview tab is missing its animated route icon");
+    throw new Error(
+      "A Dockview tab is missing its animated route icon. Tab DOM: " +
+      (await page.locator(".dock-grid .dv-tabs-and-actions-container").first().evaluate(
+        (element) => element.outerHTML.slice(0, 4200),
+      )),
+    );
   if (!(await page.locator(".title-navigation").count()))
     throw new Error("Title-bar breadcrumb dropdowns are missing");
   const viewSelector = page.getByTestId("breadcrumb-view");
@@ -44,6 +49,7 @@ try {
   await monacoTab.click({ button: "right" });
   await page.getByRole("menuitem", { name: "Split right" }).waitFor();
   await page.keyboard.press("Escape");
+  await page.locator('.sidebar .nav-link[title="Projects"]').click();
 
   await page.waitForFunction(() => location.hash.includes("/projects"));
   await page.locator(".dock-grid .dv-groupview").first().getByRole("button", { name: "Add tab" }).click();
