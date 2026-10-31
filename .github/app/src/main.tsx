@@ -10,5 +10,9 @@ import "dockview-react/dist/styles/dockview.css";
 const root = document.getElementById("root");
 if (!root) throw new Error("Canvas root is missing");
 createRoot(root).render(
-  <React.StrictMode><Router hook={useHashLocation}><App /></Router></React.StrictMode>
+  <React.StrictMode>
+    <Router hook={useHashLocation}>
+      <App />
+    </Router>
+  </React.StrictMode>,
 );
