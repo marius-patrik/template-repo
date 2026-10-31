@@ -27,7 +27,7 @@ const panes: { id: Perspective; label: string; icon: string }[] = [
 ];
 const basename = (path: string) => path.split("/").at(-1)?.replace(/\.md$/i, "") ?? path;
 const categoryOf = (path: string): Category => {
-  const name = path.toLowerCase();
+  const name = basename(path).toLowerCase();
   if (/architecture|adr|design|decision|system/.test(name)) return "Architecture";
   if (/plan|roadmap|prd|todo|milestone|backlog/.test(name)) return "Planning";
   if (/agents|goal|instruction|readme|context|guide/.test(name)) return "Guidance";
@@ -297,7 +297,7 @@ export default function Canvas() {
       notify.error(t("Clipboard unavailable"));
     }
   };
-  const goalText = extractSummary(context.goal, 520);
+  const goalText = extractSummary(context.goal, 340);
   const firstGuidance = documents.filter((doc) => categoryOf(doc.path) === "Guidance").slice(0, 5);
   const suggested = firstGuidance.length ? firstGuidance : documents.slice(0, 5);
   return (

@@ -829,8 +829,24 @@
     padding-inline: 13px;
     gap: 8px;
   }
+  .cx-repository .cx-viewbar-modes.canvas-mode-switch {
+    flex: 0 0 auto;
+    min-width: 0;
+    margin-left: auto;
+    padding: 2px;
+  }
+  .cx-repository .cx-viewbar-title {
+    flex: 1 1 auto;
+    width: 0;
+    min-width: 0;
+  }
+  .cx-repository .cx-viewbar-title .cx-overline {
+    display: none;
+  }
   .cx-repository .cx-viewbar-modes button {
-    padding: 0 8px;
+    width: 28px;
+    min-width: 28px;
+    padding: 0;
     min-height: 27px;
   }
   .cx-repository .cx-viewbar-modes button span {
