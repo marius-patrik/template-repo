@@ -5402,7 +5402,7 @@ if __name__ == &quot;__main__&quot;:
         print(f&quot;error: {error}&quot;, file=sys.stderr)
         sys.exit(1)
 </pre></section>
-<section class="file" id="file-0079"><h3>.github/tests/smoke_canvas.mjs</h3><p class="meta">Git mode 100644 · 6971506de3d335a895796bddf1e31755dab069de</p><pre>import { createRequire } from &quot;node:module&quot;;
+<section class="file" id="file-0079"><h3>.github/tests/smoke_canvas.mjs</h3><p class="meta">Git mode 100644 · 9e31dcd574a9577b4388846e5d757c716314aaeb</p><pre>import { createRequire } from &quot;node:module&quot;;
 import { resolve } from &quot;node:path&quot;;
 import { pathToFileURL } from &quot;node:url&quot;;
 
@@ -5420,6 +5420,9 @@ try {
   await page.locator(&quot;.window-titlebar&quot;).waitFor();
   await page.locator(&quot;.window-statusbar&quot;).waitFor();
   await page.locator(&#x27;.dock-grid [data-dock-view=&quot;overview&quot;]&#x27;).waitFor();
+  if (await page.locator(&quot;.dock-toolbar&quot;).count())
+    throw new Error(&quot;Redundant secondary workspace toolbar remains&quot;);
+  await page.locator(&quot;.dock-grid .dv-groupview&quot;).first().getByRole(&quot;button&quot;, { name: &quot;More tab actions&quot; }).waitFor();
   const addTab = page.locator(&quot;.dock-grid .dv-groupview&quot;).first().getByRole(&quot;button&quot;, { name: &quot;Add tab&quot; });
   await addTab.waitFor();
   await addTab.click();
@@ -5437,16 +5440,22 @@ try {
     throw new Error(&quot;Adding a tab created a separate group instead of reusing the tab bar&quot;);
   if ((await page.locator(&quot;.dockview-theme-dark, .dockview-theme-light&quot;).count()) !== 1)
     throw new Error(&quot;Expected exactly one root Dockview compositor&quot;);
-  await page.getByRole(&quot;button&quot;, { name: &quot;Split active panel right&quot; }).click();
+  await page.locator(&quot;.dock-grid .dv-groupview&quot;).first().getByRole(&quot;button&quot;, { name: &quot;More tab actions&quot; }).click();
+  const layoutActions = page.locator(&quot;.dock-more-menu&quot;);
+  await layoutActions.waitFor();
+  if ((await layoutActions.getByRole(&quot;menuitem&quot;).count()) !== 2)
+    throw new Error(&quot;The tab actions menu must contain split and reset&quot;);
+  await layoutActions.getByRole(&quot;menuitem&quot;, { name: &quot;Split right&quot; }).click();
   await page.waitForFunction(() =&gt; document.querySelectorAll(&quot;.dock-grid .dv-groupview&quot;).length &gt;= 2);
   if (!(await page.evaluate(() =&gt; !!localStorage.getItem(&quot;canvas-dockview-layout-v1&quot;))))
     throw new Error(&quot;Dockview layout was not saved&quot;);
   await page.reload({ waitUntil: &quot;load&quot; });
   await page.locator(&#x27;.dock-grid [data-dock-view=&quot;overview&quot;]&#x27;).first().waitFor();
   await page.waitForFunction(() =&gt; document.querySelectorAll(&quot;.dock-grid .dv-groupview&quot;).length &gt;= 2);
-  await page.getByRole(&quot;button&quot;, { name: &quot;Reset panel layout&quot; }).click();
+  await page.locator(&quot;.dock-grid .dv-groupview&quot;).first().getByRole(&quot;button&quot;, { name: &quot;More tab actions&quot; }).click();
+  await page.locator(&quot;.dock-more-menu&quot;).getByRole(&quot;menuitem&quot;, { name: &quot;Reset layout&quot; }).click();
   await page.waitForFunction(() =&gt; document.querySelectorAll(&quot;.dock-grid .dv-groupview&quot;).length === 1);
-  await page.getByRole(&quot;button&quot;, { name: &quot;Open knowledge graph&quot; }).click();
+  await page.locator(&#x27;.sidebar .nav-link[title=&quot;Knowledge graph&quot;]&#x27;).click();
   await page.locator(&#x27;.dock-grid [data-dock-view=&quot;graph&quot;]&#x27;).waitFor();
   await page.waitForFunction(() =&gt; location.hash.includes(&quot;/graph&quot;));
   await page.locator(&#x27;.sidebar .nav-link[title=&quot;Overview&quot;]&#x27;).click();
@@ -5502,7 +5511,7 @@ try {
   await page.locator(&quot;.sidebar.mobile-open&quot;).waitFor();
 
   if (errors.length) throw new Error(`Browser uncaught errors: ${errors.join(&quot;; &quot;)}`);
-  console.log(&quot;Canvas Chromium smoke passed: one Dockview compositor, split/restore/reset, route panels, chrome, shortcuts, settings and mobile.&quot;);
+  console.log(&quot;Canvas Chromium smoke passed: Dockview tab actions, split/restore/reset, routes, chrome, shortcuts, settings and mobile.&quot;);
 } finally {
   await browser.close();
 }
