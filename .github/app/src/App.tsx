@@ -714,7 +714,6 @@ export default function App() {
         </aside>
         <hr
           className={`sidebar-resizer ${collapsed ? "disabled" : ""}`}
-          role="separator"
           aria-label={t("Resize sidebar")}
           aria-orientation="vertical"
           aria-valuenow={sidebarWidth}
