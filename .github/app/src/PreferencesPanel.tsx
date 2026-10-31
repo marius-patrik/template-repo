@@ -283,7 +283,7 @@ export default function PreferencesPanel() {
             "Override a component's color and scale tokens without changing the global palette. Inherit keeps the global setting.",
           )}
         </p>
-        <div className="component-token-table" aria-label={t("Component token mapping")}>
+        <div className="component-token-table">
           {COMPONENTS.map((component) => (
             <div className="component-token-row" key={component}>
               <strong>{t(readable(component))}</strong>
