@@ -514,9 +514,6 @@ export default function App() {
               </div>
             ))}
           </nav>
-          <div className="sidebar-footer">
-            {(!collapsed || mobileOpen) && <small>Repository snapshot · read-only</small>}
-          </div>
         </aside>
         <div className="main-column">
           <main className="page-container">
@@ -542,7 +539,10 @@ export default function App() {
         </div>
       </div>
       <footer className="window-statusbar">
-        <span>Canvas · Git snapshot</span>
+        <span className="snapshot-state">
+          <span className="snapshot-desktop">Repository snapshot · read-only</span>
+          <span className="snapshot-mobile">Read-only snapshot</span>
+        </span>
         <span className="version">Version: 0.7.0 · Prototype</span>
         <span>
           {context.repository} / {context.revision}
