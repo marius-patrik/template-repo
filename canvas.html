@@ -3229,7 +3229,7 @@ export default function Graph() {
   );
 }
 </pre></section>
-<section class="file" id="file-0068"><h3>.github/app/src/KeyboardSettings.tsx</h3><p class="meta">Git mode 100644 · 71564bcde88d3f3d46507eecd4d977d70fb15e88</p><pre>import { useState } from &quot;react&quot;;
+<section class="file" id="file-0068"><h3>.github/app/src/KeyboardSettings.tsx</h3><p class="meta">Git mode 100644 · b5b7baafa4be8aaf1264178a45fb0c01b0eee997</p><pre>import { useState } from &quot;react&quot;;
 import { useTranslation } from &quot;react-i18next&quot;;
 import {
   formatForDisplay,
@@ -3251,7 +3251,7 @@ function KeybindingRow({ id }: { id: AppHotkeyId }) {
       const collisions = findConflicts(id, binding);
       return (
         collisions.length === 0 ||
-        `Already assigned to ${collisions[0]?.meta?.name ?? &quot;another command&quot;}`
+        t(&quot;Already assigned to {{name}}&quot;, { name: t(collisions[0]?.meta?.name ?? &quot;Another command&quot;) })
       );
     },
     onRecord: (binding) =&gt; {
@@ -3326,7 +3326,7 @@ export default function KeyboardSettings() {
   const items = useAppHotkeyList();
   const { resetCustomHotkeys } = useCustomHotkeys();
   const matching = items.filter(({ appHotkey }) =&gt;
-    [appHotkey.meta?.name ?? &quot;&quot;, appHotkey.id, appHotkey.meta?.group ?? &quot;&quot;]
+    [t(appHotkey.meta?.name ?? &quot;&quot;), appHotkey.id, t(appHotkey.meta?.group ?? &quot;&quot;)]
       .join(&quot; &quot;)
       .toLowerCase()
       .includes(query.trim().toLowerCase()),
@@ -3337,7 +3337,7 @@ export default function KeyboardSettings() {
       &lt;div className=&quot;keybind-heading&quot;&gt;
         &lt;div&gt;
           &lt;h2&gt;{t(&quot;Keyboard shortcuts&quot;)}&lt;/h2&gt;
-          &lt;p className=&quot;muted&quot;&gt;Shortcuts follow your system: ⌘ on macOS, Ctrl on Windows/Linux.&lt;/p&gt;
+          &lt;p className=&quot;muted&quot;&gt;{t(&quot;Shortcuts follow your system: ⌘ on macOS, Ctrl on Windows/Linux.&quot;)}&lt;/p&gt;
         &lt;/div&gt;
         &lt;button type=&quot;button&quot; className=&quot;keybind-reset-all&quot; onClick={resetCustomHotkeys}&gt;
           {t(&quot;Reset all&quot;)}
@@ -3360,8 +3360,7 @@ export default function KeyboardSettings() {
         {matching.length === 0 &amp;&amp; &lt;p className=&quot;muted&quot;&gt;{t(&quot;No matching commands.&quot;)}&lt;/p&gt;}
       &lt;/div&gt;
       &lt;p className=&quot;keybind-hint&quot;&gt;
-        Click Edit and press a shortcut. Escape cancels; Delete clears. Conflicting bindings are
-        rejected.
+        {t(&quot;Click Edit and press a shortcut. Escape cancels; Delete clears. Conflicting bindings are rejected.&quot;)}
       &lt;/p&gt;
     &lt;/section&gt;
   );
@@ -3567,7 +3566,7 @@ export const useCanvasConfig = create&lt;ConfigState&gt;()(
   ),
 );
 </pre></section>
-<section class="file" id="file-0073"><h3>.github/app/src/i18n.ts</h3><p class="meta">Git mode 100644 · 3ef91158309df1b99c4fc0dfbbe16430d5e309b0</p><pre>import i18next from &quot;i18next&quot;;
+<section class="file" id="file-0073"><h3>.github/app/src/i18n.ts</h3><p class="meta">Git mode 100644 · 773427ba045fb65e4b8446a9d807ca337615d3c6</p><pre>import i18next from &quot;i18next&quot;;
 import LanguageDetector from &quot;i18next-browser-languagedetector&quot;;
 import { initReactI18next } from &quot;react-i18next&quot;;
 
@@ -3619,11 +3618,27 @@ const english = [
   &quot;No source documents available.&quot;,
   &quot;The default interface skin&quot;,&quot;Cooler neutral surfaces&quot;,&quot;Stronger panel boundaries&quot;,
   &quot;Reset to defaults&quot;,&quot;Theme selection&quot;,&quot;Skin selection&quot;,&quot;Density selection&quot;,
+  &quot;Neutral&quot;,&quot;Blue&quot;,&quot;Sage&quot;,&quot;Violet&quot;,&quot;Amber&quot;,&quot;Accent color picker&quot;,&quot;Accent color hex value&quot;,
+  &quot;HEX · RGB opaque&quot;,&quot;Shortcuts follow your system: ⌘ on macOS, Ctrl on Windows/Linux.&quot;,
+  &quot;Click Edit and press a shortcut. Escape cancels; Delete clears. Conflicting bindings are rejected.&quot;,
+  &quot;Already assigned to {{name}}&quot;,&quot;Another command&quot;,&quot;Toggle sidebar&quot;,&quot;Open navigation&quot;,
+  &quot;Open overview&quot;,&quot;Open workspace&quot;,&quot;Open projects&quot;,&quot;Open knowledge graph&quot;,
+  &quot;Reset settings&quot;,
 ] as const;
 
 const en = Object.fromEntries(english.map((value) =&gt; [value, value]));
 
 const cs: Record&lt;string, string&gt; = {
+  &quot;Neutral&quot;:&quot;Neutrální&quot;,&quot;Blue&quot;:&quot;Modrá&quot;,&quot;Sage&quot;:&quot;Šalvějová&quot;,&quot;Violet&quot;:&quot;Fialová&quot;,&quot;Amber&quot;:&quot;Jantarová&quot;,
+  &quot;Accent color picker&quot;:&quot;Výběr barvy zvýraznění&quot;,&quot;Accent color hex value&quot;:&quot;Hexadecimální barva&quot;,
+  &quot;HEX · RGB opaque&quot;:&quot;HEX · neprůhledná RGB&quot;,
+  &quot;Shortcuts follow your system: ⌘ on macOS, Ctrl on Windows/Linux.&quot;:&quot;Zkratky se přizpůsobují systému: ⌘ na macOS, Ctrl na Windows/Linux.&quot;,
+  &quot;Click Edit and press a shortcut. Escape cancels; Delete clears. Conflicting bindings are rejected.&quot;:&quot;Klikněte na Upravit a stiskněte zkratku. Escape zruší, Delete vymaže. Konflikty se odmítají.&quot;,
+  &quot;Already assigned to {{name}}&quot;:&quot;Již přiřazeno příkazu {{name}}&quot;,
+  &quot;Another command&quot;:&quot;Jiný příkaz&quot;,&quot;Toggle sidebar&quot;:&quot;Přepnout postranní panel&quot;,
+  &quot;Open navigation&quot;:&quot;Otevřít navigaci&quot;,&quot;Open overview&quot;:&quot;Otevřít přehled&quot;,
+  &quot;Open workspace&quot;:&quot;Otevřít pracovní plochu&quot;,&quot;Open projects&quot;:&quot;Otevřít projekty&quot;,
+  &quot;Open knowledge graph&quot;:&quot;Otevřít znalostní graf&quot;,
   &quot;Overview&quot;:&quot;Přehled&quot;,&quot;Workspace&quot;:&quot;Pracovní plocha&quot;,&quot;Projects&quot;:&quot;Projekty&quot;,&quot;Agents&quot;:&quot;Agenti&quot;,
   &quot;Knowledge graph&quot;:&quot;Znalostní graf&quot;,&quot;Roadmap&quot;:&quot;Plán&quot;,&quot;Artifacts&quot;:&quot;Artefakty&quot;,&quot;Activity&quot;:&quot;Aktivita&quot;,
   &quot;Context&quot;:&quot;Kontext&quot;,&quot;Settings&quot;:&quot;Nastavení&quot;,&quot;System&quot;:&quot;Systém&quot;,&quot;Personal workspace&quot;:&quot;Osobní prostor&quot;,
@@ -3709,6 +3724,16 @@ const cs: Record&lt;string, string&gt; = {
   &quot;Theme selection&quot;:&quot;Výběr režimu&quot;,&quot;Skin selection&quot;:&quot;Výběr stylu&quot;,&quot;Density selection&quot;:&quot;Výběr hustoty&quot;,
 };
 const es: Record&lt;string, string&gt; = {
+  &quot;Neutral&quot;:&quot;Neutro&quot;,&quot;Blue&quot;:&quot;Azul&quot;,&quot;Sage&quot;:&quot;Salvia&quot;,&quot;Violet&quot;:&quot;Violeta&quot;,&quot;Amber&quot;:&quot;Ámbar&quot;,
+  &quot;Accent color picker&quot;:&quot;Selector del color de acento&quot;,&quot;Accent color hex value&quot;:&quot;Valor hexadecimal del color de acento&quot;,
+  &quot;HEX · RGB opaque&quot;:&quot;HEX · RGB opaco&quot;,
+  &quot;Shortcuts follow your system: ⌘ on macOS, Ctrl on Windows/Linux.&quot;:&quot;Los atajos se adaptan al sistema: ⌘ en macOS, Ctrl en Windows/Linux.&quot;,
+  &quot;Click Edit and press a shortcut. Escape cancels; Delete clears. Conflicting bindings are rejected.&quot;:&quot;Haz clic en Editar y pulsa un atajo. Escape cancela, Supr borra. Se rechazan los conflictos.&quot;,
+  &quot;Already assigned to {{name}}&quot;:&quot;Ya asignado a {{name}}&quot;,
+  &quot;Another command&quot;:&quot;Otro comando&quot;,&quot;Toggle sidebar&quot;:&quot;Alternar barra lateral&quot;,
+  &quot;Open navigation&quot;:&quot;Abrir navegación&quot;,&quot;Open overview&quot;:&quot;Abrir resumen&quot;,
+  &quot;Open workspace&quot;:&quot;Abrir espacio de trabajo&quot;,&quot;Open projects&quot;:&quot;Abrir proyectos&quot;,
+  &quot;Open knowledge graph&quot;:&quot;Abrir grafo de conocimiento&quot;,
   &quot;Overview&quot;:&quot;Resumen&quot;,&quot;Workspace&quot;:&quot;Espacio de trabajo&quot;,&quot;Projects&quot;:&quot;Proyectos&quot;,&quot;Agents&quot;:&quot;Agentes&quot;,
   &quot;Knowledge graph&quot;:&quot;Grafo de conocimiento&quot;,&quot;Roadmap&quot;:&quot;Hoja de ruta&quot;,&quot;Artifacts&quot;:&quot;Artefactos&quot;,
   &quot;Activity&quot;:&quot;Actividad&quot;,&quot;Context&quot;:&quot;Contexto&quot;,&quot;Settings&quot;:&quot;Configuración&quot;,&quot;System&quot;:&quot;Sistema&quot;,
