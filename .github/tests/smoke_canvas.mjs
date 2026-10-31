@@ -15,6 +15,24 @@ try {
   await page.locator("#root .app-root").waitFor({ timeout: 15000 });
   await page.locator(".window-titlebar").waitFor();
   await page.locator(".window-statusbar").waitFor();
+  await page.locator('.dock-grid [data-dock-view="overview"]').waitFor();
+  if ((await page.locator(".dockview-theme-dark, .dockview-theme-light").count()) !== 1)
+    throw new Error("Expected exactly one root Dockview compositor");
+  await page.getByRole("button", { name: "Split active panel right" }).click();
+  await page.waitForFunction(() => document.querySelectorAll(".dock-grid .dv-groupview").length >= 2);
+  if (!(await page.evaluate(() => !!localStorage.getItem("canvas-dockview-layout-v1"))))
+    throw new Error("Dockview layout was not saved");
+  await page.reload({ waitUntil: "load" });
+  await page.locator('.dock-grid [data-dock-view="overview"]').first().waitFor();
+  await page.waitForFunction(() => document.querySelectorAll(".dock-grid .dv-groupview").length >= 2);
+  await page.getByRole("button", { name: "Reset panel layout" }).click();
+  await page.waitForFunction(() => document.querySelectorAll(".dock-grid .dv-groupview").length === 1);
+  await page.getByRole("button", { name: "Open knowledge graph" }).click();
+  await page.locator('.dock-grid [data-dock-view="graph"]').waitFor();
+  await page.waitForFunction(() => location.hash.includes("/graph"));
+  await page.locator('.sidebar a[href="/overview"]').click();
+  await page.locator('.dock-grid [data-dock-view="overview"]').first().waitFor();
+  await page.waitForFunction(() => location.hash.includes("/overview"));
   if (await page.locator(".sidebar-footer").count()) throw new Error("Redundant sidebar snapshot footer remains");
   if (await page.locator(".sidebar").getByText("Repository snapshot").count()) throw new Error("Snapshot information duplicated in sidebar");
   if (await page.locator(".window-statusbar .snapshot-desktop").count() !== 1)
@@ -64,7 +82,7 @@ try {
   await page.locator(".sidebar.mobile-open").waitFor();
 
   if (errors.length) throw new Error(`Browser uncaught errors: ${errors.join("; ")}`);
-  console.log("Canvas Chromium smoke passed: mount, chrome, Ctrl+B, settings, accent picker, keybinding recorder and mobile.");
+  console.log("Canvas Chromium smoke passed: one Dockview compositor, split/restore/reset, route panels, chrome, shortcuts, settings and mobile.");
 } finally {
   await browser.close();
 }
