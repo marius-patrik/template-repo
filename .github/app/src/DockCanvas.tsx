@@ -247,7 +247,7 @@ type Props = {
 };
 
 export default function DockCanvas({ route, dark, onNavigate, renderView }: Props) {
-  const { i18n: translation } = useTranslation();
+  const { t } = useTranslation();
   const apiRef = useRef<DockviewApi | null>(null);
   const disposables = useRef<Array<{ dispose: () => void }>>([]);
   const latest = useRef({ route, onNavigate });
@@ -280,10 +280,10 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
     for (const panel of api.panels) {
       const candidate: unknown = panel.api.getParameters().view;
       if (typeof candidate === "string" && isView(candidate)) {
-        panel.api.setTitle(localizedTitle(candidate));
+        panel.api.setTitle(t(TITLES[candidate]));
       }
     }
-  }, [translation.resolvedLanguage]);
+  }, [t]);
 
   useEffect(
     () => () => {

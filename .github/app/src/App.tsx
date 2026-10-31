@@ -317,7 +317,7 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
   ) => (
     <div className="setting-row">
       <strong>{t(label)}</strong>
-      <div className="segmented" role="group" aria-label={t(label)}>
+      <fieldset className="segmented" aria-label={t(label)}>
         {values.map((value) => (
           <button
             type="button"
@@ -329,7 +329,7 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
             {valueLabel(value)}
           </button>
         ))}
-      </div>
+      </fieldset>
     </div>
   );
 
@@ -354,7 +354,7 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
         )}
         <div className="setting-row skin-setting">
           <strong>{t("Skin")}</strong>
-          <div className="skin-options" role="group" aria-label={t("Skin selection")}>
+          <fieldset className="skin-options" aria-label={t("Skin selection")}>
             {(["graphite", "slate", "contrast"] as const).map((skin) => (
               <button
                 type="button"
@@ -369,7 +369,7 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
                 <span>{t(skin === "graphite" ? "Graphite" : skin === "slate" ? "Slate" : "High contrast")}</span>
               </button>
             ))}
-          </div>
+          </fieldset>
         </div>
         {options("density", ["comfortable", "compact"] as const, "Density", (value) =>
           t(value === "comfortable" ? "Comfortable" : "Compact")
