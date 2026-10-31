@@ -28,7 +28,7 @@ footer{max-width:1180px;padding:22px 24px;margin:auto;color:#687989;font-size:.8
 </style>
 </head>
 <body>
-<header><div class="eyebrow">Repository Canvas · Generated from tracked source</div><h1>template-repo</h1><p>Customize this repository into a well-specified project with a single authoritative requirement source, explicit architecture decisions, reproducible verification and an auditable release path.</p><p>99 source entries · static, read-only view · agent actions modify repository files and regenerate this document</p></header>
+<header><div class="eyebrow">Repository Canvas · Generated from tracked source</div><h1>template-repo</h1><p>Customize this repository into a well-specified project with a single authoritative requirement source, explicit architecture decisions, reproducible verification and an auditable release path.</p><p>98 source entries · static, read-only view · agent actions modify repository files and regenerate this document</p></header>
 <main><p class="hint"><strong>Source of truth:</strong> the Git repository. This HTML has no independent application state, external data feed or editing controls. The generated canvas is excluded from its own input inventory; Git submodules and binary assets are represented by identifiers or checksums, not expanded data.</p>
 
 <div class="layout"><nav class="navigator" aria-label="Repository index"><h2>Repository files</h2><ol>
@@ -116,21 +116,20 @@ footer{max-width:1180px;padding:22px 24px;margin:auto;color:#687989;font-size:.8
 <li><a href="#file-0082">.github/tests/test_canvas_web.py</a></li>
 <li><a href="#file-0083">.github/tests/test_repository_structure.py</a></li>
 <li><a href="#file-0084">.github/tests/test_versioning.py</a></li>
-<li><a href="#file-0085">.github/workflows/canvas-format-once.yml</a></li>
-<li><a href="#file-0086">.github/workflows/canvas-pages.yml</a></li>
-<li><a href="#file-0087">.github/workflows/canvas-sync.yml</a></li>
-<li><a href="#file-0088">.github/workflows/darkfactory-control.yml</a></li>
-<li><a href="#file-0089">.github/workflows/darkfactory.yml</a></li>
-<li><a href="#file-0090">.github/workflows/docs.yml</a></li>
-<li><a href="#file-0091">.github/workflows/keep-development.yml</a></li>
-<li><a href="#file-0092">.github/workflows/main-source.yml</a></li>
-<li><a href="#file-0093">.github/workflows/pr-version.yml</a></li>
-<li><a href="#file-0094">.github/workflows/release.yml</a></li>
-<li><a href="#file-0095">.gitmodules</a></li>
-<li><a href="#file-0096">CONTRIBUTING.md</a></li>
-<li><a href="#file-0097">LICENSE</a></li>
-<li><a href="#file-0098">README.md</a></li>
-<li><a href="#file-0099">repo.dfconfig</a></li>
+<li><a href="#file-0085">.github/workflows/canvas-pages.yml</a></li>
+<li><a href="#file-0086">.github/workflows/canvas-sync.yml</a></li>
+<li><a href="#file-0087">.github/workflows/darkfactory-control.yml</a></li>
+<li><a href="#file-0088">.github/workflows/darkfactory.yml</a></li>
+<li><a href="#file-0089">.github/workflows/docs.yml</a></li>
+<li><a href="#file-0090">.github/workflows/keep-development.yml</a></li>
+<li><a href="#file-0091">.github/workflows/main-source.yml</a></li>
+<li><a href="#file-0092">.github/workflows/pr-version.yml</a></li>
+<li><a href="#file-0093">.github/workflows/release.yml</a></li>
+<li><a href="#file-0094">.gitmodules</a></li>
+<li><a href="#file-0095">CONTRIBUTING.md</a></li>
+<li><a href="#file-0096">LICENSE</a></li>
+<li><a href="#file-0097">README.md</a></li>
+<li><a href="#file-0098">repo.dfconfig</a></li>
 </ol></nav><div class="files">
 <section class="file" id="file-0001"><h3>.agents/AGENTS.md</h3><p class="meta">Git mode 100644 · fe682dfcf5d2d016885549f7aaf363189f4506a0</p><pre># Agent and contributor rules
 
@@ -1891,7 +1890,7 @@ for (const script of scripts) {
 }
 console.log(`Canvas DOM boot order valid: #root precedes ${scripts.length} bundled script(s).`);
 </pre></section>
-<section class="file" id="file-0064"><h3>.github/app/src/AccentColorPicker.tsx</h3><p class="meta">Git mode 100644 · 549c2061c20d82e4391223bb4b901bbc3f695118</p><pre>import * as Popover from &quot;@radix-ui/react-popover&quot;;
+<section class="file" id="file-0064"><h3>.github/app/src/AccentColorPicker.tsx</h3><p class="meta">Git mode 100644 · ddb80843442c7319ef57dd2723f8840218e89db8</p><pre>import * as Popover from &quot;@radix-ui/react-popover&quot;;
 import { colord } from &quot;colord&quot;;
 import { HexColorInput, HexColorPicker } from &quot;react-colorful&quot;;
 import { useState } from &quot;react&quot;;
@@ -1915,7 +1914,7 @@ export function AccentColorPicker({
   const custom = value.startsWith(&quot;#&quot;);
   const current = custom
     ? value
-    : accentPresets.find((preset) =&gt; preset.id === value)?.hex ?? &quot;#81adf1&quot;;
+    : (accentPresets.find((preset) =&gt; preset.id === value)?.hex ?? &quot;#81adf1&quot;);
   const update = (color: string) =&gt; {
     if (colord(color).isValid()) onChange(colord(color).toHex());
   };
@@ -1981,7 +1980,7 @@ export function AccentColorPicker({
   );
 }
 </pre></section>
-<section class="file" id="file-0065"><h3>.github/app/src/App.tsx</h3><p class="meta">Git mode 100644 · 9798d0ffc2d5f9d2911c35eba4df612a73c0e6fe</p><pre>import { useEffect, useMemo, useRef, useState } from &quot;react&quot;;
+<section class="file" id="file-0065"><h3>.github/app/src/App.tsx</h3><p class="meta">Git mode 100644 · 19611ca01dc6af883f1296114a5031a72dae3058</p><pre>import { useEffect, useMemo, useRef, useState } from &quot;react&quot;;
 import { colord, extend } from &quot;colord&quot;;
 import a11yPlugin from &quot;colord/plugins/a11y&quot;;
 import { formatForDisplay, useAppHotkeys, useHotkey } from &quot;@tanstack/react-hotkeys&quot;;
@@ -2030,7 +2029,8 @@ function loadPrefs(): Preferences {
       data &amp;&amp;
       [&quot;dark&quot;, &quot;light&quot;, &quot;system&quot;].includes(data.theme) &amp;&amp;
       typeof data.accent === &quot;string&quot; &amp;&amp;
-      (accentPresets.some((preset) =&gt; preset.id === data.accent) || /^#[0-9a-f]{6}$/i.test(data.accent)) &amp;&amp;
+      (accentPresets.some((preset) =&gt; preset.id === data.accent) ||
+        /^#[0-9a-f]{6}$/i.test(data.accent)) &amp;&amp;
       [13, 14, 15, 16].includes(data.fontSize) &amp;&amp;
       [16, 18, 20].includes(data.iconSize)
     )
@@ -2308,7 +2308,10 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
         {options(&quot;theme&quot;, [&quot;dark&quot;, &quot;light&quot;, &quot;system&quot;] as const, &quot;Theme&quot;)}
         &lt;div className=&quot;setting-row accent-setting&quot;&gt;
           &lt;strong&gt;Accent color&lt;/strong&gt;
-          &lt;AccentColorPicker value={prefs.accent} onChange={(accent) =&gt; setPrefs({ ...prefs, accent })} /&gt;
+          &lt;AccentColorPicker
+            value={prefs.accent}
+            onChange={(accent) =&gt; setPrefs({ ...prefs, accent })}
+          /&gt;
         &lt;/div&gt;
         {options(&quot;fontSize&quot;, [13, 14, 15, 16] as const, &quot;Text size&quot;)}
         {options(&quot;iconSize&quot;, [16, 18, 20] as const, &quot;Icon size&quot;)}
@@ -2343,11 +2346,18 @@ export default function App() {
           : &quot;light&quot;
         : prefs.theme;
     document.documentElement.dataset.theme = resolved;
-    document.documentElement.dataset.accent = accentPresets.some((preset) =&gt; preset.id === prefs.accent) ? prefs.accent : &quot;custom&quot;;
+    document.documentElement.dataset.accent = accentPresets.some(
+      (preset) =&gt; preset.id === prefs.accent,
+    )
+      ? prefs.accent
+      : &quot;custom&quot;;
     if (/^#[0-9a-f]{6}$/i.test(prefs.accent) &amp;&amp; colord(prefs.accent).isValid()) {
       const color = colord(prefs.accent);
       document.documentElement.style.setProperty(&quot;--accent&quot;, color.toHex());
-      document.documentElement.style.setProperty(&quot;--accent-foreground&quot;, color.contrast(&quot;#ffffff&quot;) &gt;= color.contrast(&quot;#111113&quot;) ? &quot;#ffffff&quot; : &quot;#111113&quot;);
+      document.documentElement.style.setProperty(
+        &quot;--accent-foreground&quot;,
+        color.contrast(&quot;#ffffff&quot;) &gt;= color.contrast(&quot;#111113&quot;) ? &quot;#ffffff&quot; : &quot;#111113&quot;,
+      );
     } else {
       document.documentElement.style.removeProperty(&quot;--accent&quot;);
       document.documentElement.style.removeProperty(&quot;--accent-foreground&quot;);
@@ -2376,11 +2386,17 @@ export default function App() {
     setPaletteOpen(false);
     setSearch(&quot;&quot;);
   };
-  useHotkey(hotkeys[&quot;canvas.sidebar.toggle&quot;], () =&gt; {
-    if (window.matchMedia(&quot;(max-width: 700px)&quot;).matches) setMobileOpen((v) =&gt; !v);
-    else setCollapsed((v) =&gt; !v);
-  }, { ignoreInputs: true });
-  useHotkey(hotkeys[&quot;canvas.omnibar.toggle&quot;], () =&gt; setPaletteOpen((v) =&gt; !v), { ignoreInputs: false });
+  useHotkey(
+    hotkeys[&quot;canvas.sidebar.toggle&quot;],
+    () =&gt; {
+      if (window.matchMedia(&quot;(max-width: 700px)&quot;).matches) setMobileOpen((v) =&gt; !v);
+      else setCollapsed((v) =&gt; !v);
+    },
+    { ignoreInputs: true },
+  );
+  useHotkey(hotkeys[&quot;canvas.omnibar.toggle&quot;], () =&gt; setPaletteOpen((v) =&gt; !v), {
+    ignoreInputs: false,
+  });
   useHotkey(hotkeys[&quot;canvas.settings.open&quot;], () =&gt; go(&quot;/settings&quot;));
   useHotkey(hotkeys[&quot;canvas.overview.open&quot;], () =&gt; go(&quot;/overview&quot;));
   useHotkey(hotkeys[&quot;canvas.workspace.open&quot;], () =&gt; go(&quot;/workspace&quot;));
@@ -2423,7 +2439,11 @@ export default function App() {
             &lt;span className=&quot;crumb&quot;&gt;{context.name}&lt;/span&gt;
             {icon(&quot;right&quot;, 12)}
             &lt;strong&gt;{title}&lt;/strong&gt;
-            &lt;kbd&gt;{hotkeys[&quot;canvas.omnibar.toggle&quot;].hotkey ? formatForDisplay(hotkeys[&quot;canvas.omnibar.toggle&quot;].hotkey) : &quot;Unbound&quot;}&lt;/kbd&gt;
+            &lt;kbd&gt;
+              {hotkeys[&quot;canvas.omnibar.toggle&quot;].hotkey
+                ? formatForDisplay(hotkeys[&quot;canvas.omnibar.toggle&quot;].hotkey)
+                : &quot;Unbound&quot;}
+            &lt;/kbd&gt;
           &lt;/button&gt;
         &lt;/div&gt;
         &lt;Button
@@ -2542,8 +2562,11 @@ export default function App() {
                     setSelection(0);
                   }}
                   onKeyDown={(e) =&gt; {
-                    if (e.key === &quot;Escape&quot;) { e.preventDefault(); setPaletteOpen(false); }
-                if (e.key === &quot;ArrowDown&quot;) {
+                    if (e.key === &quot;Escape&quot;) {
+                      e.preventDefault();
+                      setPaletteOpen(false);
+                    }
+                    if (e.key === &quot;ArrowDown&quot;) {
                       e.preventDefault();
                       setSelection((s) =&gt; Math.min(s + 1, filtered.length - 1));
                     }
@@ -2678,7 +2701,7 @@ export default function Graph() {
   );
 }
 </pre></section>
-<section class="file" id="file-0067"><h3>.github/app/src/KeyboardSettings.tsx</h3><p class="meta">Git mode 100644 · 1e2a27526b4e406749019beecdf0a7aad97f5374</p><pre>import { useState } from &quot;react&quot;;
+<section class="file" id="file-0067"><h3>.github/app/src/KeyboardSettings.tsx</h3><p class="meta">Git mode 100644 · 8deb890cc08a10f9fe1d7ea8ecebc19bb316917f</p><pre>import { useState } from &quot;react&quot;;
 import {
   formatForDisplay,
   useAppHotkeyList,
@@ -2696,7 +2719,10 @@ function KeybindingRow({ id }: { id: AppHotkeyId }) {
     maxSteps: 1,
     validate: (binding) =&gt; {
       const collisions = findConflicts(id, binding);
-      return collisions.length === 0 || `Already assigned to ${collisions[0]?.meta?.name ?? &quot;another command&quot;}`;
+      return (
+        collisions.length === 0 ||
+        `Already assigned to ${collisions[0]?.meta?.name ?? &quot;another command&quot;}`
+      );
     },
     onRecord: (binding) =&gt; {
       setError(&quot;&quot;);
@@ -2715,7 +2741,11 @@ function KeybindingRow({ id }: { id: AppHotkeyId }) {
       &lt;div className=&quot;keybind-description&quot;&gt;
         &lt;strong&gt;{hotkey.meta?.name ?? id}&lt;/strong&gt;
         &lt;small&gt;{id}&lt;/small&gt;
-        {error &amp;&amp; &lt;span className=&quot;keybind-error&quot; role=&quot;alert&quot;&gt;{error}&lt;/span&gt;}
+        {error &amp;&amp; (
+          &lt;span className=&quot;keybind-error&quot; role=&quot;alert&quot;&gt;
+            {error}
+          &lt;/span&gt;
+        )}
       &lt;/div&gt;
       &lt;div className=&quot;keybind-controls&quot;&gt;
         &lt;kbd&gt;{hotkey.hotkey ? formatForDisplay(hotkey.hotkey) : &quot;Unassigned&quot;}&lt;/kbd&gt;
@@ -2734,7 +2764,11 @@ function KeybindingRow({ id }: { id: AppHotkeyId }) {
         &lt;button
           type=&quot;button&quot;
           className=&quot;keybind-reset&quot;
-          onClick={() =&gt; { recorder.cancelRecording(); resetCustomHotkey(id); setError(&quot;&quot;); }}
+          onClick={() =&gt; {
+            recorder.cancelRecording();
+            resetCustomHotkey(id);
+            setError(&quot;&quot;);
+          }}
           aria-label={`Reset shortcut for ${hotkey.meta?.name ?? id}`}
         &gt;
           Reset
@@ -2742,7 +2776,11 @@ function KeybindingRow({ id }: { id: AppHotkeyId }) {
         &lt;button
           type=&quot;button&quot;
           className=&quot;keybind-reset&quot;
-          onClick={() =&gt; { recorder.cancelRecording(); setCustomHotkey(id, null); setError(&quot;&quot;); }}
+          onClick={() =&gt; {
+            recorder.cancelRecording();
+            setCustomHotkey(id, null);
+            setError(&quot;&quot;);
+          }}
           aria-label={`Clear shortcut for ${hotkey.meta?.name ?? id}`}
         &gt;
           Clear
@@ -2766,10 +2804,17 @@ export default function KeyboardSettings() {
   return (
     &lt;section className=&quot;panel padded settings-panel keyboard-settings&quot;&gt;
       &lt;div className=&quot;keybind-heading&quot;&gt;
-        &lt;div&gt;&lt;h2&gt;Keyboard shortcuts&lt;/h2&gt;&lt;p className=&quot;muted&quot;&gt;Shortcuts follow your system: ⌘ on macOS, Ctrl on Windows/Linux.&lt;/p&gt;&lt;/div&gt;
-        &lt;button type=&quot;button&quot; className=&quot;keybind-reset-all&quot; onClick={resetCustomHotkeys}&gt;Reset all&lt;/button&gt;
+        &lt;div&gt;
+          &lt;h2&gt;Keyboard shortcuts&lt;/h2&gt;
+          &lt;p className=&quot;muted&quot;&gt;Shortcuts follow your system: ⌘ on macOS, Ctrl on Windows/Linux.&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;button type=&quot;button&quot; className=&quot;keybind-reset-all&quot; onClick={resetCustomHotkeys}&gt;
+          Reset all
+        &lt;/button&gt;
       &lt;/div&gt;
-      &lt;label className=&quot;keybind-search-label&quot; htmlFor=&quot;canvas-shortcut-filter&quot;&gt;Find a command&lt;/label&gt;
+      &lt;label className=&quot;keybind-search-label&quot; htmlFor=&quot;canvas-shortcut-filter&quot;&gt;
+        Find a command
+      &lt;/label&gt;
       &lt;input
         id=&quot;canvas-shortcut-filter&quot;
         className=&quot;keybind-search&quot;
@@ -2778,10 +2823,15 @@ export default function KeyboardSettings() {
         placeholder=&quot;Search commands and shortcuts&quot;
       /&gt;
       &lt;div className=&quot;keybind-list&quot;&gt;
-        {matching.map(({ appHotkey }) =&gt; &lt;KeybindingRow key={appHotkey.id} id={appHotkey.id} /&gt;)}
+        {matching.map(({ appHotkey }) =&gt; (
+          &lt;KeybindingRow key={appHotkey.id} id={appHotkey.id} /&gt;
+        ))}
         {matching.length === 0 &amp;&amp; &lt;p className=&quot;muted&quot;&gt;No matching commands.&lt;/p&gt;}
       &lt;/div&gt;
-      &lt;p className=&quot;keybind-hint&quot;&gt;Click Edit and press a shortcut. Escape cancels; Delete clears. Conflicting bindings are rejected.&lt;/p&gt;
+      &lt;p className=&quot;keybind-hint&quot;&gt;
+        Click Edit and press a shortcut. Escape cancels; Delete clears. Conflicting bindings are
+        rejected.
+      &lt;/p&gt;
     &lt;/section&gt;
   );
 }
@@ -2969,7 +3019,7 @@ export function Button({ className, variant, size, asChild = false, ...props }: 
   return &lt;Component className={twMerge(clsx(variants({ variant, size }), className))} {...props} /&gt;;
 }
 </pre></section>
-<section class="file" id="file-0072"><h3>.github/app/src/main.tsx</h3><p class="meta">Git mode 100644 · 219e306d4f2ff20126d0023b9c58528c7af03f78</p><pre>import React from &quot;react&quot;;
+<section class="file" id="file-0072"><h3>.github/app/src/main.tsx</h3><p class="meta">Git mode 100644 · ac05d9bb08247cce615ca966c7cd2bdc4b3e5d2a</p><pre>import React from &quot;react&quot;;
 import { HotkeysProvider } from &quot;@tanstack/react-hotkeys&quot;;
 import type { CustomHotkeys } from &quot;@tanstack/react-hotkeys&quot;;
 import { appHotkeys } from &quot;./commands&quot;;
@@ -2998,7 +3048,11 @@ createRoot(root).render(
       appHotkeys={appHotkeys}
       customHotkeys={loadHotkeys()}
       onCustomHotkeysChange={(hotkeys) =&gt; {
-        try { localStorage.setItem(&quot;canvas-hotkeys&quot;, JSON.stringify(hotkeys)); } catch { /* private mode */ }
+        try {
+          localStorage.setItem(&quot;canvas-hotkeys&quot;, JSON.stringify(hotkeys));
+        } catch {
+          /* private mode */
+        }
       }}
     &gt;
       &lt;Router hook={useHashLocation}&gt;
@@ -3008,7 +3062,7 @@ createRoot(root).render(
   &lt;/React.StrictMode&gt;,
 );
 </pre></section>
-<section class="file" id="file-0073"><h3>.github/app/src/styles.css</h3><p class="meta">Git mode 100644 · 82a5642bfbbf3a03bd71c21d8759c10bec9038d6</p><pre>@import &quot;tailwindcss&quot;;
+<section class="file" id="file-0073"><h3>.github/app/src/styles.css</h3><p class="meta">Git mode 100644 · 96a638a44ea4740863279e8ceca1ab2e040a5abc</p><pre>@import &quot;tailwindcss&quot;;
 @source &quot;.&quot;;
 :root {
   color-scheme: dark;
@@ -4086,7 +4140,9 @@ kbd {
   outline: 1px solid var(--border);
   display: inline-grid;
   place-items: center;
-  transition: outline-color 0.16s, transform 0.16s;
+  transition:
+    outline-color 0.16s,
+    transform 0.16s;
 }
 .accent-swatch:hover {
   transform: translateY(-1px);
@@ -5106,53 +5162,7 @@ class VersioningTests(unittest.TestCase):
 if __name__ == &quot;__main__&quot;:
     unittest.main()
 </pre></section>
-<section class="file" id="file-0085"><h3>.github/workflows/canvas-format-once.yml</h3><p class="meta">Git mode 100644 · b6354106b0c6fd03e2275411914058d91fb96f87</p><pre>name: Canvas — format source once
-on:
-  push:
-    branches: [feat/canvas-react-pages]
-    paths:
-      - &#x27;.github/app/**&#x27;
-  workflow_dispatch:
-
-permissions:
-  contents: write
-
-concurrency:
-  group: canvas-format-once
-  cancel-in-progress: true
-
-jobs:
-  format:
-    if: github.actor != &#x27;github-actions[bot]&#x27;
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: feat/canvas-react-pages
-          persist-credentials: true
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: &#x27;1.3.11&#x27;
-      - name: Apply Biome formatting
-        working-directory: .github/app
-        run: |
-          bun install --frozen-lockfile
-          bunx biome format --write .
-      - name: Commit formatted source
-        run: |
-          set -euo pipefail
-          git add -u -- .github/app
-          if git diff --cached --quiet; then
-            echo &#x27;No format changes&#x27;
-            exit 0
-          fi
-          git config user.name &#x27;github-actions[bot]&#x27;
-          git config user.email &#x27;41898282+github-actions[bot]@users.noreply.github.com&#x27;
-          git commit -m &#x27;style(canvas): format updated settings and command UI&#x27;
-          git pull --rebase origin feat/canvas-react-pages
-          git push origin HEAD:feat/canvas-react-pages
-</pre></section>
-<section class="file" id="file-0086"><h3>.github/workflows/canvas-pages.yml</h3><p class="meta">Git mode 100644 · 926b65fad968987993176363b5ac2770a6e44b25</p><pre>name: Canvas — GitHub Pages
+<section class="file" id="file-0085"><h3>.github/workflows/canvas-pages.yml</h3><p class="meta">Git mode 100644 · 926b65fad968987993176363b5ac2770a6e44b25</p><pre>name: Canvas — GitHub Pages
 on:
   pull_request:
     branches: [development, main]
@@ -5226,7 +5236,7 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v4
 </pre></section>
-<section class="file" id="file-0087"><h3>.github/workflows/canvas-sync.yml</h3><p class="meta">Git mode 100644 · f17c4d43c66ab1c4767be3ae734ec9ed5dd4880a</p><pre>name: Synchronize repository Canvas
+<section class="file" id="file-0086"><h3>.github/workflows/canvas-sync.yml</h3><p class="meta">Git mode 100644 · f17c4d43c66ab1c4767be3ae734ec9ed5dd4880a</p><pre>name: Synchronize repository Canvas
 on:
   push:
     branches:
@@ -5271,7 +5281,7 @@ jobs:
           git commit -m &quot;docs(canvas): synchronize generated repository view&quot;
           git push origin &quot;HEAD:${GITHUB_REF_NAME}&quot;
 </pre></section>
-<section class="file" id="file-0088"><h3>.github/workflows/darkfactory-control.yml</h3><p class="meta">Git mode 100644 · 75fa15c2604451203799ec160fabea908221cee9</p><pre># df-control-managed: 1
+<section class="file" id="file-0087"><h3>.github/workflows/darkfactory-control.yml</h3><p class="meta">Git mode 100644 · 75fa15c2604451203799ec160fabea908221cee9</p><pre># df-control-managed: 1
 name: DarkFactory Control
 on:
   workflow_call:
@@ -5424,7 +5434,7 @@ jobs:
       pipeline-repo: marius-patrik/DarkFactory
     secrets: inherit
 </pre></section>
-<section class="file" id="file-0089"><h3>.github/workflows/darkfactory.yml</h3><p class="meta">Git mode 100644 · 0573b940cd16a9932acdaeb9f9b0200e0a91e493</p><pre># df-control-bridge: 1
+<section class="file" id="file-0088"><h3>.github/workflows/darkfactory.yml</h3><p class="meta">Git mode 100644 · 0573b940cd16a9932acdaeb9f9b0200e0a91e493</p><pre># df-control-bridge: 1
 # GitHub requires issues, workflow_dispatch and schedules on the default branch.
 # Configuration and executable workflows reside on this repository&#x27;s default branch.
 name: DarkFactory Runtime
@@ -5455,7 +5465,7 @@ jobs:
     uses: ./.github/workflows/darkfactory-control.yml
     secrets: inherit
 </pre></section>
-<section class="file" id="file-0090"><h3>.github/workflows/docs.yml</h3><p class="meta">Git mode 100644 · 09be66ac95b3bf75130e8cecb9ca33cebe0b2e87</p><pre>name: Generated documents
+<section class="file" id="file-0089"><h3>.github/workflows/docs.yml</h3><p class="meta">Git mode 100644 · 09be66ac95b3bf75130e8cecb9ca33cebe0b2e87</p><pre>name: Generated documents
 on:
   pull_request:
     branches: [development, main]
@@ -5478,7 +5488,7 @@ jobs:
       - name: Test source behavior and repository layout
         run: python3 -m unittest discover -s .github/tests -p &#x27;test_*.py&#x27;
 </pre></section>
-<section class="file" id="file-0091"><h3>.github/workflows/keep-development.yml</h3><p class="meta">Git mode 100644 · e0ca712e55a67121efc47a56e32dd751a17c0109</p><pre>name: Keep development branch
+<section class="file" id="file-0090"><h3>.github/workflows/keep-development.yml</h3><p class="meta">Git mode 100644 · e0ca712e55a67121efc47a56e32dd751a17c0109</p><pre>name: Keep development branch
 on:
   delete:
   workflow_run:
@@ -5539,7 +5549,7 @@ jobs:
               core.info(&#x27;Concurrent restoration completed at &#x27; + current.data.object.sha);
             }
 </pre></section>
-<section class="file" id="file-0092"><h3>.github/workflows/main-source.yml</h3><p class="meta">Git mode 100644 · ab63ee227e23d1a329cb15a0da037e27cabe2b43</p><pre>name: Main source policy
+<section class="file" id="file-0091"><h3>.github/workflows/main-source.yml</h3><p class="meta">Git mode 100644 · ab63ee227e23d1a329cb15a0da037e27cabe2b43</p><pre>name: Main source policy
 on:
   pull_request:
     branches: [main]
@@ -5580,7 +5590,7 @@ jobs:
             }
             core.info(&#x27;Authorized main PR: #&#x27; + pr.number + &#x27; from development.&#x27;);
 </pre></section>
-<section class="file" id="file-0093"><h3>.github/workflows/pr-version.yml</h3><p class="meta">Git mode 100644 · 728984d9be66d5b399ac00b5f79b178210f2ecc0</p><pre>name: Bump version on PR
+<section class="file" id="file-0092"><h3>.github/workflows/pr-version.yml</h3><p class="meta">Git mode 100644 · 728984d9be66d5b399ac00b5f79b178210f2ecc0</p><pre>name: Bump version on PR
 on:
   pull_request_target:
     branches: [development, main]
@@ -5671,7 +5681,7 @@ jobs:
             core.info(&#x27;Bumped VERSION to &#x27; + newVersion.trim());
             await dispatchChecks();
 </pre></section>
-<section class="file" id="file-0094"><h3>.github/workflows/release.yml</h3><p class="meta">Git mode 100644 · 5f3ac29dcbf6152e40e1c5fe0b22a3065ad24cfe</p><pre>name: Release main
+<section class="file" id="file-0093"><h3>.github/workflows/release.yml</h3><p class="meta">Git mode 100644 · 5f3ac29dcbf6152e40e1c5fe0b22a3065ad24cfe</p><pre>name: Release main
 on:
   push:
     branches: [main]
@@ -5727,14 +5737,14 @@ jobs:
           fi
           gh release view &quot;$RELEASE_TAG&quot; --json tagName,url
 </pre></section>
-<section class="file" id="file-0095"><h3>.gitmodules</h3><p class="meta">Git mode 100644 · 674a1ce0b95f16d9c0b222911e1be9b2ef0b1ccc</p><pre>[submodule &quot;.darkfactory&quot;]
+<section class="file" id="file-0094"><h3>.gitmodules</h3><p class="meta">Git mode 100644 · 674a1ce0b95f16d9c0b222911e1be9b2ef0b1ccc</p><pre>[submodule &quot;.darkfactory&quot;]
 	path = .darkfactory
 	url = https://github.com/marius-patrik/DarkFactory.git
 	branch = main
 </pre></section>
-<section class="file" id="file-0096"><h3>CONTRIBUTING.md</h3><p class="meta">Git mode 120000 · 41280d2fa808081dc9c5bd47c047fe1ea62e6aae</p><pre>Symbolic link to: .agents/AGENTS.md
+<section class="file" id="file-0095"><h3>CONTRIBUTING.md</h3><p class="meta">Git mode 120000 · 41280d2fa808081dc9c5bd47c047fe1ea62e6aae</p><pre>Symbolic link to: .agents/AGENTS.md
 </pre></section>
-<section class="file" id="file-0097"><h3>LICENSE</h3><p class="meta">Git mode 100644 · f288702d2fa16d3cdf0035b15a9fcbc552cd88e7</p><pre>                    GNU GENERAL PUBLIC LICENSE
+<section class="file" id="file-0096"><h3>LICENSE</h3><p class="meta">Git mode 100644 · f288702d2fa16d3cdf0035b15a9fcbc552cd88e7</p><pre>                    GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
  Copyright (C) 2007 Free Software Foundation, Inc. &lt;https://fsf.org/&gt;
@@ -6409,9 +6419,9 @@ the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 &lt;https://www.gnu.org/licenses/why-not-lgpl.html&gt;.
 </pre></section>
-<section class="file" id="file-0098"><h3>README.md</h3><p class="meta">Git mode 120000 · fa67a2d3e2abc3d138f3534762f958e4fe16fc25</p><pre>Symbolic link to: .agents/README.md
+<section class="file" id="file-0097"><h3>README.md</h3><p class="meta">Git mode 120000 · fa67a2d3e2abc3d138f3534762f958e4fe16fc25</p><pre>Symbolic link to: .agents/README.md
 </pre></section>
-<section class="file" id="file-0099"><h3>repo.dfconfig</h3><p class="meta">Git mode 100644 · dc53ee610d6da1ba8672730abced245644781334</p><pre>{
+<section class="file" id="file-0098"><h3>repo.dfconfig</h3><p class="meta">Git mode 100644 · dc53ee610d6da1ba8672730abced245644781334</p><pre>{
   &quot;repo&quot;: {
     &quot;$comment&quot;: &quot;Starter policy and repository identity. Review and replace project-specific values before installation; declarations do not configure GitHub protection by themselves.&quot;,
     &quot;identity&quot;: {
