@@ -44,7 +44,7 @@ function CanvasTab(props: IDockviewPanelHeaderProps) {
   const view: CanvasView = typeof raw === "string" && isCanvasView(raw) ? raw : "overview";
   return (
     <CanvasContextMenu actions={[
-      { icon: "split", label: t("Split right"), action: () => workspace?.splitPanel(view, props.group.id) },
+      { icon: "split", label: t("Split right"), action: () => workspace?.splitPanel(view, props.api.id) },
       { icon: "close", label: t("Close tab"), action: () => props.api.close() },
       { type: "separator" },
       { icon: "reset", label: t("Reset layout"), action: () => workspace?.resetLayout() },
@@ -254,16 +254,17 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
     latest.current.onNavigate("/overview");
     notify.success(i18n.t("Layout reset"));
   }, []);
-  const splitPanel = useCallback((view: CanvasView, groupId: string) => {
+  const splitPanel = useCallback((view: CanvasView, panelId: string) => {
     const api = apiRef.current;
-    if (!api) return;
+    const panel = api?.getPanel(panelId);
+    if (!api || !panel) return;
     api.addPanel({
       id: `split:${view}:${Date.now().toString(36)}:${++tabSequence}`,
       component: "page",
       tabComponent: "canvas",
       title: localizedTitle(view),
       params: { view },
-      position: { referenceGroup: groupId, direction: "right" },
+      position: { referenceGroup: panel.group.id, direction: "right" },
     });
     latest.current.onNavigate(`/${view}`);
     notify.info(i18n.t("Panel split to the right"));
@@ -362,7 +363,7 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
             theme={dark ? themeDark : themeLight}
             components={components}
             tabComponents={tabComponents}
-            defaultTabComponent="canvas"
+            defaultTabComponent={CanvasTab}
             rightHeaderActionsComponent={AddTabHeader}
             onReady={onReady}
           />

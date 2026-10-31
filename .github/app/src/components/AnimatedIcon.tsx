@@ -4,7 +4,7 @@ import {
   FileTextIcon, HistoryIcon, SettingsIcon, SearchIcon, PlusIcon,
   ChevronRightIcon, ChevronDownIcon, PanelLeftCloseIcon, PanelLeftOpenIcon,
   SunIcon, MoonIcon, CircleCheckIcon, CircleHelpIcon, ArrowRightIcon,
-  PanelRightOpenIcon, RotateCcwIcon, CodeXmlIcon, BellIcon, EllipsisIcon,
+  PanelRightOpenIcon, RotateCcwIcon, CodeIcon, BellIcon, MoreHorizontalIcon,
   CopyIcon, XIcon,
 } from "lucide-animated";
 
