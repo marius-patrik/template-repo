@@ -138,6 +138,26 @@ try {
   if (Math.abs(storedWidth - resizedWidth) > 2)
     throw new Error("Sidebar width failed to persist after reload");
 
+  const dividerBox = await resize.boundingBox();
+  if (!dividerBox) throw new Error("Sidebar pointer resize handle is not visible");
+  const pointerX = dividerBox.x + dividerBox.width / 2;
+  const pointerY = dividerBox.y + dividerBox.height / 2;
+  await page.mouse.move(pointerX, pointerY);
+  await page.mouse.down();
+  await page.mouse.move(pointerX + 62, pointerY, { steps: 6 });
+  await page.mouse.up();
+  await page.waitForFunction(
+    (previous) => Number(document.querySelector(".sidebar-resizer")?.getAttribute("aria-valuenow")) >= previous + 40,
+    resizedWidth,
+  );
+  await page.waitForFunction(
+    (previous) => (document.querySelector(".sidebar")?.getBoundingClientRect().width ?? 0) >= previous + 35,
+    resizedWidth,
+  );
+  const draggedWidth = await page.locator(".sidebar").evaluate((el) => el.getBoundingClientRect().width);
+  if (draggedWidth < resizedWidth + 35) throw new Error("Sidebar pointer drag did not resize");
+
+
 
   await page.getByRole("button", { name: "Search pages and commands" }).click();
   await page.getByRole("dialog", { name: "Open navigation tree" }).waitFor();
