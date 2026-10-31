@@ -1,6 +1,7 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -248,7 +249,7 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
   const disposables = useRef<Array<{ dispose: () => void }>>([]);
   const latest = useRef({ route, onNavigate });
   latest.current = { route, onNavigate };
-  const resetLayout = () => {
+  const resetLayout = useCallback(() => {
     const api = apiRef.current;
     if (!api) return;
     api.clear();
@@ -259,7 +260,7 @@ export default function DockCanvas({ route, dark, onNavigate, renderView }: Prop
     }
     openRoute(api, "overview");
     latest.current.onNavigate("/overview");
-  };
+  }, []);
   const panelContext = useMemo(
     () => ({ render: renderView, onNavigate, resetLayout }),
     [renderView, onNavigate, resetLayout],
