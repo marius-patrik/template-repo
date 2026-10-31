@@ -7,6 +7,8 @@ const { chromium } = require("playwright");
 const url = pathToFileURL(resolve(process.argv[2] ?? ".canvas-dist/index.html")).href;
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+page.setDefaultTimeout(9000);
+const watchdog = setTimeout(() => { console.error("Canvas smoke exceeded hard timeout"); process.exit(1); }, 150000);
 const errors = [];
 const captureReview = async (label, page) => {
   const image = await page.screenshot({ type: "jpeg", quality: 54, animations: "disabled" });
@@ -27,6 +29,7 @@ try {
     ["MOBILE_CANVAS", "Canvas", 390, 844],
   ]) {
     const review = await browser.newPage({ viewport: { width, height }, reducedMotion: "reduce" });
+    review.setDefaultTimeout(9000);
     try {
       await review.goto(url, { waitUntil: "load" });
       await review.getByTestId("empty-workspace").waitFor();
@@ -280,5 +283,6 @@ try {
   if (errors.length) throw new Error("Browser exception: " + errors.join("; "));
   console.log("Canvas profile-first prototype: Chromium acceptance passed");
 } finally {
+  clearTimeout(watchdog);
   await browser.close();
 }

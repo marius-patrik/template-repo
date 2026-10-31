@@ -4,6 +4,7 @@ import { toast, Toaster } from "sonner";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { AnimatedIcon } from "./components/AnimatedIcon";
+import { useCanvasConfig } from "./config";
 
 type Level = "success" | "info" | "warning" | "error";
 type Notice = {
@@ -179,15 +180,23 @@ export function NotificationCenter() {
 }
 
 export function Notifications() {
+  const theme = useCanvasConfig((state) => state.preferences.theme);
   return (
     <Toaster
       position="bottom-right"
-      closeButton
-      visibleToasts={4}
-      duration={3500}
-      theme="system"
+      visibleToasts={1}
+      duration={2600}
+      theme={theme}
       className="canvas-notification-root"
-      toastOptions={{ className: "canvas-toast" }}
+      toastOptions={{
+        className: "canvas-toast",
+        style: {
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          color: "var(--text)",
+          boxShadow: "0 12px 28px color-mix(in srgb,var(--shadow) 35%,transparent)",
+        },
+      }}
     />
   );
 }

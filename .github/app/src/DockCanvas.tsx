@@ -284,7 +284,6 @@ export default function DockCanvas({
       ...(groupId ? { position: { referenceGroup: groupId } } : {}),
     });
     latest.current.onNavigate(`/${view}`);
-    notify.info(i18n.t("Tab opened"));
   }, []);
   const split = useCallback((view: CanvasView, panelId: string) => {
     const api = apiRef.current,
@@ -331,7 +330,6 @@ export default function DockCanvas({
       params: { view },
     });
     latest.current.onNavigate(`/${view}`);
-    notify.info(i18n.t("Tab opened"));
   }, []);
   const closePanel = useCallback((panelId: string) => {
     const api = apiRef.current;
