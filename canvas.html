@@ -28,7 +28,7 @@ footer{max-width:1180px;padding:22px 24px;margin:auto;color:#687989;font-size:.8
 </style>
 </head>
 <body>
-<header><div class="eyebrow">Repository Canvas · Generated from tracked source</div><h1>template-repo</h1><p>Customize this repository into a well-specified project with a single authoritative requirement source, explicit architecture decisions, reproducible verification and an auditable release path.</p><p>98 source entries · static, read-only view · agent actions modify repository files and regenerate this document</p></header>
+<header><div class="eyebrow">Repository Canvas · Generated from tracked source</div><h1>template-repo</h1><p>Customize this repository into a well-specified project with a single authoritative requirement source, explicit architecture decisions, reproducible verification and an auditable release path.</p><p>100 source entries · static, read-only view · agent actions modify repository files and regenerate this document</p></header>
 <main><p class="hint"><strong>Source of truth:</strong> the Git repository. This HTML has no independent application state, external data feed or editing controls. The generated canvas is excluded from its own input inventory; Git submodules and binary assets are represented by identifiers or checksums, not expanded data.</p>
 
 <div class="layout"><nav class="navigator" aria-label="Repository index"><h2>Repository files</h2><ol>
@@ -103,33 +103,35 @@ footer{max-width:1180px;padding:22px 24px;margin:auto;color:#687989;font-size:.8
 <li><a href="#file-0069">.github/app/src/commands.ts</a></li>
 <li><a href="#file-0070">.github/app/src/components/AnimatedIcon.tsx</a></li>
 <li><a href="#file-0071">.github/app/src/components/ui/button.tsx</a></li>
-<li><a href="#file-0072">.github/app/src/main.tsx</a></li>
-<li><a href="#file-0073">.github/app/src/styles.css</a></li>
-<li><a href="#file-0074">.github/app/tsconfig.json</a></li>
-<li><a href="#file-0075">.github/darkfactory-installation.json</a></li>
-<li><a href="#file-0076">.github/scripts/apply_branch_protection.py</a></li>
-<li><a href="#file-0077">.github/scripts/generate_documents.py</a></li>
-<li><a href="#file-0078">.github/scripts/versioning.py</a></li>
-<li><a href="#file-0079">.github/tests/smoke_canvas.mjs</a></li>
-<li><a href="#file-0080">.github/tests/test_apply_branch_protection.py</a></li>
-<li><a href="#file-0081">.github/tests/test_canvas.py</a></li>
-<li><a href="#file-0082">.github/tests/test_canvas_web.py</a></li>
-<li><a href="#file-0083">.github/tests/test_repository_structure.py</a></li>
-<li><a href="#file-0084">.github/tests/test_versioning.py</a></li>
-<li><a href="#file-0085">.github/workflows/canvas-pages.yml</a></li>
-<li><a href="#file-0086">.github/workflows/canvas-sync.yml</a></li>
-<li><a href="#file-0087">.github/workflows/darkfactory-control.yml</a></li>
-<li><a href="#file-0088">.github/workflows/darkfactory.yml</a></li>
-<li><a href="#file-0089">.github/workflows/docs.yml</a></li>
-<li><a href="#file-0090">.github/workflows/keep-development.yml</a></li>
-<li><a href="#file-0091">.github/workflows/main-source.yml</a></li>
-<li><a href="#file-0092">.github/workflows/pr-version.yml</a></li>
-<li><a href="#file-0093">.github/workflows/release.yml</a></li>
-<li><a href="#file-0094">.gitmodules</a></li>
-<li><a href="#file-0095">CONTRIBUTING.md</a></li>
-<li><a href="#file-0096">LICENSE</a></li>
-<li><a href="#file-0097">README.md</a></li>
-<li><a href="#file-0098">repo.dfconfig</a></li>
+<li><a href="#file-0072">.github/app/src/config.ts</a></li>
+<li><a href="#file-0073">.github/app/src/i18n.ts</a></li>
+<li><a href="#file-0074">.github/app/src/main.tsx</a></li>
+<li><a href="#file-0075">.github/app/src/styles.css</a></li>
+<li><a href="#file-0076">.github/app/tsconfig.json</a></li>
+<li><a href="#file-0077">.github/darkfactory-installation.json</a></li>
+<li><a href="#file-0078">.github/scripts/apply_branch_protection.py</a></li>
+<li><a href="#file-0079">.github/scripts/generate_documents.py</a></li>
+<li><a href="#file-0080">.github/scripts/versioning.py</a></li>
+<li><a href="#file-0081">.github/tests/smoke_canvas.mjs</a></li>
+<li><a href="#file-0082">.github/tests/test_apply_branch_protection.py</a></li>
+<li><a href="#file-0083">.github/tests/test_canvas.py</a></li>
+<li><a href="#file-0084">.github/tests/test_canvas_web.py</a></li>
+<li><a href="#file-0085">.github/tests/test_repository_structure.py</a></li>
+<li><a href="#file-0086">.github/tests/test_versioning.py</a></li>
+<li><a href="#file-0087">.github/workflows/canvas-pages.yml</a></li>
+<li><a href="#file-0088">.github/workflows/canvas-sync.yml</a></li>
+<li><a href="#file-0089">.github/workflows/darkfactory-control.yml</a></li>
+<li><a href="#file-0090">.github/workflows/darkfactory.yml</a></li>
+<li><a href="#file-0091">.github/workflows/docs.yml</a></li>
+<li><a href="#file-0092">.github/workflows/keep-development.yml</a></li>
+<li><a href="#file-0093">.github/workflows/main-source.yml</a></li>
+<li><a href="#file-0094">.github/workflows/pr-version.yml</a></li>
+<li><a href="#file-0095">.github/workflows/release.yml</a></li>
+<li><a href="#file-0096">.gitmodules</a></li>
+<li><a href="#file-0097">CONTRIBUTING.md</a></li>
+<li><a href="#file-0098">LICENSE</a></li>
+<li><a href="#file-0099">README.md</a></li>
+<li><a href="#file-0100">repo.dfconfig</a></li>
 </ol></nav><div class="files">
 <section class="file" id="file-0001"><h3>.agents/AGENTS.md</h3><p class="meta">Git mode 100644 · fe682dfcf5d2d016885549f7aaf363189f4506a0</p><pre># Agent and contributor rules
 
@@ -3375,7 +3377,332 @@ export function Button({ className, variant, size, asChild = false, ...props }: 
   return &lt;Component className={twMerge(clsx(variants({ variant, size }), className))} {...props} /&gt;;
 }
 </pre></section>
-<section class="file" id="file-0072"><h3>.github/app/src/main.tsx</h3><p class="meta">Git mode 100644 · ac05d9bb08247cce615ca966c7cd2bdc4b3e5d2a</p><pre>import React from &quot;react&quot;;
+<section class="file" id="file-0072"><h3>.github/app/src/config.ts</h3><p class="meta">Git mode 100644 · b48864df7f17d4d59ffb0464c54e77ada2ebbfbd</p><pre>import { create } from &quot;zustand&quot;;
+import { createJSONStorage, persist } from &quot;zustand/middleware&quot;;
+import { z } from &quot;zod&quot;;
+
+const accentIds = [&quot;neutral&quot;, &quot;blue&quot;, &quot;sage&quot;, &quot;violet&quot;, &quot;amber&quot;] as const;
+const schema = z.object({
+  theme: z.enum([&quot;dark&quot;, &quot;light&quot;, &quot;system&quot;]),
+  skin: z.enum([&quot;graphite&quot;, &quot;slate&quot;, &quot;contrast&quot;]),
+  density: z.enum([&quot;comfortable&quot;, &quot;compact&quot;]),
+  accent: z.string().refine(
+    (value) =&gt; accentIds.some((id) =&gt; id === value) || /^#[0-9a-f]{6}$/i.test(value),
+    &quot;Invalid accent color&quot;,
+  ),
+  fontSize: z.number().int().min(13).max(16),
+  iconSize: z.number().int().min(16).max(20),
+});
+
+export type CanvasPreferences = z.infer&lt;typeof schema&gt;;
+export const defaults: CanvasPreferences = {
+  theme: &quot;dark&quot;,
+  skin: &quot;graphite&quot;,
+  density: &quot;comfortable&quot;,
+  accent: &quot;neutral&quot;,
+  fontSize: 14,
+  iconSize: 18,
+};
+
+function validated(input: unknown): CanvasPreferences {
+  const value = input &amp;&amp; typeof input === &quot;object&quot; ? input : {};
+  const result = schema.safeParse({ ...defaults, ...value });
+  return result.success ? result.data : defaults;
+}
+
+function legacySettings(): CanvasPreferences {
+  try {
+    const saved = localStorage.getItem(&quot;canvas-preferences&quot;);
+    return validated(saved ? JSON.parse(saved) : {});
+  } catch {
+    return defaults;
+  }
+}
+
+type ConfigState = {
+  preferences: CanvasPreferences;
+  setPreferences: (patch: Partial&lt;CanvasPreferences&gt;) =&gt; void;
+  resetPreferences: () =&gt; void;
+};
+
+// Settings are intentionally separate from repository-authoritative data.
+// Persisted records are schema-validated, versioned and safe to reset.
+export const useCanvasConfig = create&lt;ConfigState&gt;()(
+  persist(
+    (set, get) =&gt; ({
+      preferences: legacySettings(),
+      setPreferences: (patch) =&gt;
+        set({ preferences: validated({ ...get().preferences, ...patch }) }),
+      resetPreferences: () =&gt; set({ preferences: defaults }),
+    }),
+    {
+      name: &quot;canvas-config&quot;,
+      version: 1,
+      storage: createJSONStorage(() =&gt; localStorage),
+      partialize: (state) =&gt; ({ preferences: state.preferences }),
+      migrate: (saved) =&gt; saved,
+      merge: (saved, current) =&gt; {
+        const record = saved &amp;&amp; typeof saved === &quot;object&quot; ? saved : {};
+        const preferences =
+          &quot;preferences&quot; in record ? record.preferences : record;
+        return { ...current, preferences: validated(preferences) };
+      },
+    },
+  ),
+);
+</pre></section>
+<section class="file" id="file-0073"><h3>.github/app/src/i18n.ts</h3><p class="meta">Git mode 100644 · 3ef91158309df1b99c4fc0dfbbe16430d5e309b0</p><pre>import i18next from &quot;i18next&quot;;
+import LanguageDetector from &quot;i18next-browser-languagedetector&quot;;
+import { initReactI18next } from &quot;react-i18next&quot;;
+
+export const LANGUAGES = [
+  { code: &quot;en&quot;, label: &quot;English&quot;, nativeLabel: &quot;English&quot; },
+  { code: &quot;cs&quot;, label: &quot;Czech&quot;, nativeLabel: &quot;Čeština&quot; },
+  { code: &quot;es&quot;, label: &quot;Spanish&quot;, nativeLabel: &quot;Español&quot; },
+] as const;
+
+const english = [
+  &quot;Overview&quot;,&quot;Workspace&quot;,&quot;Projects&quot;,&quot;Agents&quot;,&quot;Knowledge graph&quot;,&quot;Roadmap&quot;,&quot;Artifacts&quot;,&quot;Activity&quot;,
+  &quot;Context&quot;,&quot;Settings&quot;,&quot;System&quot;,&quot;Personal workspace&quot;,&quot;Open navigation tree&quot;,&quot;Search pages and commands&quot;,
+  &quot;No matching routes.&quot;,&quot;Navigate&quot;,&quot;Open&quot;,&quot;Dismiss&quot;,&quot;Toggle navigation&quot;,&quot;Close navigation&quot;,
+  &quot;Expand sidebar&quot;,&quot;Collapse sidebar&quot;,&quot;Repository snapshot · read-only&quot;,&quot;Read-only snapshot&quot;,
+  &quot;Prototype&quot;,&quot;Version&quot;,&quot;Appearance&quot;,&quot;Keyboard shortcuts&quot;,&quot;Theme&quot;,&quot;Skin&quot;,&quot;Density&quot;,&quot;Accent color&quot;,
+  &quot;Text size&quot;,&quot;Icon size&quot;,&quot;Language&quot;,&quot;Comfortable&quot;,&quot;Compact&quot;,&quot;Graphite&quot;,&quot;Slate&quot;,&quot;High contrast&quot;,
+  &quot;Dark&quot;,&quot;Light&quot;,&quot;Use system&quot;,&quot;Custom&quot;,&quot;Custom accent&quot;,&quot;Hexadecimal&quot;,
+  &quot;Applied immediately to this browser only.&quot;,&quot;Keyboard shortcuts follow your system:&quot;,
+  &quot;Find a command&quot;,&quot;Search commands and shortcuts&quot;,&quot;No matching commands.&quot;,&quot;Reset all&quot;,
+  &quot;Unassigned&quot;,&quot;Edit&quot;,&quot;Press keys…&quot;,&quot;Reset&quot;,&quot;Clear&quot;,&quot;Open settings&quot;,&quot;Source repository&quot;,
+  &quot;Workspace map&quot;,&quot;Documentation relationships&quot;,&quot;Expand&quot;,&quot;Project identity&quot;,&quot;Build source&quot;,
+  &quot;Current branch&quot;,&quot;Publication&quot;,&quot;Static · read-only&quot;,&quot;Authoritative goal&quot;,&quot;View original source&quot;,
+  &quot;Repository source&quot;,&quot;Generated from tracked records&quot;,&quot;Open document&quot;,&quot;Workspace&quot;,
+  &quot;Layout&quot;,&quot;Arrange your workspace&quot;,&quot;Open graph&quot;,&quot;Repository context&quot;,&quot;Browse artifacts&quot;,
+  &quot;Requirements source&quot;,&quot;Current agent guidance&quot;,&quot;Available source documents&quot;,&quot;Build provenance&quot;,
+  &quot;Source revision&quot;,&quot;No documents&quot;,&quot;Choose custom accent color&quot;,&quot;Available tabs&quot;,&quot;Add tab&quot;,
+  &quot;More tab actions&quot;,&quot;Split right&quot;,&quot;Reset layout&quot;,&quot;Navigation&quot;,&quot;Close dialog&quot;,&quot;No source documents available.&quot;,
+  &quot;Theme preset&quot;,&quot;Visual density&quot;,&quot;Theme and skinning&quot;,&quot;Configuration&quot;,&quot;Reset appearance&quot;,
+  &quot;Interface language&quot;,&quot;Use {{name}} accent&quot;,&quot;Change shortcut for {{name}}&quot;,&quot;Reset shortcut for {{name}}&quot;,
+  &quot;Clear shortcut for {{name}}&quot;,&quot;Edit shortcuts locally; changes never modify the repository.&quot;,
+  &quot;Drag tabs to create groups, split panels, or float windows. Your arrangement is saved locally in this browser.&quot;,
+  &quot;A configurable working surface. Open views with the sidebar or omnibar, then arrange their tabs with Dockview.&quot;,
+  &quot;A repository-authored workspace. This view is generated from tracked source at build time, not a live service.&quot;,
+  &quot;Repository / {{name}}&quot;,&quot;{{documents}} source documents · {{records}} documented records&quot;,
+  &quot;Repositories available in this compiled snapshot.&quot;,
+  &quot;Document links derived from the repository&#x27;s existing authoring structure.&quot;,
+  &quot;Requirements and plans are sourced from the repository rather than simulated task statuses.&quot;,
+  &quot;Agent rules are sourced from the generated repository guidance.&quot;,
+  &quot;Context authority and repository-authored Markdown.&quot;,
+  &quot;The published snapshot does not represent live execution telemetry.&quot;,
+  &quot;Built from tracked repository documents. No agent activity or task completion is inferred.&quot;,
+  &quot;Source documents embedded during the GitHub Actions build.&quot;,
+  &quot;Appearance, keyboard and language preferences are local to this browser.&quot;,
+  &quot;Local UI settings are not authoritative project data.&quot;,
+  &quot;A preview of skin tokens and spacing, independent from accent color.&quot;,
+  &quot;The template currently generates .agents/AGENTS.md from its agent rules. A separate root context file has not been assumed or fabricated.&quot;,
+  &quot;No generated PRD is available in this snapshot.&quot;,
+  &quot;No agent-rule document is available.&quot;,
+  &quot;No source documents available.&quot;,
+  &quot;The default interface skin&quot;,&quot;Cooler neutral surfaces&quot;,&quot;Stronger panel boundaries&quot;,
+  &quot;Reset to defaults&quot;,&quot;Theme selection&quot;,&quot;Skin selection&quot;,&quot;Density selection&quot;,
+] as const;
+
+const en = Object.fromEntries(english.map((value) =&gt; [value, value]));
+
+const cs: Record&lt;string, string&gt; = {
+  &quot;Overview&quot;:&quot;Přehled&quot;,&quot;Workspace&quot;:&quot;Pracovní plocha&quot;,&quot;Projects&quot;:&quot;Projekty&quot;,&quot;Agents&quot;:&quot;Agenti&quot;,
+  &quot;Knowledge graph&quot;:&quot;Znalostní graf&quot;,&quot;Roadmap&quot;:&quot;Plán&quot;,&quot;Artifacts&quot;:&quot;Artefakty&quot;,&quot;Activity&quot;:&quot;Aktivita&quot;,
+  &quot;Context&quot;:&quot;Kontext&quot;,&quot;Settings&quot;:&quot;Nastavení&quot;,&quot;System&quot;:&quot;Systém&quot;,&quot;Personal workspace&quot;:&quot;Osobní prostor&quot;,
+  &quot;Open navigation tree&quot;:&quot;Otevřít navigační strom&quot;,&quot;Search pages and commands&quot;:&quot;Hledat stránky a příkazy&quot;,
+  &quot;No matching routes.&quot;:&quot;Žádné odpovídající stránky.&quot;,&quot;Navigate&quot;:&quot;Navigovat&quot;,&quot;Open&quot;:&quot;Otevřít&quot;,&quot;Dismiss&quot;:&quot;Zavřít&quot;,
+  &quot;Toggle navigation&quot;:&quot;Přepnout navigaci&quot;,&quot;Close navigation&quot;:&quot;Zavřít navigaci&quot;,
+  &quot;Expand sidebar&quot;:&quot;Rozbalit postranní panel&quot;,&quot;Collapse sidebar&quot;:&quot;Sbalit postranní panel&quot;,
+  &quot;Repository snapshot · read-only&quot;:&quot;Snímek repozitáře · pouze ke čtení&quot;,
+  &quot;Read-only snapshot&quot;:&quot;Snímek · pouze ke čtení&quot;,&quot;Prototype&quot;:&quot;Prototyp&quot;,&quot;Version&quot;:&quot;Verze&quot;,
+  &quot;Appearance&quot;:&quot;Vzhled&quot;,&quot;Keyboard shortcuts&quot;:&quot;Klávesové zkratky&quot;,&quot;Theme&quot;:&quot;Režim&quot;,&quot;Skin&quot;:&quot;Vzhledový styl&quot;,
+  &quot;Density&quot;:&quot;Hustota rozhraní&quot;,&quot;Accent color&quot;:&quot;Barva zvýraznění&quot;,&quot;Text size&quot;:&quot;Velikost textu&quot;,
+  &quot;Icon size&quot;:&quot;Velikost ikon&quot;,&quot;Language&quot;:&quot;Jazyk&quot;,&quot;Comfortable&quot;:&quot;Pohodlné&quot;,&quot;Compact&quot;:&quot;Kompaktní&quot;,
+  &quot;Graphite&quot;:&quot;Grafit&quot;,&quot;Slate&quot;:&quot;Břidlice&quot;,&quot;High contrast&quot;:&quot;Vysoký kontrast&quot;,
+  &quot;Dark&quot;:&quot;Tmavý&quot;,&quot;Light&quot;:&quot;Světlý&quot;,&quot;Use system&quot;:&quot;Podle systému&quot;,&quot;Custom&quot;:&quot;Vlastní&quot;,
+  &quot;Custom accent&quot;:&quot;Vlastní zvýraznění&quot;,&quot;Hexadecimal&quot;:&quot;Hexadecimální hodnota&quot;,
+  &quot;Applied immediately to this browser only.&quot;:&quot;Projeví se okamžitě pouze v tomto prohlížeči.&quot;,
+  &quot;Find a command&quot;:&quot;Vyhledat příkaz&quot;,&quot;Search commands and shortcuts&quot;:&quot;Hledat příkazy a zkratky&quot;,
+  &quot;No matching commands.&quot;:&quot;Žádné odpovídající příkazy.&quot;,&quot;Reset all&quot;:&quot;Obnovit vše&quot;,
+  &quot;Unassigned&quot;:&quot;Nepřiřazeno&quot;,&quot;Edit&quot;:&quot;Upravit&quot;,&quot;Press keys…&quot;:&quot;Stiskněte klávesy…&quot;,
+  &quot;Reset&quot;:&quot;Obnovit&quot;,&quot;Clear&quot;:&quot;Vymazat&quot;,&quot;Open settings&quot;:&quot;Otevřít nastavení&quot;,
+  &quot;Source repository&quot;:&quot;Zdrojový repozitář&quot;,&quot;Workspace map&quot;:&quot;Mapa prostoru&quot;,
+  &quot;Documentation relationships&quot;:&quot;Vazby dokumentace&quot;,&quot;Expand&quot;:&quot;Rozbalit&quot;,
+  &quot;Project identity&quot;:&quot;Identita projektu&quot;,&quot;Build source&quot;:&quot;Zdroj sestavení&quot;,
+  &quot;Current branch&quot;:&quot;Aktuální větev&quot;,&quot;Publication&quot;:&quot;Publikace&quot;,
+  &quot;Static · read-only&quot;:&quot;Statické · pouze ke čtení&quot;,&quot;Authoritative goal&quot;:&quot;Závazný cíl&quot;,
+  &quot;View original source&quot;:&quot;Zobrazit zdroj&quot;,&quot;Repository source&quot;:&quot;Zdroj repozitáře&quot;,
+  &quot;Generated from tracked records&quot;:&quot;Vytvořeno ze sledovaných záznamů&quot;,
+  &quot;Open document&quot;:&quot;Otevřít dokument&quot;,&quot;Layout&quot;:&quot;Rozvržení&quot;,
+  &quot;Arrange your workspace&quot;:&quot;Uspořádejte si pracovní plochu&quot;,&quot;Open graph&quot;:&quot;Otevřít graf&quot;,
+  &quot;Repository context&quot;:&quot;Kontext repozitáře&quot;,&quot;Browse artifacts&quot;:&quot;Procházet artefakty&quot;,
+  &quot;Requirements source&quot;:&quot;Zdroj požadavků&quot;,&quot;Current agent guidance&quot;:&quot;Aktuální pokyny pro agenty&quot;,
+  &quot;Available source documents&quot;:&quot;Dostupné zdrojové dokumenty&quot;,
+  &quot;Build provenance&quot;:&quot;Původ sestavení&quot;,&quot;Source revision&quot;:&quot;Revize zdroje&quot;,&quot;No documents&quot;:&quot;Žádné dokumenty&quot;,
+  &quot;Choose custom accent color&quot;:&quot;Vybrat vlastní barvu zvýraznění&quot;,
+  &quot;Available tabs&quot;:&quot;Dostupné záložky&quot;,&quot;Add tab&quot;:&quot;Přidat záložku&quot;,
+  &quot;More tab actions&quot;:&quot;Další akce se záložkami&quot;,&quot;Split right&quot;:&quot;Rozdělit doprava&quot;,
+  &quot;Reset layout&quot;:&quot;Obnovit rozvržení&quot;,&quot;Navigation&quot;:&quot;Navigace&quot;,
+  &quot;No source documents available.&quot;:&quot;Nejsou dostupné žádné zdrojové dokumenty.&quot;,
+  &quot;Theme preset&quot;:&quot;Předvolba vzhledu&quot;,&quot;Visual density&quot;:&quot;Hustota zobrazení&quot;,
+  &quot;Theme and skinning&quot;:&quot;Motivy a vzhledové styly&quot;,&quot;Configuration&quot;:&quot;Konfigurace&quot;,
+  &quot;Reset appearance&quot;:&quot;Obnovit vzhled&quot;,&quot;Interface language&quot;:&quot;Jazyk rozhraní&quot;,
+  &quot;Use {{name}} accent&quot;:&quot;Použít zvýraznění {{name}}&quot;,
+  &quot;Change shortcut for {{name}}&quot;:&quot;Změnit zkratku pro {{name}}&quot;,
+  &quot;Reset shortcut for {{name}}&quot;:&quot;Obnovit zkratku pro {{name}}&quot;,
+  &quot;Clear shortcut for {{name}}&quot;:&quot;Vymazat zkratku pro {{name}}&quot;,
+  &quot;Edit shortcuts locally; changes never modify the repository.&quot;:&quot;Zkratky lze upravovat lokálně; změny nikdy neupravují repozitář.&quot;,
+  &quot;Drag tabs to create groups, split panels, or float windows. Your arrangement is saved locally in this browser.&quot;:
+    &quot;Přetažením záložek vytvářejte skupiny, rozdělujte panely nebo otevírejte plovoucí okna. Rozvržení se ukládá lokálně.&quot;,
+  &quot;A configurable working surface. Open views with the sidebar or omnibar, then arrange their tabs with Dockview.&quot;:
+    &quot;Přizpůsobitelná pracovní plocha. Otevírejte pohledy z postranního panelu nebo omnibaru a uspořádejte záložky v Dockview.&quot;,
+  &quot;A repository-authored workspace. This view is generated from tracked source at build time, not a live service.&quot;:
+    &quot;Pracovní prostor založený na repozitáři. Pohled vzniká ze sledovaných souborů při sestavení; nejde o živou službu.&quot;,
+  &quot;Repository / {{name}}&quot;:&quot;Repozitář / {{name}}&quot;,
+  &quot;{{documents}} source documents · {{records}} documented records&quot;:
+    &quot;{{documents}} zdrojových dokumentů · {{records}} zdokumentovaných záznamů&quot;,
+  &quot;Repositories available in this compiled snapshot.&quot;:&quot;Repozitáře dostupné v tomto sestaveném snímku.&quot;,
+  &quot;Document links derived from the repository&#x27;s existing authoring structure.&quot;:
+    &quot;Vazby dokumentů odvozené ze stávající struktury repozitáře.&quot;,
+  &quot;Requirements and plans are sourced from the repository rather than simulated task statuses.&quot;:
+    &quot;Požadavky a plány pocházejí z repozitáře, nikoli ze simulovaných stavů úloh.&quot;,
+  &quot;Agent rules are sourced from the generated repository guidance.&quot;:
+    &quot;Pravidla agentů pocházejí z vygenerovaných pokynů repozitáře.&quot;,
+  &quot;Context authority and repository-authored Markdown.&quot;:&quot;Autorita kontextu a Markdown v repozitáři.&quot;,
+  &quot;The published snapshot does not represent live execution telemetry.&quot;:
+    &quot;Publikovaný snímek nepředstavuje živou telemetrii.&quot;,
+  &quot;Built from tracked repository documents. No agent activity or task completion is inferred.&quot;:
+    &quot;Sestaveno ze sledovaných dokumentů. Aktivita agentů ani dokončení úloh se neodhadují.&quot;,
+  &quot;Source documents embedded during the GitHub Actions build.&quot;:
+    &quot;Zdrojové dokumenty vložené při sestavení pomocí GitHub Actions.&quot;,
+  &quot;Appearance, keyboard and language preferences are local to this browser.&quot;:
+    &quot;Předvolby vzhledu, klávesnice a jazyka se ukládají pouze v tomto prohlížeči.&quot;,
+  &quot;Local UI settings are not authoritative project data.&quot;:
+    &quot;Lokální nastavení rozhraní nejsou závaznými projektovými daty.&quot;,
+  &quot;A preview of skin tokens and spacing, independent from accent color.&quot;:
+    &quot;Náhled stylových tokenů a rozestupů nezávislých na barvě zvýraznění.&quot;,
+  &quot;The template currently generates .agents/AGENTS.md from its agent rules. A separate root context file has not been assumed or fabricated.&quot;:
+    &quot;Šablona nyní generuje .agents/AGENTS.md z pravidel agentů. Samostatný kořenový kontext nebyl předpokládán ani vytvořen.&quot;,
+  &quot;No generated PRD is available in this snapshot.&quot;:&quot;V tomto snímku není dostupné PRD.&quot;,
+  &quot;No agent-rule document is available.&quot;:&quot;Nejsou dostupné pokyny pro agenty.&quot;,
+  &quot;The default interface skin&quot;:&quot;Výchozí styl rozhraní&quot;,&quot;Cooler neutral surfaces&quot;:&quot;Chladnější neutrální povrchy&quot;,
+  &quot;Stronger panel boundaries&quot;:&quot;Výraznější hranice panelů&quot;,
+  &quot;Reset to defaults&quot;:&quot;Obnovit výchozí nastavení&quot;,
+  &quot;Theme selection&quot;:&quot;Výběr režimu&quot;,&quot;Skin selection&quot;:&quot;Výběr stylu&quot;,&quot;Density selection&quot;:&quot;Výběr hustoty&quot;,
+};
+const es: Record&lt;string, string&gt; = {
+  &quot;Overview&quot;:&quot;Resumen&quot;,&quot;Workspace&quot;:&quot;Espacio de trabajo&quot;,&quot;Projects&quot;:&quot;Proyectos&quot;,&quot;Agents&quot;:&quot;Agentes&quot;,
+  &quot;Knowledge graph&quot;:&quot;Grafo de conocimiento&quot;,&quot;Roadmap&quot;:&quot;Hoja de ruta&quot;,&quot;Artifacts&quot;:&quot;Artefactos&quot;,
+  &quot;Activity&quot;:&quot;Actividad&quot;,&quot;Context&quot;:&quot;Contexto&quot;,&quot;Settings&quot;:&quot;Configuración&quot;,&quot;System&quot;:&quot;Sistema&quot;,
+  &quot;Personal workspace&quot;:&quot;Espacio personal&quot;,&quot;Open navigation tree&quot;:&quot;Abrir árbol de navegación&quot;,
+  &quot;Search pages and commands&quot;:&quot;Buscar páginas y comandos&quot;,&quot;No matching routes.&quot;:&quot;No hay rutas coincidentes.&quot;,
+  &quot;Navigate&quot;:&quot;Navegar&quot;,&quot;Open&quot;:&quot;Abrir&quot;,&quot;Dismiss&quot;:&quot;Cerrar&quot;,&quot;Toggle navigation&quot;:&quot;Alternar navegación&quot;,
+  &quot;Close navigation&quot;:&quot;Cerrar navegación&quot;,&quot;Expand sidebar&quot;:&quot;Expandir barra lateral&quot;,
+  &quot;Collapse sidebar&quot;:&quot;Contraer barra lateral&quot;,&quot;Repository snapshot · read-only&quot;:&quot;Instantánea del repositorio · solo lectura&quot;,
+  &quot;Read-only snapshot&quot;:&quot;Instantánea de solo lectura&quot;,&quot;Prototype&quot;:&quot;Prototipo&quot;,&quot;Version&quot;:&quot;Versión&quot;,
+  &quot;Appearance&quot;:&quot;Apariencia&quot;,&quot;Keyboard shortcuts&quot;:&quot;Atajos de teclado&quot;,&quot;Theme&quot;:&quot;Tema&quot;,
+  &quot;Skin&quot;:&quot;Estilo visual&quot;,&quot;Density&quot;:&quot;Densidad&quot;,&quot;Accent color&quot;:&quot;Color de acento&quot;,
+  &quot;Text size&quot;:&quot;Tamaño del texto&quot;,&quot;Icon size&quot;:&quot;Tamaño de iconos&quot;,&quot;Language&quot;:&quot;Idioma&quot;,
+  &quot;Comfortable&quot;:&quot;Cómodo&quot;,&quot;Compact&quot;:&quot;Compacto&quot;,&quot;Graphite&quot;:&quot;Grafito&quot;,&quot;Slate&quot;:&quot;Pizarra&quot;,
+  &quot;High contrast&quot;:&quot;Alto contraste&quot;,&quot;Dark&quot;:&quot;Oscuro&quot;,&quot;Light&quot;:&quot;Claro&quot;,&quot;Use system&quot;:&quot;Usar sistema&quot;,
+  &quot;Custom&quot;:&quot;Personalizado&quot;,&quot;Custom accent&quot;:&quot;Acento personalizado&quot;,&quot;Hexadecimal&quot;:&quot;Hexadecimal&quot;,
+  &quot;Applied immediately to this browser only.&quot;:&quot;Se aplica inmediatamente solo a este navegador.&quot;,
+  &quot;Find a command&quot;:&quot;Buscar comando&quot;,&quot;Search commands and shortcuts&quot;:&quot;Buscar comandos y atajos&quot;,
+  &quot;No matching commands.&quot;:&quot;No hay comandos coincidentes.&quot;,&quot;Reset all&quot;:&quot;Restablecer todo&quot;,
+  &quot;Unassigned&quot;:&quot;Sin asignar&quot;,&quot;Edit&quot;:&quot;Editar&quot;,&quot;Press keys…&quot;:&quot;Pulsa las teclas…&quot;,
+  &quot;Reset&quot;:&quot;Restablecer&quot;,&quot;Clear&quot;:&quot;Borrar&quot;,&quot;Open settings&quot;:&quot;Abrir configuración&quot;,
+  &quot;Source repository&quot;:&quot;Repositorio de origen&quot;,&quot;Workspace map&quot;:&quot;Mapa del espacio&quot;,
+  &quot;Documentation relationships&quot;:&quot;Relaciones entre documentos&quot;,&quot;Expand&quot;:&quot;Expandir&quot;,
+  &quot;Project identity&quot;:&quot;Identidad del proyecto&quot;,&quot;Build source&quot;:&quot;Fuente de compilación&quot;,
+  &quot;Current branch&quot;:&quot;Rama actual&quot;,&quot;Publication&quot;:&quot;Publicación&quot;,&quot;Static · read-only&quot;:&quot;Estático · solo lectura&quot;,
+  &quot;Authoritative goal&quot;:&quot;Objetivo principal&quot;,&quot;View original source&quot;:&quot;Ver código fuente&quot;,
+  &quot;Repository source&quot;:&quot;Fuente del repositorio&quot;,&quot;Generated from tracked records&quot;:&quot;Generado a partir de registros versionados&quot;,
+  &quot;Open document&quot;:&quot;Abrir documento&quot;,&quot;Layout&quot;:&quot;Diseño&quot;,
+  &quot;Arrange your workspace&quot;:&quot;Organiza tu espacio de trabajo&quot;,&quot;Open graph&quot;:&quot;Abrir grafo&quot;,
+  &quot;Repository context&quot;:&quot;Contexto del repositorio&quot;,&quot;Browse artifacts&quot;:&quot;Explorar artefactos&quot;,
+  &quot;Requirements source&quot;:&quot;Fuente de requisitos&quot;,&quot;Current agent guidance&quot;:&quot;Directrices actuales de agentes&quot;,
+  &quot;Available source documents&quot;:&quot;Documentos fuente disponibles&quot;,&quot;Build provenance&quot;:&quot;Origen de compilación&quot;,
+  &quot;Source revision&quot;:&quot;Revisión de origen&quot;,&quot;No documents&quot;:&quot;Sin documentos&quot;,
+  &quot;Choose custom accent color&quot;:&quot;Elegir color de acento personalizado&quot;,
+  &quot;Available tabs&quot;:&quot;Pestañas disponibles&quot;,&quot;Add tab&quot;:&quot;Añadir pestaña&quot;,&quot;More tab actions&quot;:&quot;Más acciones de pestañas&quot;,
+  &quot;Split right&quot;:&quot;Dividir a la derecha&quot;,&quot;Reset layout&quot;:&quot;Restablecer diseño&quot;,&quot;Navigation&quot;:&quot;Navegación&quot;,
+  &quot;No source documents available.&quot;:&quot;No hay documentos fuente disponibles.&quot;,
+  &quot;Theme preset&quot;:&quot;Tema predefinido&quot;,&quot;Visual density&quot;:&quot;Densidad visual&quot;,
+  &quot;Theme and skinning&quot;:&quot;Temas y estilos visuales&quot;,&quot;Configuration&quot;:&quot;Configuración&quot;,
+  &quot;Reset appearance&quot;:&quot;Restablecer apariencia&quot;,&quot;Interface language&quot;:&quot;Idioma de la interfaz&quot;,
+  &quot;Use {{name}} accent&quot;:&quot;Usar acento {{name}}&quot;,
+  &quot;Change shortcut for {{name}}&quot;:&quot;Cambiar atajo de {{name}}&quot;,
+  &quot;Reset shortcut for {{name}}&quot;:&quot;Restablecer atajo de {{name}}&quot;,
+  &quot;Clear shortcut for {{name}}&quot;:&quot;Borrar atajo de {{name}}&quot;,
+  &quot;Edit shortcuts locally; changes never modify the repository.&quot;:
+    &quot;Los atajos se editan localmente; los cambios nunca modifican el repositorio.&quot;,
+  &quot;Drag tabs to create groups, split panels, or float windows. Your arrangement is saved locally in this browser.&quot;:
+    &quot;Arrastra pestañas para crear grupos, dividir paneles o abrir ventanas flotantes. El diseño se guarda localmente.&quot;,
+  &quot;A configurable working surface. Open views with the sidebar or omnibar, then arrange their tabs with Dockview.&quot;:
+    &quot;Un espacio configurable. Abre vistas desde la barra lateral o el omnibar y organiza sus pestañas con Dockview.&quot;,
+  &quot;A repository-authored workspace. This view is generated from tracked source at build time, not a live service.&quot;:
+    &quot;Espacio basado en el repositorio. La vista se genera al compilar desde archivos versionados; no es un servicio en vivo.&quot;,
+  &quot;Repository / {{name}}&quot;:&quot;Repositorio / {{name}}&quot;,
+  &quot;{{documents}} source documents · {{records}} documented records&quot;:
+    &quot;{{documents}} documentos fuente · {{records}} registros documentados&quot;,
+  &quot;Repositories available in this compiled snapshot.&quot;:&quot;Repositorios disponibles en esta instantánea.&quot;,
+  &quot;Document links derived from the repository&#x27;s existing authoring structure.&quot;:
+    &quot;Vínculos derivados de la estructura de autoría del repositorio.&quot;,
+  &quot;Requirements and plans are sourced from the repository rather than simulated task statuses.&quot;:
+    &quot;Los requisitos y planes provienen del repositorio, no de estados de tareas simulados.&quot;,
+  &quot;Agent rules are sourced from the generated repository guidance.&quot;:
+    &quot;Las reglas de los agentes se obtienen de las directrices del repositorio.&quot;,
+  &quot;Context authority and repository-authored Markdown.&quot;:&quot;Autoridad del contexto y Markdown del repositorio.&quot;,
+  &quot;The published snapshot does not represent live execution telemetry.&quot;:
+    &quot;La instantánea publicada no representa telemetría en tiempo real.&quot;,
+  &quot;Built from tracked repository documents. No agent activity or task completion is inferred.&quot;:
+    &quot;Generado desde documentos versionados. No se infieren actividades ni tareas completadas.&quot;,
+  &quot;Source documents embedded during the GitHub Actions build.&quot;:
+    &quot;Documentos fuente incluidos durante la compilación de GitHub Actions.&quot;,
+  &quot;Appearance, keyboard and language preferences are local to this browser.&quot;:
+    &quot;Las preferencias de apariencia, teclado e idioma son locales a este navegador.&quot;,
+  &quot;Local UI settings are not authoritative project data.&quot;:
+    &quot;Las preferencias locales de la interfaz no son datos oficiales del proyecto.&quot;,
+  &quot;A preview of skin tokens and spacing, independent from accent color.&quot;:
+    &quot;Vista previa de los tokens de estilo y espaciado, independiente del color de acento.&quot;,
+  &quot;The template currently generates .agents/AGENTS.md from its agent rules. A separate root context file has not been assumed or fabricated.&quot;:
+    &quot;La plantilla genera .agents/AGENTS.md a partir de reglas de agentes. No se ha supuesto ni inventado otro archivo de contexto raíz.&quot;,
+  &quot;No generated PRD is available in this snapshot.&quot;:&quot;No hay PRD generado en esta instantánea.&quot;,
+  &quot;No agent-rule document is available.&quot;:&quot;No hay un documento de reglas de agentes disponible.&quot;,
+  &quot;The default interface skin&quot;:&quot;El estilo predeterminado&quot;,&quot;Cooler neutral surfaces&quot;:&quot;Superficies neutras más frías&quot;,
+  &quot;Stronger panel boundaries&quot;:&quot;Bordes de paneles más marcados&quot;,
+  &quot;Reset to defaults&quot;:&quot;Restablecer valores predeterminados&quot;,&quot;Theme selection&quot;:&quot;Selección de tema&quot;,
+  &quot;Skin selection&quot;:&quot;Selección de estilo&quot;,&quot;Density selection&quot;:&quot;Selección de densidad&quot;,
+};
+
+export const i18n = i18next
+  .use(LanguageDetector)
+  .use(initReactI18next);
+
+void i18n.init({
+  resources: {
+    en: { translation: en },
+    cs: { translation: cs },
+    es: { translation: es },
+  },
+  fallbackLng: &quot;en&quot;,
+  supportedLngs: [&quot;en&quot;, &quot;cs&quot;, &quot;es&quot;],
+  nonExplicitSupportedLngs: true,
+  detection: {
+    order: [&quot;localStorage&quot;, &quot;navigator&quot;, &quot;htmlTag&quot;],
+    lookupLocalStorage: &quot;canvas-language&quot;,
+    caches: [&quot;localStorage&quot;],
+  },
+  interpolation: { escapeValue: false },
+  initImmediate: false,
+  react: { useSuspense: false },
+});
+
+export default i18n;
+</pre></section>
+<section class="file" id="file-0074"><h3>.github/app/src/main.tsx</h3><p class="meta">Git mode 100644 · ac05d9bb08247cce615ca966c7cd2bdc4b3e5d2a</p><pre>import React from &quot;react&quot;;
 import { HotkeysProvider } from &quot;@tanstack/react-hotkeys&quot;;
 import type { CustomHotkeys } from &quot;@tanstack/react-hotkeys&quot;;
 import { appHotkeys } from &quot;./commands&quot;;
@@ -3418,7 +3745,7 @@ createRoot(root).render(
   &lt;/React.StrictMode&gt;,
 );
 </pre></section>
-<section class="file" id="file-0073"><h3>.github/app/src/styles.css</h3><p class="meta">Git mode 100644 · 5da01771237591c5867485b86c748658055d1688</p><pre>@import &quot;tailwindcss&quot;;
+<section class="file" id="file-0075"><h3>.github/app/src/styles.css</h3><p class="meta">Git mode 100644 · 5da01771237591c5867485b86c748658055d1688</p><pre>@import &quot;tailwindcss&quot;;
 @source &quot;.&quot;;
 :root {
   color-scheme: dark;
@@ -4962,7 +5289,7 @@ kbd {
   background: var(--raised);
 }
 </pre></section>
-<section class="file" id="file-0074"><h3>.github/app/tsconfig.json</h3><p class="meta">Git mode 100644 · e5facd2ff85a68129ec0d60b7ff7ae93f77376c6</p><pre>{
+<section class="file" id="file-0076"><h3>.github/app/tsconfig.json</h3><p class="meta">Git mode 100644 · e5facd2ff85a68129ec0d60b7ff7ae93f77376c6</p><pre>{
   &quot;compilerOptions&quot;: {
     &quot;target&quot;: &quot;ES2022&quot;,
     &quot;lib&quot;: [&quot;ES2022&quot;, &quot;DOM&quot;, &quot;DOM.Iterable&quot;],
@@ -4980,7 +5307,7 @@ kbd {
   &quot;include&quot;: [&quot;src&quot;, &quot;rsbuild.config.ts&quot;]
 }
 </pre></section>
-<section class="file" id="file-0075"><h3>.github/darkfactory-installation.json</h3><p class="meta">Git mode 100644 · a16dabfd7f7fd2608c48fbebbca831cd705d727b</p><pre>{
+<section class="file" id="file-0077"><h3>.github/darkfactory-installation.json</h3><p class="meta">Git mode 100644 · a16dabfd7f7fd2608c48fbebbca831cd705d727b</p><pre>{
   &quot;managedBy&quot;: &quot;DarkFactory&quot;,
   &quot;schema&quot;: 2,
   &quot;slug&quot;: &quot;marius-patrik/template-repo&quot;,
@@ -4996,7 +5323,7 @@ kbd {
   }
 }
 </pre></section>
-<section class="file" id="file-0076"><h3>.github/scripts/apply_branch_protection.py</h3><p class="meta">Git mode 100644 · 12e9ed6796591d9eab6a49c5d105f3f832ae8e8d</p><pre>#!/usr/bin/env python3
+<section class="file" id="file-0078"><h3>.github/scripts/apply_branch_protection.py</h3><p class="meta">Git mode 100644 · 12e9ed6796591d9eab6a49c5d105f3f832ae8e8d</p><pre>#!/usr/bin/env python3
 &quot;&quot;&quot;Apply the declared native GitHub main-branch protection using the maintainer&#x27;s gh login.
 
 Requires GitHub CLI authenticated as a repository administrator.
@@ -5141,7 +5468,7 @@ if __name__ == &quot;__main__&quot;:
         print(f&quot;error: {error}&quot;, file=sys.stderr)
         sys.exit(1)
 </pre></section>
-<section class="file" id="file-0077"><h3>.github/scripts/generate_documents.py</h3><p class="meta">Git mode 100644 · 0ca916f8940f1018307217d387e4e1908941d157</p><pre>#!/usr/bin/env python3
+<section class="file" id="file-0079"><h3>.github/scripts/generate_documents.py</h3><p class="meta">Git mode 100644 · 0ca916f8940f1018307217d387e4e1908941d157</p><pre>#!/usr/bin/env python3
 &quot;&quot;&quot;Generate README, PRD, ARCHITECTURE and AGENTS from reviewed Markdown records.&quot;&quot;&quot;
 
 from __future__ import annotations
@@ -5326,7 +5653,7 @@ def main() -&gt; int:
 if __name__ == &quot;__main__&quot;:
     raise SystemExit(main())
 </pre></section>
-<section class="file" id="file-0078"><h3>.github/scripts/versioning.py</h3><p class="meta">Git mode 100644 · ee6d58cfefae411311b90514f97016f1cd4bfac3</p><pre>#!/usr/bin/env python3
+<section class="file" id="file-0080"><h3>.github/scripts/versioning.py</h3><p class="meta">Git mode 100644 · ee6d58cfefae411311b90514f97016f1cd4bfac3</p><pre>#!/usr/bin/env python3
 &quot;&quot;&quot;Compute an immutable release tag from Git tags, or opt-in VERSION file.&quot;&quot;&quot;
 
 from __future__ import annotations
@@ -5409,7 +5736,7 @@ if __name__ == &quot;__main__&quot;:
         print(f&quot;error: {error}&quot;, file=sys.stderr)
         sys.exit(1)
 </pre></section>
-<section class="file" id="file-0079"><h3>.github/tests/smoke_canvas.mjs</h3><p class="meta">Git mode 100644 · 9e31dcd574a9577b4388846e5d757c716314aaeb</p><pre>import { createRequire } from &quot;node:module&quot;;
+<section class="file" id="file-0081"><h3>.github/tests/smoke_canvas.mjs</h3><p class="meta">Git mode 100644 · 9e31dcd574a9577b4388846e5d757c716314aaeb</p><pre>import { createRequire } from &quot;node:module&quot;;
 import { resolve } from &quot;node:path&quot;;
 import { pathToFileURL } from &quot;node:url&quot;;
 
@@ -5523,7 +5850,7 @@ try {
   await browser.close();
 }
 </pre></section>
-<section class="file" id="file-0080"><h3>.github/tests/test_apply_branch_protection.py</h3><p class="meta">Git mode 100644 · a6db2e2ff26e9ef67dba8d7c2d52d1c921d1bc6a</p><pre>&quot;&quot;&quot;Tests for administrative branch-protection policy rendering and verification.&quot;&quot;&quot;
+<section class="file" id="file-0082"><h3>.github/tests/test_apply_branch_protection.py</h3><p class="meta">Git mode 100644 · a6db2e2ff26e9ef67dba8d7c2d52d1c921d1bc6a</p><pre>&quot;&quot;&quot;Tests for administrative branch-protection policy rendering and verification.&quot;&quot;&quot;
 
 from __future__ import annotations
 
@@ -5584,7 +5911,7 @@ class BranchProtectionTests(unittest.TestCase):
 if __name__ == &quot;__main__&quot;:
     unittest.main()
 </pre></section>
-<section class="file" id="file-0081"><h3>.github/tests/test_canvas.py</h3><p class="meta">Git mode 100644 · 1e1e92a69c570d5285dd0bfa9d1edcb7fdcded30</p><pre>&quot;&quot;&quot;Behavior checks for deterministic, repository-sourced Canvas.&quot;&quot;&quot;
+<section class="file" id="file-0083"><h3>.github/tests/test_canvas.py</h3><p class="meta">Git mode 100644 · 1e1e92a69c570d5285dd0bfa9d1edcb7fdcded30</p><pre>&quot;&quot;&quot;Behavior checks for deterministic, repository-sourced Canvas.&quot;&quot;&quot;
 from __future__ import annotations
 import importlib.util
 import json
@@ -5638,7 +5965,7 @@ class CanvasTests(unittest.TestCase):
 if __name__ == &quot;__main__&quot;:
     unittest.main()
 </pre></section>
-<section class="file" id="file-0082"><h3>.github/tests/test_canvas_web.py</h3><p class="meta">Git mode 100644 · 3bb0c07f7e1c56abb155d7014c42de01b0cb8d32</p><pre>&quot;&quot;&quot;Validate the build-time source contract without installing frontend packages.&quot;&quot;&quot;
+<section class="file" id="file-0084"><h3>.github/tests/test_canvas_web.py</h3><p class="meta">Git mode 100644 · 3bb0c07f7e1c56abb155d7014c42de01b0cb8d32</p><pre>&quot;&quot;&quot;Validate the build-time source contract without installing frontend packages.&quot;&quot;&quot;
 from __future__ import annotations
 
 import json
@@ -5688,7 +6015,7 @@ class CanvasWebTests(unittest.TestCase):
 if __name__ == &quot;__main__&quot;:
     unittest.main()
 </pre></section>
-<section class="file" id="file-0083"><h3>.github/tests/test_repository_structure.py</h3><p class="meta">Git mode 100644 · 4b6278ed2104d8a08ae08852c989f86974802659</p><pre>&quot;&quot;&quot;Behavior tests for native GitHub layout, independent docs, submodule, tests.&quot;&quot;&quot;
+<section class="file" id="file-0085"><h3>.github/tests/test_repository_structure.py</h3><p class="meta">Git mode 100644 · 4b6278ed2104d8a08ae08852c989f86974802659</p><pre>&quot;&quot;&quot;Behavior tests for native GitHub layout, independent docs, submodule, tests.&quot;&quot;&quot;
 
 from __future__ import annotations
 
@@ -5767,7 +6094,7 @@ class WorkspaceLayoutTests(unittest.TestCase):
 if __name__ == &quot;__main__&quot;:
     unittest.main()
 </pre></section>
-<section class="file" id="file-0084"><h3>.github/tests/test_versioning.py</h3><p class="meta">Git mode 100644 · eaad888bd4979e3f3bd8516220147f206b684d67</p><pre>&quot;&quot;&quot;Behavioral tests of Git tag-only and optional file-driven versions.&quot;&quot;&quot;
+<section class="file" id="file-0086"><h3>.github/tests/test_versioning.py</h3><p class="meta">Git mode 100644 · eaad888bd4979e3f3bd8516220147f206b684d67</p><pre>&quot;&quot;&quot;Behavioral tests of Git tag-only and optional file-driven versions.&quot;&quot;&quot;
 
 from __future__ import annotations
 
@@ -5828,7 +6155,7 @@ class VersioningTests(unittest.TestCase):
 if __name__ == &quot;__main__&quot;:
     unittest.main()
 </pre></section>
-<section class="file" id="file-0085"><h3>.github/workflows/canvas-pages.yml</h3><p class="meta">Git mode 100644 · 926b65fad968987993176363b5ac2770a6e44b25</p><pre>name: Canvas — GitHub Pages
+<section class="file" id="file-0087"><h3>.github/workflows/canvas-pages.yml</h3><p class="meta">Git mode 100644 · 926b65fad968987993176363b5ac2770a6e44b25</p><pre>name: Canvas — GitHub Pages
 on:
   pull_request:
     branches: [development, main]
@@ -5902,7 +6229,7 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v4
 </pre></section>
-<section class="file" id="file-0086"><h3>.github/workflows/canvas-sync.yml</h3><p class="meta">Git mode 100644 · f17c4d43c66ab1c4767be3ae734ec9ed5dd4880a</p><pre>name: Synchronize repository Canvas
+<section class="file" id="file-0088"><h3>.github/workflows/canvas-sync.yml</h3><p class="meta">Git mode 100644 · f17c4d43c66ab1c4767be3ae734ec9ed5dd4880a</p><pre>name: Synchronize repository Canvas
 on:
   push:
     branches:
@@ -5947,7 +6274,7 @@ jobs:
           git commit -m &quot;docs(canvas): synchronize generated repository view&quot;
           git push origin &quot;HEAD:${GITHUB_REF_NAME}&quot;
 </pre></section>
-<section class="file" id="file-0087"><h3>.github/workflows/darkfactory-control.yml</h3><p class="meta">Git mode 100644 · 75fa15c2604451203799ec160fabea908221cee9</p><pre># df-control-managed: 1
+<section class="file" id="file-0089"><h3>.github/workflows/darkfactory-control.yml</h3><p class="meta">Git mode 100644 · 75fa15c2604451203799ec160fabea908221cee9</p><pre># df-control-managed: 1
 name: DarkFactory Control
 on:
   workflow_call:
@@ -6100,7 +6427,7 @@ jobs:
       pipeline-repo: marius-patrik/DarkFactory
     secrets: inherit
 </pre></section>
-<section class="file" id="file-0088"><h3>.github/workflows/darkfactory.yml</h3><p class="meta">Git mode 100644 · 0573b940cd16a9932acdaeb9f9b0200e0a91e493</p><pre># df-control-bridge: 1
+<section class="file" id="file-0090"><h3>.github/workflows/darkfactory.yml</h3><p class="meta">Git mode 100644 · 0573b940cd16a9932acdaeb9f9b0200e0a91e493</p><pre># df-control-bridge: 1
 # GitHub requires issues, workflow_dispatch and schedules on the default branch.
 # Configuration and executable workflows reside on this repository&#x27;s default branch.
 name: DarkFactory Runtime
@@ -6131,7 +6458,7 @@ jobs:
     uses: ./.github/workflows/darkfactory-control.yml
     secrets: inherit
 </pre></section>
-<section class="file" id="file-0089"><h3>.github/workflows/docs.yml</h3><p class="meta">Git mode 100644 · 09be66ac95b3bf75130e8cecb9ca33cebe0b2e87</p><pre>name: Generated documents
+<section class="file" id="file-0091"><h3>.github/workflows/docs.yml</h3><p class="meta">Git mode 100644 · 09be66ac95b3bf75130e8cecb9ca33cebe0b2e87</p><pre>name: Generated documents
 on:
   pull_request:
     branches: [development, main]
@@ -6154,7 +6481,7 @@ jobs:
       - name: Test source behavior and repository layout
         run: python3 -m unittest discover -s .github/tests -p &#x27;test_*.py&#x27;
 </pre></section>
-<section class="file" id="file-0090"><h3>.github/workflows/keep-development.yml</h3><p class="meta">Git mode 100644 · e0ca712e55a67121efc47a56e32dd751a17c0109</p><pre>name: Keep development branch
+<section class="file" id="file-0092"><h3>.github/workflows/keep-development.yml</h3><p class="meta">Git mode 100644 · e0ca712e55a67121efc47a56e32dd751a17c0109</p><pre>name: Keep development branch
 on:
   delete:
   workflow_run:
@@ -6215,7 +6542,7 @@ jobs:
               core.info(&#x27;Concurrent restoration completed at &#x27; + current.data.object.sha);
             }
 </pre></section>
-<section class="file" id="file-0091"><h3>.github/workflows/main-source.yml</h3><p class="meta">Git mode 100644 · ab63ee227e23d1a329cb15a0da037e27cabe2b43</p><pre>name: Main source policy
+<section class="file" id="file-0093"><h3>.github/workflows/main-source.yml</h3><p class="meta">Git mode 100644 · ab63ee227e23d1a329cb15a0da037e27cabe2b43</p><pre>name: Main source policy
 on:
   pull_request:
     branches: [main]
@@ -6256,7 +6583,7 @@ jobs:
             }
             core.info(&#x27;Authorized main PR: #&#x27; + pr.number + &#x27; from development.&#x27;);
 </pre></section>
-<section class="file" id="file-0092"><h3>.github/workflows/pr-version.yml</h3><p class="meta">Git mode 100644 · 728984d9be66d5b399ac00b5f79b178210f2ecc0</p><pre>name: Bump version on PR
+<section class="file" id="file-0094"><h3>.github/workflows/pr-version.yml</h3><p class="meta">Git mode 100644 · 728984d9be66d5b399ac00b5f79b178210f2ecc0</p><pre>name: Bump version on PR
 on:
   pull_request_target:
     branches: [development, main]
@@ -6347,7 +6674,7 @@ jobs:
             core.info(&#x27;Bumped VERSION to &#x27; + newVersion.trim());
             await dispatchChecks();
 </pre></section>
-<section class="file" id="file-0093"><h3>.github/workflows/release.yml</h3><p class="meta">Git mode 100644 · 5f3ac29dcbf6152e40e1c5fe0b22a3065ad24cfe</p><pre>name: Release main
+<section class="file" id="file-0095"><h3>.github/workflows/release.yml</h3><p class="meta">Git mode 100644 · 5f3ac29dcbf6152e40e1c5fe0b22a3065ad24cfe</p><pre>name: Release main
 on:
   push:
     branches: [main]
@@ -6403,14 +6730,14 @@ jobs:
           fi
           gh release view &quot;$RELEASE_TAG&quot; --json tagName,url
 </pre></section>
-<section class="file" id="file-0094"><h3>.gitmodules</h3><p class="meta">Git mode 100644 · 674a1ce0b95f16d9c0b222911e1be9b2ef0b1ccc</p><pre>[submodule &quot;.darkfactory&quot;]
+<section class="file" id="file-0096"><h3>.gitmodules</h3><p class="meta">Git mode 100644 · 674a1ce0b95f16d9c0b222911e1be9b2ef0b1ccc</p><pre>[submodule &quot;.darkfactory&quot;]
 	path = .darkfactory
 	url = https://github.com/marius-patrik/DarkFactory.git
 	branch = main
 </pre></section>
-<section class="file" id="file-0095"><h3>CONTRIBUTING.md</h3><p class="meta">Git mode 120000 · 41280d2fa808081dc9c5bd47c047fe1ea62e6aae</p><pre>Symbolic link to: .agents/AGENTS.md
+<section class="file" id="file-0097"><h3>CONTRIBUTING.md</h3><p class="meta">Git mode 120000 · 41280d2fa808081dc9c5bd47c047fe1ea62e6aae</p><pre>Symbolic link to: .agents/AGENTS.md
 </pre></section>
-<section class="file" id="file-0096"><h3>LICENSE</h3><p class="meta">Git mode 100644 · f288702d2fa16d3cdf0035b15a9fcbc552cd88e7</p><pre>                    GNU GENERAL PUBLIC LICENSE
+<section class="file" id="file-0098"><h3>LICENSE</h3><p class="meta">Git mode 100644 · f288702d2fa16d3cdf0035b15a9fcbc552cd88e7</p><pre>                    GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
  Copyright (C) 2007 Free Software Foundation, Inc. &lt;https://fsf.org/&gt;
@@ -7085,9 +7412,9 @@ the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 &lt;https://www.gnu.org/licenses/why-not-lgpl.html&gt;.
 </pre></section>
-<section class="file" id="file-0097"><h3>README.md</h3><p class="meta">Git mode 120000 · fa67a2d3e2abc3d138f3534762f958e4fe16fc25</p><pre>Symbolic link to: .agents/README.md
+<section class="file" id="file-0099"><h3>README.md</h3><p class="meta">Git mode 120000 · fa67a2d3e2abc3d138f3534762f958e4fe16fc25</p><pre>Symbolic link to: .agents/README.md
 </pre></section>
-<section class="file" id="file-0098"><h3>repo.dfconfig</h3><p class="meta">Git mode 100644 · dc53ee610d6da1ba8672730abced245644781334</p><pre>{
+<section class="file" id="file-0100"><h3>repo.dfconfig</h3><p class="meta">Git mode 100644 · dc53ee610d6da1ba8672730abced245644781334</p><pre>{
   &quot;repo&quot;: {
     &quot;$comment&quot;: &quot;Starter policy and repository identity. Review and replace project-specific values before installation; declarations do not configure GitHub protection by themselves.&quot;,
     &quot;identity&quot;: {
