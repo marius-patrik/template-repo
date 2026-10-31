@@ -3337,7 +3337,7 @@ createRoot(root).render(
   &lt;/React.StrictMode&gt;,
 );
 </pre></section>
-<section class="file" id="file-0074"><h3>.github/app/src/styles.css</h3><p class="meta">Git mode 100644 · 553a44f07cc9f39470b958d5ca4a80ae76158599</p><pre>@import &quot;tailwindcss&quot;;
+<section class="file" id="file-0074"><h3>.github/app/src/styles.css</h3><p class="meta">Git mode 100644 · f22ac97fc86af1d10ae2589a0dae78ae47c91660</p><pre>@import &quot;tailwindcss&quot;;
 @source &quot;.&quot;;
 :root {
   color-scheme: dark;
@@ -4642,6 +4642,212 @@ kbd {
 :root[data-theme=&quot;light&quot;][data-accent=&quot;amber&quot;] {
   --accent: #9c5113;
   --accent-foreground: #fff;
+}
+
+/* Dockview is the primary workspace compositor; the application chrome stays outside it. */
+.dock-content {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+.dock-workspace {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+.dock-toolbar {
+  height: 39px;
+  min-height: 39px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 17px;
+  background: var(--bg);
+  font-size: 11px;
+}
+.dock-toolbar-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  white-space: nowrap;
+  color: var(--text);
+}
+.dock-eyebrow {
+  color: var(--subtle);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+}
+.dock-toolbar-divider {
+  color: var(--subtle);
+}
+.dock-panel-count {
+  min-width: 18px;
+  height: 18px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+}
+.dock-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+.dock-toolbar-button {
+  height: 27px;
+  padding: 0 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 5px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.dock-toolbar-button:hover {
+  border-color: var(--border);
+  color: var(--text);
+  background: var(--hover);
+}
+.dock-grid {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+.dock-grid &gt; .dv-react {
+  width: 100%;
+  height: 100%;
+}
+.dock-grid .dockview-theme-dark,
+.dock-grid .dockview-theme-light {
+  --dv-background-color: var(--bg);
+  --dv-group-view-background-color: var(--bg);
+  --dv-tabs-and-actions-container-background-color: var(--surface);
+  --dv-activegroup-visiblepanel-tab-background-color: var(--bg);
+  --dv-inactivegroup-visiblepanel-tab-background-color: var(--bg);
+  --dv-activegroup-hiddenpanel-tab-background-color: var(--surface);
+  --dv-inactivegroup-hiddenpanel-tab-background-color: var(--surface);
+  --dv-activegroup-visiblepanel-tab-color: var(--text);
+  --dv-inactivegroup-visiblepanel-tab-color: var(--text);
+  --dv-activegroup-hiddenpanel-tab-color: var(--muted);
+  --dv-inactivegroup-hiddenpanel-tab-color: var(--muted);
+  --dv-separator-border: 1px solid var(--border);
+  --dv-tab-divider-color: var(--border);
+  --dv-icon-hover-background-color: var(--raised);
+  --dv-active-sash-color: var(--accent);
+  --dv-tabs-and-actions-container-height: 34px;
+  --dv-tabs-and-actions-container-font-size: 12px;
+  font-family: inherit;
+}
+.dock-grid .dv-tabs-and-actions-container {
+  border-bottom: 1px solid var(--border);
+}
+.dock-grid .dv-default-tab {
+  font-family: inherit;
+}
+.dock-route-page {
+  height: 100%;
+  width: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  background: var(--bg);
+}
+.dock-route-page .page,
+.dock-route-page .workbench-page {
+  max-width: 1500px;
+  margin: 0 auto;
+  height: auto;
+}
+.dock-route-page .workbench-page {
+  min-height: 0;
+  display: block;
+  padding-bottom: 24px;
+}
+.dock-route-page .full-graph {
+  height: clamp(430px, 63vh, 960px);
+  flex: none;
+}
+.workspace-board-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+  max-width: 970px;
+}
+.workspace-board-grid .panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+.workspace-board-grid .panel .eyebrow,
+.workspace-board-grid .panel h2 {
+  margin: 0;
+}
+.workspace-board-grid .panel p.muted {
+  line-height: 1.65;
+  margin: 0;
+}
+.workspace-board-grid .panel button {
+  margin-top: auto;
+}
+@media (max-width: 700px) {
+  .dock-toolbar {
+    height: 38px;
+    min-height: 38px;
+    padding: 0 9px;
+    gap: 5px;
+  }
+  .dock-toolbar-title {
+    gap: 6px;
+  }
+  .dock-eyebrow,
+  .dock-toolbar-divider,
+  .dock-panel-count {
+    display: none;
+  }
+  .dock-toolbar-actions {
+    gap: 1px;
+  }
+  .dock-toolbar-button {
+    padding: 0 6px;
+    font-size: 10px;
+  }
+  .dock-toolbar-button span {
+    display: none;
+  }
+  .dock-grid .dockview-theme-dark,
+  .dock-grid .dockview-theme-light {
+    --dv-tabs-and-actions-container-height: 34px;
+  }
+  .workspace-board-grid {
+    grid-template-columns: 1fr;
+  }
+  .dock-route-page .full-graph {
+    height: 460px;
+  }
 }
 </pre></section>
 <section class="file" id="file-0075"><h3>.github/app/tsconfig.json</h3><p class="meta">Git mode 100644 · e5facd2ff85a68129ec0d60b7ff7ae93f77376c6</p><pre>{
