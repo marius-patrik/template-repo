@@ -16,7 +16,7 @@ if (root < body || root > endBody) {
 }
 for (const script of scripts) {
   if (script.index < root || script.index > endBody) {
-    throw new Error("Canvas JavaScript executes before #root exists");
+    throw new Error(`Canvas JavaScript executes before #root exists: ${script[0]}`);
   }
 }
 console.log(`Canvas DOM boot order valid: #root precedes ${scripts.length} bundled script(s).`);
