@@ -247,6 +247,7 @@ export default function DockCanvas({
   const hotkeys = useAppHotkeys();
   const apiRef = useRef<DockviewApi | null>(null);
   const suppressedRoute = useRef<string | null>(null);
+  const alreadyOpenedRoute = useRef<string | null>(null);
   const disposables = useRef<Array<{ dispose: () => void }>>([]);
   const [empty, setEmpty] = useState(true);
   const latest = useRef({ route, onNavigate });
@@ -314,6 +315,7 @@ export default function DockCanvas({
     // can trigger a route synchronization update while both panels are visible,
     // creating an unintended duplicate Editor tab.
     placeholder.api.close();
+    alreadyOpenedRoute.current = `/${view}`;
     api.addPanel({
       id: `tab:${view}:${++sequence}`,
       component: "page",
@@ -388,6 +390,11 @@ export default function DockCanvas({
 
   useEffect(() => {
     const api = apiRef.current;
+    // Dockview already created this tab; route changes must not duplicate it.
+    if (alreadyOpenedRoute.current === route) {
+      alreadyOpenedRoute.current = null;
+      return;
+    }
     // A Dockview state update can render with the old route before wouter commits
     // the close action. Never resurrect that explicitly closed pane.
     if (suppressedRoute.current === route) return;
