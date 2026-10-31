@@ -258,7 +258,9 @@ function SimplePage({ id, to }: { id: View; to: (p: string) => void }) {
         />
         <div className="panel padded">
           <p className="eyebrow">{t("Build provenance")}</p>
-          <h2>{t("Source revision")} {context.revision}</h2>
+          <h2>
+            {t("Source revision")} {context.revision}
+          </h2>
           <p className="muted">
             Built from tracked repository documents. No agent activity or task completion is
             inferred.
@@ -343,14 +345,16 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
         <div className="settings-section-heading">
           <div>
             <h2>{t("Theme and skinning")}</h2>
-            <p className="muted">{t("A preview of skin tokens and spacing, independent from accent color.")}</p>
+            <p className="muted">
+              {t("A preview of skin tokens and spacing, independent from accent color.")}
+            </p>
           </div>
           <button className="keybind-reset-all" type="button" onClick={resetPreferences}>
             {t("Reset appearance")}
           </button>
         </div>
         {options("theme", ["dark", "light", "system"] as const, "Theme", (value) =>
-          t(value === "system" ? "Use system" : value === "dark" ? "Dark" : "Light")
+          t(value === "system" ? "Use system" : value === "dark" ? "Dark" : "Light"),
         )}
         <div className="setting-row skin-setting">
           <strong>{t("Skin")}</strong>
@@ -364,20 +368,28 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
                 onClick={() => setPrefs({ ...prefs, skin })}
               >
                 <span className={`skin-preview skin-preview-${skin}`}>
-                  <span /><span /><span />
+                  <span />
+                  <span />
+                  <span />
                 </span>
-                <span>{t(skin === "graphite" ? "Graphite" : skin === "slate" ? "Slate" : "High contrast")}</span>
+                <span>
+                  {t(
+                    skin === "graphite" ? "Graphite" : skin === "slate" ? "Slate" : "High contrast",
+                  )}
+                </span>
               </button>
             ))}
           </fieldset>
         </div>
         {options("density", ["comfortable", "compact"] as const, "Density", (value) =>
-          t(value === "comfortable" ? "Comfortable" : "Compact")
+          t(value === "comfortable" ? "Comfortable" : "Compact"),
         )}
         <div className="setting-row accent-setting">
           <strong>{t("Accent color")}</strong>
-          <AccentColorPicker value={prefs.accent}
-            onChange={(accent) => setPrefs({ ...prefs, accent })} />
+          <AccentColorPicker
+            value={prefs.accent}
+            onChange={(accent) => setPrefs({ ...prefs, accent })}
+          />
         </div>
         {options("fontSize", [13, 14, 15, 16] as const, "Text size")}
         {options("iconSize", [16, 18, 20] as const, "Icon size")}
@@ -391,7 +403,9 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
             className="settings-language-select"
             aria-label={t("Interface language")}
             value={language}
-            onChange={(event) => { void i18n.changeLanguage(event.target.value); }}
+            onChange={(event) => {
+              void i18n.changeLanguage(event.target.value);
+            }}
           >
             <option value="en">English</option>
             <option value="cs">Čeština</option>
@@ -401,7 +415,8 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
       </section>
       <KeyboardSettings />
       <p className="muted settings-note">
-        Canvas v0.9.0 · {t("Prototype")}. {t("Local UI settings are not authoritative project data.")}
+        Canvas v0.9.0 · {t("Prototype")}.{" "}
+        {t("Local UI settings are not authoritative project data.")}
       </p>
     </div>
   );
@@ -413,7 +428,9 @@ export default function App() {
   const prefs = useCanvasConfig((state) => state.preferences);
   const updatePreferences = useCanvasConfig((state) => state.setPreferences);
   const setPrefs = (next: Preferences) => updatePreferences(next);
-  const [systemDark, setSystemDark] = useState(() => window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const [systemDark, setSystemDark] = useState(
+    () => window.matchMedia("(prefers-color-scheme: dark)").matches,
+  );
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -426,12 +443,7 @@ export default function App() {
     if (path === "/") navigate("/overview", { replace: true });
   }, [path, navigate]);
   useEffect(() => {
-    const resolved =
-      prefs.theme === "system"
-        ? systemDark
-          ? "dark"
-          : "light"
-        : prefs.theme;
+    const resolved = prefs.theme === "system" ? (systemDark ? "dark" : "light") : prefs.theme;
     document.documentElement.dataset.theme = resolved;
     document.documentElement.dataset.skin = prefs.skin;
     document.documentElement.dataset.density = prefs.density;
@@ -460,10 +472,16 @@ export default function App() {
     media.addEventListener("change", update);
     return () => media.removeEventListener("change", update);
   }, []);
-  useEffect(() => { document.documentElement.lang = i18n.resolvedLanguage?.split("-")[0] ?? "en"; }, [i18n.resolvedLanguage]);
+  useEffect(() => {
+    document.documentElement.lang = i18n.resolvedLanguage?.split("-")[0] ?? "en";
+  }, [i18n.resolvedLanguage]);
   const filtered = useMemo(
-    () => nav.filter((x) =>
-      (t(x.group) + " " + context.name + " " + t(x.label)).toLowerCase().includes(search.toLowerCase())),
+    () =>
+      nav.filter((x) =>
+        (t(x.group) + " " + context.name + " " + t(x.label))
+          .toLowerCase()
+          .includes(search.toLowerCase()),
+      ),
     [search, t],
   );
   useEffect(() => {
@@ -602,11 +620,7 @@ export default function App() {
             <DockCanvas
               route={path}
               onNavigate={go}
-              dark={
-                prefs.theme === "system"
-                  ? systemDark
-                  : prefs.theme === "dark"
-              }
+              dark={prefs.theme === "system" ? systemDark : prefs.theme === "dark"}
               renderView={(view) => {
                 const id = view as View;
                 if (id === "overview") return <Overview to={go} />;
@@ -622,7 +636,9 @@ export default function App() {
           <span className="snapshot-desktop">{t("Repository snapshot · read-only")}</span>
           <span className="snapshot-mobile">{t("Read-only snapshot")}</span>
         </span>
-        <span className="version">{t("Version")}: 0.9.0 · {t("Prototype")}</span>
+        <span className="version">
+          {t("Version")}: 0.9.0 · {t("Prototype")}
+        </span>
         <span>
           {context.repository} / {context.revision}
         </span>

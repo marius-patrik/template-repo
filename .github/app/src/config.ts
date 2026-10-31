@@ -7,10 +7,12 @@ const schema = z.object({
   theme: z.enum(["dark", "light", "system"]),
   skin: z.enum(["graphite", "slate", "contrast"]),
   density: z.enum(["comfortable", "compact"]),
-  accent: z.string().refine(
-    (value) => accentIds.some((id) => id === value) || /^#[0-9a-f]{6}$/i.test(value),
-    "Invalid accent color",
-  ),
+  accent: z
+    .string()
+    .refine(
+      (value) => accentIds.some((id) => id === value) || /^#[0-9a-f]{6}$/i.test(value),
+      "Invalid accent color",
+    ),
   fontSize: z.number().int().min(13).max(16),
   iconSize: z.number().int().min(16).max(20),
 });
@@ -64,8 +66,7 @@ export const useCanvasConfig = create<ConfigState>()(
       migrate: (saved) => saved,
       merge: (saved, current) => {
         const record = saved && typeof saved === "object" ? saved : {};
-        const preferences =
-          "preferences" in record ? record.preferences : record;
+        const preferences = "preferences" in record ? record.preferences : record;
         return { ...current, preferences: validated(preferences) };
       },
     },
