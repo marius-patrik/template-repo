@@ -43,7 +43,7 @@ Pages builds on the feature branch deploy through the `canvas-preview` environme
 - Shortcuts are registered centrally with TanStack Hotkeys, defaulting to Mod+B (sidebar) and Mod+K (omnibar), and are editable in Settings. Custom bindings persist only in the current browser.
 - Accent color selection uses react-colorful inside a Radix Popover and validates contrast using colord. The theme state remains local and independent of repository authority.
 
-## Dockview application shell (v0.8)
+## Dockview application shell (v0.9)
 
 Dockview now renders every route within one application-level compositor, replacing the
 old nested Workbench instance and fixed page-switching layout. The title bar, omnibar,
@@ -114,3 +114,5 @@ language and is never machine-translated or rewritten.
 Keep user-facing display strings as i18n keys; retain stable canonical IDs for
 routes, commands and source files. New languages should add a resource dictionary,
 not fork the UI.
+
+Build checks now verify localized Czech/English labels, the locale persisted across reload, and visual density/skin configuration while retaining existing Dockview and keyboard acceptance tests.
