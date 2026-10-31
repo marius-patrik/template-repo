@@ -29,6 +29,11 @@ try {
     route: location.hash,
     panels: [...document.querySelectorAll("[data-dock-view]")].map((el) => el.getAttribute("data-dock-view")),
     tabCount: document.querySelectorAll(".dv-tab").length,
+    tabs: [...document.querySelectorAll(".dv-tab")].map((tab) => ({
+      text: tab.textContent, id: tab.getAttribute("data-id"), selected: tab.getAttribute("aria-selected"),
+      html: tab.outerHTML.slice(0, 240),
+    })),
+    canvasTabs: [...document.querySelectorAll(".canvas-dock-tab")].map((tab) => tab.getAttribute("data-canvas-tab")),
   }));
   console.log("Pre-close snapshot:", JSON.stringify(beforeClose));
   await page.locator('.canvas-dock-tab[data-canvas-tab="editor"] .canvas-tab-close').last().click();
