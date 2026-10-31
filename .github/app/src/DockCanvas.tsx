@@ -86,7 +86,19 @@ function openRoute(api: DockviewApi, view: CanvasView) {
 }
 
 const TAB_GROUPS: Array<{ label: string; views: CanvasView[] }> = [
-  { label: "Workspace", views: ["overview", "workspace", "projects", "agents", "graph", "roadmap", "artifacts", "activity"] },
+  {
+    label: "Workspace",
+    views: [
+      "overview",
+      "workspace",
+      "projects",
+      "agents",
+      "graph",
+      "roadmap",
+      "artifacts",
+      "activity",
+    ],
+  },
   { label: "System", views: ["context", "settings"] },
 ];
 let tabSequence = 0;
@@ -109,7 +121,11 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
   };
 
   return (
-    <div className="dock-tab-add" data-dock-group={group.id} onPointerDown={(event) => event.stopPropagation()}>
+    <div
+      className="dock-tab-add"
+      data-dock-group={group.id}
+      onPointerDown={(event) => event.stopPropagation()}
+    >
       <DropdownMenu.Root>
         <DropdownMenu.Trigger asChild>
           <button
@@ -133,7 +149,9 @@ function AddTabHeader({ containerApi, group }: IDockviewHeaderActionsProps) {
             {TAB_GROUPS.map((section, index) => (
               <DropdownMenu.Group key={section.label}>
                 {index > 0 && <DropdownMenu.Separator className="dock-add-separator" />}
-                <DropdownMenu.Label className="dock-add-group-label">{section.label}</DropdownMenu.Label>
+                <DropdownMenu.Label className="dock-add-group-label">
+                  {section.label}
+                </DropdownMenu.Label>
                 {section.views.map((view) => (
                   <DropdownMenu.Item
                     key={view}
