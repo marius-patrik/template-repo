@@ -334,13 +334,15 @@ export default function App() {
   const input = useRef<HTMLInputElement>(null);
   const page = viewFromRoute(path);
 
+  const didRestoreRoute = useRef(false);
   useEffect(() => {
-    const profile = useProfiles
-      .getState()
-      .profiles.find((p) => p.id === useProfiles.getState().currentId);
+    if (didRestoreRoute.current) return;
+    didRestoreRoute.current = true;
+    const state = useProfiles.getState();
+    const profile = state.profiles.find((p) => p.id === state.currentId);
     if (path === "/" && profile?.route && profile.route !== "/")
       navigate(profile.route, { replace: true });
-  }, []);
+  }, [path, navigate]);
   const dark = prefs.theme === "system" ? systemDark : prefs.theme === "dark";
   useEffect(() => {
     const root = document.documentElement;
@@ -523,9 +525,8 @@ export default function App() {
                     </>
                   )}
                 </aside>
-                <div
+                <hr
                   className={`sidebar-resizer ${collapsed ? "disabled" : ""}`}
-                  role="separator"
                   aria-label={t("Resize sidebar")}
                   aria-orientation="vertical"
                   aria-valuenow={prefs.sidebarWidth}

@@ -161,7 +161,7 @@ export default function PreferencesPanel() {
           values={Object.keys(SCALES)}
           onChange={(value) => setScale(value as keyof typeof SCALES)}
         />
-        <div className="settings-subgrid" aria-label={t("Individual scale values")}>
+        <div className="settings-subgrid" role="group" aria-label={t("Individual scale values")}>
           <NumberPreference
             label="Text size"
             value={prefs.fontSize}
