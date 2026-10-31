@@ -11,13 +11,7 @@ import { CanvasContextMenu } from "./components/ui/ContextMenu";
 import Monaco from "./Monaco";
 import PreferencesPanel from "./PreferencesPanel";
 import { useProfiles } from "./profiles";
-import {
-  Navigator,
-  ActivityBar,
-  SidebarContents,
-  Library,
-  SurfaceMenu,
-} from "./ShellComponents";
+import { Navigator, ActivityBar, SidebarContents, Library, SurfaceMenu } from "./ShellComponents";
 import { NotificationCenter, Notifications } from "./notifications";
 import { viewFromRoute } from "./views";
 import { version as appVersion } from "../package.json";
@@ -101,13 +95,17 @@ export default function App() {
       const tokens = prefs.componentThemes[component];
       const prefix = `--component-${component}-`;
       for (const [target, key] of Object.entries({
-        bg: tokens.surface, text: tokens.text, border: tokens.border, accent: tokens.accent,
+        bg: tokens.surface,
+        text: tokens.text,
+        border: tokens.border,
+        accent: tokens.accent,
       })) {
         if (key === "inherit") root.style.removeProperty(prefix + target);
         else root.style.setProperty(prefix + target, palette[key as keyof typeof palette]);
       }
       for (const [target, preset, field] of [
-        ["font", tokens.font, "fontSize"], ["icon", tokens.icon, "iconSize"],
+        ["font", tokens.font, "fontSize"],
+        ["icon", tokens.icon, "iconSize"],
         ["spacing", tokens.spacing, "spacing"],
       ] as const) {
         if (preset === "inherit") root.style.removeProperty(prefix + target);
@@ -144,7 +142,11 @@ export default function App() {
     },
     { ignoreInputs: true },
   );
-  useHotkey(hotkeys["canvas.omnibar.toggle"], () => window.dispatchEvent(new Event("canvas:omnibar-focus")), { ignoreInputs: false });
+  useHotkey(
+    hotkeys["canvas.omnibar.toggle"],
+    () => window.dispatchEvent(new Event("canvas:omnibar-focus")),
+    { ignoreInputs: false },
+  );
   useHotkey(hotkeys["canvas.settings.open"], () => go("/settings"));
   useHotkey(hotkeys["canvas.canvas.open"], () => go("/canvas"));
   useHotkey(hotkeys["canvas.editor.open"], () => go("/editor"));
@@ -186,7 +188,9 @@ export default function App() {
         </div>
         <div className="title-center">
           {prefs.omnibarPosition === "titlebar" ? (
-            <SurfaceMenu kind="omnibar"><Omnibar onNavigate={go} /></SurfaceMenu>
+            <SurfaceMenu kind="omnibar">
+              <Omnibar onNavigate={go} />
+            </SurfaceMenu>
           ) : (
             <strong>Canvas</strong>
           )}
@@ -236,10 +240,16 @@ export default function App() {
                   {(!collapsed || mobileOpen) && (
                     <>
                       {prefs.omnibarPosition === "sidebar" && (
-                        <SurfaceMenu kind="omnibar"><Omnibar onNavigate={go} /></SurfaceMenu>
+                        <SurfaceMenu kind="omnibar">
+                          <Omnibar onNavigate={go} />
+                        </SurfaceMenu>
                       )}
                       <div className="sidebar-action-row">
-                        <button type="button" className="sidebar-new-tab" onClick={() => window.dispatchEvent(new Event("canvas:new-tab"))}>
+                        <button
+                          type="button"
+                          className="sidebar-new-tab"
+                          onClick={() => window.dispatchEvent(new Event("canvas:new-tab"))}
+                        >
                           <AnimatedIcon name="plus" size={16} />
                           <span>{t("New tab")}</span>
                         </button>
@@ -356,36 +366,96 @@ export default function App() {
         </div>
       </div>
       <footer className="window-statusbar">
-        {(["left","center","right"] as const).map((alignment) => {
+        {(["left", "center", "right"] as const).map((alignment) => {
           const segments = [
-            { id: "snapshot", visible: true, node: <span className="snapshot-state">{t("Repository snapshot · read-only")}</span> },
-            { id: "navigation", visible: prefs.navigationPosition === "statusbar", node: <Navigator current={page} onNavigate={go} onProfile={switchProfile} /> },
-            { id: "omnibar", visible: prefs.omnibarPosition === "statusbar", node: <Omnibar onNavigate={go} /> },
-            { id: "settings", visible: prefs.settingsPosition === "statusbar", node:
-              <SurfaceMenu kind="settings"><button type="button" className="status-settings"
-                aria-label={t("Settings")} title={t("Settings")} onClick={() => go("/settings")}>
-                <AnimatedIcon name="settings" size={16} />
-              </button></SurfaceMenu> },
-            { id: "version", visible: true, node: <span>{t("Version")}: {appVersion} · {t("Prototype")}</span> },
-            { id: "revision", visible: true, node: <span>{context.repository} / {context.revision}</span> },
-          ].filter((segment) => segment.visible && prefs.statusAlignment[segment.id as keyof typeof prefs.statusAlignment] === alignment);
-          return <div className={`status-group status-group-${alignment}`} key={alignment}>
-            {segments.map((segment, index) => <Fragment key={segment.id}>
-              {index > 0 && <span className="status-delimiter" aria-hidden="true">|</span>}
-              {segment.node}
-            </Fragment>)}
-          </div>;
+            {
+              id: "snapshot",
+              visible: true,
+              node: <span className="snapshot-state">{t("Repository snapshot · read-only")}</span>,
+            },
+            {
+              id: "navigation",
+              visible: prefs.navigationPosition === "statusbar",
+              node: <Navigator current={page} onNavigate={go} onProfile={switchProfile} />,
+            },
+            {
+              id: "omnibar",
+              visible: prefs.omnibarPosition === "statusbar",
+              node: <Omnibar onNavigate={go} />,
+            },
+            {
+              id: "settings",
+              visible: prefs.settingsPosition === "statusbar",
+              node: (
+                <SurfaceMenu kind="settings">
+                  <button
+                    type="button"
+                    className="status-settings"
+                    aria-label={t("Settings")}
+                    title={t("Settings")}
+                    onClick={() => go("/settings")}
+                  >
+                    <AnimatedIcon name="settings" size={16} />
+                  </button>
+                </SurfaceMenu>
+              ),
+            },
+            {
+              id: "version",
+              visible: true,
+              node: (
+                <span>
+                  {t("Version")}: {appVersion} · {t("Prototype")}
+                </span>
+              ),
+            },
+            {
+              id: "revision",
+              visible: true,
+              node: (
+                <span>
+                  {context.repository} / {context.revision}
+                </span>
+              ),
+            },
+          ].filter(
+            (segment) =>
+              segment.visible &&
+              prefs.statusAlignment[segment.id as keyof typeof prefs.statusAlignment] === alignment,
+          );
+          return (
+            <div className={`status-group status-group-${alignment}`} key={alignment}>
+              {segments.map((segment, index) => (
+                <Fragment key={segment.id}>
+                  {index > 0 && (
+                    <span className="status-delimiter" aria-hidden="true">
+                      |
+                    </span>
+                  )}
+                  {segment.node}
+                </Fragment>
+              ))}
+            </div>
+          );
         })}
       </footer>
       {prefs.omnibarPosition === "floating" && (
-          <Omnibar onNavigate={go} floating={{ left: prefs.floatingX, top: prefs.floatingY }} dragHandle={
-            <button type="button" className="floating-handle" title={t("Drag omnibar")}
+        <Omnibar
+          onNavigate={go}
+          floating={{ left: prefs.floatingX, top: prefs.floatingY }}
+          dragHandle={
+            <button
+              type="button"
+              className="floating-handle"
+              title={t("Drag omnibar")}
               aria-label={t("Drag omnibar")}
               onPointerDown={(event) => {
                 event.preventDefault();
                 floatOrigin.current = {
-                  pointerX: event.clientX, pointerY: event.clientY,
-                  x: prefs.floatingX, y: prefs.floatingY,
+                  pointerX: event.clientX,
+                  pointerY: event.clientY,
+                  x: prefs.floatingX,
+                  y: prefs.floatingY,
                 };
                 event.currentTarget.setPointerCapture(event.pointerId);
                 setFloatingDrag(true);
@@ -393,16 +463,32 @@ export default function App() {
               onPointerMove={(event) => {
                 if (!floatingDrag) return;
                 updatePreferences({
-                  floatingX: Math.min(Math.max(0, floatOrigin.current.x + event.clientX - floatOrigin.current.pointerX), window.innerWidth - 120),
-                  floatingY: Math.min(Math.max(0, floatOrigin.current.y + event.clientY - floatOrigin.current.pointerY), window.innerHeight - 35),
+                  floatingX: Math.min(
+                    Math.max(
+                      0,
+                      floatOrigin.current.x + event.clientX - floatOrigin.current.pointerX,
+                    ),
+                    window.innerWidth - 120,
+                  ),
+                  floatingY: Math.min(
+                    Math.max(
+                      0,
+                      floatOrigin.current.y + event.clientY - floatOrigin.current.pointerY,
+                    ),
+                    window.innerHeight - 35,
+                  ),
                 });
               }}
               onPointerUp={(event) => {
-                if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+                if (event.currentTarget.hasPointerCapture(event.pointerId))
+                  event.currentTarget.releasePointerCapture(event.pointerId);
               }}
-              onLostPointerCapture={() => setFloatingDrag(false)}>
+              onLostPointerCapture={() => setFloatingDrag(false)}
+            >
               <AnimatedIcon name="drag" size={15} />
-            </button>} />
+            </button>
+          }
+        />
       )}
       {prefs.omnibarPosition === "hidden" && <Omnibar onNavigate={go} fallback />}
       <Notifications />

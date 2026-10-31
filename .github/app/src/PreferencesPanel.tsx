@@ -1,6 +1,3 @@
-
-
-
 import { useTranslation } from "react-i18next";
 import { CanvasSelect } from "./components/ui/CanvasSelect";
 import { AnimatedIcon } from "./components/AnimatedIcon";
@@ -242,23 +239,34 @@ export default function PreferencesPanel() {
           label="Command results position"
           value={prefs.commandPlacement}
           values={["auto", "down", "up"]}
-          onChange={(value) => patch("commandPlacement", value as CanvasPreferences["commandPlacement"])}
+          onChange={(value) =>
+            patch("commandPlacement", value as CanvasPreferences["commandPlacement"])
+          }
         />
         <label className="setting-row settings-choice">
           <span>{t("Blur background when command centre is open")}</span>
-          <input type="checkbox" checked={prefs.commandBackdropBlur}
-            onChange={(event) => patch("commandBackdropBlur", event.target.checked)} />
+          <input
+            type="checkbox"
+            checked={prefs.commandBackdropBlur}
+            onChange={(event) => patch("commandBackdropBlur", event.target.checked)}
+          />
         </label>
         <h3>{t("Status bar alignment")}</h3>
         <p className="muted">{t("Items sharing an alignment are grouped with a separator.")}</p>
-        {STATUS_PARTS.map((part) => <Choice key={part}
-          label={readable(part)}
-          value={prefs.statusAlignment[part]}
-          values={["left", "center", "right"]}
-          onChange={(value) => patch("statusAlignment", {
-            ...prefs.statusAlignment, [part]: value,
-          } as CanvasPreferences["statusAlignment"])}
-        />)}
+        {STATUS_PARTS.map((part) => (
+          <Choice
+            key={part}
+            label={readable(part)}
+            value={prefs.statusAlignment[part]}
+            values={["left", "center", "right"]}
+            onChange={(value) =>
+              patch("statusAlignment", {
+                ...prefs.statusAlignment,
+                [part]: value,
+              } as CanvasPreferences["statusAlignment"])
+            }
+          />
+        ))}
         <Choice
           label="Activity bar density"
           value={prefs.activityBarDensity}
@@ -270,30 +278,41 @@ export default function PreferencesPanel() {
       </div>
       <div className="settings-group">
         <h2>{t("Component token mapping")}</h2>
-        <p className="muted">{t("Override a component's color and scale tokens without changing the global palette. Inherit keeps the global setting.")}</p>
+        <p className="muted">
+          {t(
+            "Override a component's color and scale tokens without changing the global palette. Inherit keeps the global setting.",
+          )}
+        </p>
         <div className="component-token-table" aria-label={t("Component token mapping")}>
           {COMPONENTS.map((component) => (
             <div className="component-token-row" key={component}>
               <strong>{t(readable(component))}</strong>
-              {(["surface","text","border","accent","font","icon","spacing"] as const).map((field) => (
-                <div key={field} className="component-token-cell">
-                  <span>{t(readable(field))}</span>
-                  <CanvasSelect
-                    label={t(readable(component)) + " · " + t(readable(field))}
-                    value={prefs.componentThemes[component][field]}
-                    options={["inherit", ...(["surface","text","border","accent"].includes(field)
-                      ? COLOR_KEYS : ["small","normal","large"])].map((option) => ({
-                        value: option, label: t(readable(option)),
+              {(["surface", "text", "border", "accent", "font", "icon", "spacing"] as const).map(
+                (field) => (
+                  <div key={field} className="component-token-cell">
+                    <span>{t(readable(field))}</span>
+                    <CanvasSelect
+                      label={t(readable(component)) + " · " + t(readable(field))}
+                      value={prefs.componentThemes[component][field]}
+                      options={[
+                        "inherit",
+                        ...(["surface", "text", "border", "accent"].includes(field)
+                          ? COLOR_KEYS
+                          : ["small", "normal", "large"]),
+                      ].map((option) => ({
+                        value: option,
+                        label: t(readable(option)),
                       }))}
-                    onValueChange={(value) => {
-                      patch("componentThemes", {
-                        ...prefs.componentThemes,
-                        [component]: { ...prefs.componentThemes[component], [field]: value },
-                      } as CanvasPreferences["componentThemes"]);
-                    }}
-                  />
-                </div>
-              ))}
+                      onValueChange={(value) => {
+                        patch("componentThemes", {
+                          ...prefs.componentThemes,
+                          [component]: { ...prefs.componentThemes[component], [field]: value },
+                        } as CanvasPreferences["componentThemes"]);
+                      }}
+                    />
+                  </div>
+                ),
+              )}
             </div>
           ))}
         </div>

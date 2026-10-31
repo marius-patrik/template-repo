@@ -136,11 +136,27 @@ const skinPalette = {
   },
 } as const;
 export const COMPONENTS = [
-  "titlebar", "statusbar", "sidebar", "activitybar", "tabs", "omnibar",
-  "canvas", "editor", "library", "settings", "menus",
+  "titlebar",
+  "statusbar",
+  "sidebar",
+  "activitybar",
+  "tabs",
+  "omnibar",
+  "canvas",
+  "editor",
+  "library",
+  "settings",
+  "menus",
 ] as const;
 export type ComponentName = (typeof COMPONENTS)[number];
-export const STATUS_PARTS = ["snapshot", "navigation", "omnibar", "settings", "version", "revision"] as const;
+export const STATUS_PARTS = [
+  "snapshot",
+  "navigation",
+  "omnibar",
+  "settings",
+  "version",
+  "revision",
+] as const;
 export type StatusPart = (typeof STATUS_PARTS)[number];
 const sizeChoice = z.enum(["inherit", "small", "normal", "large"]);
 const componentTheme = z.object({
@@ -154,22 +170,37 @@ const componentTheme = z.object({
 });
 export type ComponentTheme = z.infer<typeof componentTheme>;
 export const defaultComponentTheme: ComponentTheme = {
-  surface: "inherit", text: "inherit", border: "inherit", accent: "inherit",
-  font: "inherit", icon: "inherit", spacing: "inherit",
+  surface: "inherit",
+  text: "inherit",
+  border: "inherit",
+  accent: "inherit",
+  font: "inherit",
+  icon: "inherit",
+  spacing: "inherit",
 };
 export const defaultComponentThemes = Object.fromEntries(
   COMPONENTS.map((component) => [component, { ...defaultComponentTheme }]),
 ) as Record<ComponentName, ComponentTheme>;
-const componentThemesSchema = z.object(Object.fromEntries(COMPONENTS.map(
-  (component) => [component, componentTheme],
-)) as Record<ComponentName, typeof componentTheme>);
+const componentThemesSchema = z.object(
+  Object.fromEntries(COMPONENTS.map((component) => [component, componentTheme])) as Record<
+    ComponentName,
+    typeof componentTheme
+  >,
+);
 const statusAlign = z.enum(["left", "center", "right"]);
-const statusAlignmentSchema = z.object(Object.fromEntries(STATUS_PARTS.map(
-  (part) => [part, statusAlign],
-)) as Record<StatusPart, typeof statusAlign>);
+const statusAlignmentSchema = z.object(
+  Object.fromEntries(STATUS_PARTS.map((part) => [part, statusAlign])) as Record<
+    StatusPart,
+    typeof statusAlign
+  >,
+);
 export const defaultStatusAlignment: Record<StatusPart, "left" | "center" | "right"> = {
-  snapshot: "left", navigation: "left", omnibar: "center", settings: "right",
-  version: "right", revision: "right",
+  snapshot: "left",
+  navigation: "left",
+  omnibar: "center",
+  settings: "right",
+  version: "right",
+  revision: "right",
 };
 
 const schema = z.object({
@@ -249,9 +280,12 @@ function validate(source: unknown): CanvasPreferences {
       ...(record.lightColors && typeof record.lightColors === "object" ? record.lightColors : {}),
     },
     statusAlignment: { ...defaultStatusAlignment, ...(record.statusAlignment ?? {}) },
-    componentThemes: Object.fromEntries(COMPONENTS.map((key) => [
-      key, { ...defaultComponentTheme, ...(record.componentThemes?.[key] ?? {}) },
-    ])),
+    componentThemes: Object.fromEntries(
+      COMPONENTS.map((key) => [
+        key,
+        { ...defaultComponentTheme, ...(record.componentThemes?.[key] ?? {}) },
+      ]),
+    ),
   };
   const result = schema.safeParse(data);
   return result.success ? result.data : defaults;
@@ -309,7 +343,8 @@ export const useCanvasConfig = create<ConfigState>()(
         const prefs = record.preferences;
         if (!prefs || prefs.skin !== "graphite") return saved;
         const priorDefault = JSON.stringify(prefs.darkColors) === JSON.stringify(darkPalette);
-        const previousOled = prefs.darkColors?.bg === "#000000" && prefs.darkColors?.surface === "#000000";
+        const previousOled =
+          prefs.darkColors?.bg === "#000000" && prefs.darkColors?.surface === "#000000";
         if (!priorDefault && !previousOled) return saved;
         return {
           ...record,
