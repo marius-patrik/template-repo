@@ -107,21 +107,22 @@ _Source: [0009-agent-roles-and-skills.md](rules/0009-agent-roles-and-skills.md)_
 ## Exclusive repository test location
 
 - Store **every** repository-owned test, fixture, mock, snapshot, support harness and test-only resource under `.github/tests/`. This includes unit, integration, end-to-end, smoke, contract, regression and functional suites.
-- Organize freely under `.github/tests/`, but never place repository tests next to production code, under `.github/scripts/`, in application directories or inside the pinned `.darkfactory` submodule.
+- Organize freely under `.github/tests/`, but never place repository tests next to production code, under `.github/scripts/` or inside application directories.
 - Write behavior-driven tests that exercise external outcomes and edge cases, not syntax assertions or mocks that replace the unit under test.
-- Relocate existing tests with every relevant change. The generator and CI must reject any tracked test paths outside `.github/tests/`.
-- Update test discovery and execution commands whenever structure changes. Report unexecuted tests or unavailable CI as blocked, not passing.
+- Relocate existing tests with each relevant change. The generator and CI must reject tracked test paths outside `.github/tests/`.
+- Update discovery and execution commands whenever structure changes. Report unexecuted tests or unavailable CI as blocked, not passing.
 
 _Source: [0010-exclusive-tests.md](rules/0010-exclusive-tests.md)_
 
 
-## Repository-backed Canvas and agent interactions
+## React Canvas and agent interactions
 
-- Root `canvas.html` is a deterministic, read-only projection of Git-tracked repository content; never edit it directly.
-- At the beginning of repository work, load the Canvas and run the repository-local context script; at the end, report a concise snapshot from the repository and link to the HTML file.
-- The agent is the interaction layer: it may inspect, propose, modify and validate **underlying tracked files** with approved tools, then regenerate the Canvas. Do not add independent persisted UI state.
-- Facts must be in version-controlled source records with relevant evidence/confidence before they can be displayed as confirmed. The Canvas must not substitute external information or hallucinations for absent repository data.
-- Treat the plugin manifest and hooks as repository conventions. They are not automatically installed ChatGPT capabilities; invoke or integrate them explicitly in supported agent hosts.
-- All tests and generated-Canvas checks belong in `.github/tests/` and native GitHub Actions. Preserve human review gates and data privacy.
+- The **sole** Canvas frontend is `.github/app/`; GitHub Pages publishes its compiled `.canvas-dist/index.html`. Never introduce a separate root HTML renderer, generated root `canvas.html`, Python Canvas CLI or alternate UI authority.
+- Read `repo.dfconfig`, canonical `.agents/` source records, active work and the frontend's actual entrypoints before changing the prototype.
+- Agents operate through authorized source-control tools; they may inspect, propose, edit and validate **underlying tracked records** with approved review gates, then regenerate Markdown and rebuild React.
+- Public Canvas content is derived only from explicitly allowlisted, verified Git-tracked sources. Do not fabricate execution, external repositories, task states or private facts.
+- Browser-local appearance, layout, language and keybinding settings are **presentation state** and do not override repository truth. Keep the compiled public viewer read-only unless the user approves a new interaction contract.
+- The repository-local plugin manifest and hooks are opt-in conventions, not automatically installed ChatGPT capabilities.
+- Keep application and documentation checks in native GitHub Actions with tests under `.github/tests/`. Do not infer prototype approval from successful CI or a Pages deployment.
 
 _Source: [0011-repository-canvas.md](rules/0011-repository-canvas.md)_

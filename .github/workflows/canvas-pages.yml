@@ -42,12 +42,11 @@ jobs:
           bun run lint
           bun run format:check
           bun run build
-      - name: Check compiled site and standalone HTML
+      - name: Check compiled Pages application HTML
         run: |
           node .github/app/scripts/verify-build.mjs .canvas-dist/index.html
           test -s .canvas-dist/index.html
           grep -q '</html>' .canvas-dist/index.html
-          cp .canvas-dist/index.html .canvas-dist/canvas.html
           touch .canvas-dist/.nojekyll
       - name: Smoke test compiled HTML in Chromium
         working-directory: .github/app

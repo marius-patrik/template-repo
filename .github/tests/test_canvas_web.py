@@ -38,6 +38,15 @@ class CanvasWebTests(unittest.TestCase):
             self.assertNotIn("private/", path)
         self.assertNotIn("api_key", json.dumps(snapshot["paths"]).lower())
 
+    def test_only_one_published_canvas_application(self):
+        self.assertTrue((APP / "src/main.tsx").is_file())
+        self.assertTrue((ROOT / ".github/workflows/canvas-pages.yml").is_file())
+        for path in (
+            "canvas.html", ".gitmodules", ".agents/canvas-template.html",
+            ".agents/tools/canvas.py", ".github/workflows/canvas-sync.yml",
+        ):
+            self.assertFalse((ROOT / path).is_file(), path)
+
     def test_reproducible_snapshot(self):
         self.test_snapshot_uses_real_repository_documents()
         before = GENERATED.read_bytes()

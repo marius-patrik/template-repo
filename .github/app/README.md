@@ -2,9 +2,8 @@
 
 The first-class Canvas UI is authored in `.github/app`. A deterministic build step reads
 only allowlisted, Git-tracked repository documents and generates `src/generated/context.json`;
-this derived file is not edited manually. GitHub Actions compile a React application into
-`.canvas-dist/index.html` and `canvas.html`, publishing the former as the repository's
-GitHub Pages site. No browser fetch, backend, credential, or independent authoritative
+this derived file is not edited manually. GitHub Actions compile a single React application into
+`.canvas-dist/index.html`, the repository's only published GitHub Pages entrypoint. No browser fetch, backend, credential, or independent authoritative
 project state is required.
 
 Stack: Bun, TypeScript, React, Rsbuild, Wouter (hash routes), Tailwind CSS v4, shadcn-style
@@ -28,9 +27,11 @@ explicit allowlist and does not publish raw private archives, credentials or all
 repository files. Reusing the app in a private repo must involve a separate security
 review, not automatically opt in to public publishing.
 
-The existing `.agents/tools/canvas.py` CLI is retained as the historical
-source inspector/exporter while CI validates the React replacement. Both are derived
-views; tracked authoring records remain authoritative.
+The former root `canvas.html`, Python Canvas renderer and separate synchronization
+workflow have been removed. `.github/app/` is the sole Canvas implementation. The
+repository's authored records remain authoritative; `context.json` and compiled HTML
+are derived projections, not alternate data stores. The root DarkFactory Git submodule
+has also been removed; managed external DarkFactory workflows remain independent.
 
 ## Prototype delivery
 

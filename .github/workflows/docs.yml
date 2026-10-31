@@ -16,7 +16,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check canonical generated documents
         run: python3 .github/scripts/generate_documents.py --check
-      - name: Check repository Canvas projection
-        run: python3 .agents/tools/canvas.py check
       - name: Test source behavior and repository layout
         run: python3 -m unittest discover -s .github/tests -p 'test_*.py'

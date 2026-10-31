@@ -1,10 +1,12 @@
 ---
 status: published
 ---
-# DarkFactory integration and test ownership
+# External DarkFactory integration and test ownership
 
-The repository's own agent guidance is in `.agents/` and GitHub automation is in `.github/`; neither is a symlink. The reusable DarkFactory project is pinned as a root submodule at `.darkfactory`. Update its commit pointer explicitly and keep the `.gitmodules` URL in sync.
+The repository's agent guidance is maintained in `.agents/`, while native GitHub automation belongs in `.github/`. Both are independent physical directories. **No DarkFactory Git submodule is installed or required.**
 
-All repository tests, fixtures, mocks, snapshots and test helpers are owned by `.github/tests/`. Do not put them in application packages, under the DarkFactory submodule or in separate root test folders.
+Managed DarkFactory workflows and pinned external artifacts may remain configured in `.github/workflows/`, `.github/darkfactory-installation.json`, and `repo.dfconfig`; these are external integrations rather than a second local copy of the project.
 
-The default release strategy uses Git tags as the sole version authority. The optional `VERSION` file belongs to opt-in `file` mode and is automatically maintained by the PR workflow. GitHub Actions workflows are discoverable under `.github/workflows/`.
+All repository tests, fixtures, mocks, snapshots and helpers belong exclusively under `.github/tests/`, including Canvas browser smoke tests. GitHub Actions workflows are discoverable under `.github/workflows/`.
+
+The default release strategy uses Git tags. The optional `VERSION` file is maintained only when explicitly configured in `file` mode.

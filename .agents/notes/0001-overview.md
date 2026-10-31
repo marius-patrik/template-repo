@@ -3,14 +3,16 @@ status: published
 ---
 # Overview
 
-This repository is a technology-neutral starting point for projects coordinated by human contributors and AI coding agents. It supplies source-controlled product intent, architectural decisions, agent operating rules, reusable roles and procedures, and a minimal GitHub delivery pipeline. **It is a template, not an implemented application.**
+This repository is a reusable starting point for projects coordinated by human contributors and AI coding agents. It supplies source-controlled requirements, architecture decisions, operating rules, portable agent roles and skills, and a native GitHub delivery pipeline.
 
-The public README is an overview of the repository and onboarding process, **not** the product requirements document. Requirements are authored in `.agents/requests/` and compiled into `.agents/PRD.md`; architecture is authored in `.agents/decisions/` and compiled into `.agents/ARCHITECTURE.md`.
+Its **only Canvas application** is the React workspace in `.github/app/`, currently in an **open prototyping phase**. GitHub Pages publishes the compiled application; its screens are a source-backed design prototype, not evidence of live autonomous agents or execution telemetry.
+
+The public README introduces the repository; it is not a competing requirements document. Approved requests generate `.agents/PRD.md`, accepted decisions generate `.agents/ARCHITECTURE.md`, active rules generate `.agents/AGENTS.md`, and published notes generate `.agents/README.md`.
 
 ## Getting started
 
-1. Replace the starter goal in `.agents/GOAL.md` with a specific outcome and measurable acceptance criteria.
-2. Add an approved request to `.agents/requests/` and accepted architectural choices to `.agents/decisions/`.
-3. Adjust `.agents/rules/` for project-specific conventions, then select the relevant role and skill instructions.
-4. Regenerate committed docs: `python3 .github/scripts/generate_documents.py --write`.
-5. Verify: `python3 .github/scripts/generate_documents.py --check`, then the project's own build/test commands when an application exists.
+1. Describe the target project's goal in `.agents/GOAL.md` and approved requirements in `.agents/requests/`.
+2. Record architecture choices in `.agents/decisions/`, and adjust `.agents/rules/` as needed.
+3. Run `python3 .github/scripts/generate_documents.py --write` and `--check` to validate generated documentation.
+4. For the Canvas prototype, enter `.github/app/`, run `bun install`, then `bun run dev`; use `bun run check` before proposing changes.
+5. Keep prototyping open until its completion is explicitly approved; do not treat a successful build or deployment as design sign-off.
