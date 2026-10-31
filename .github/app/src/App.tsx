@@ -577,7 +577,10 @@ export default function App() {
                   value={search}
                   aria-label="Search routes"
                   placeholder="Search pages and commands"
-                  onChange={(e) => {setSearch(e.target.value);setSelection(0);}}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setSelection(0);
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === "ArrowDown") {
                       e.preventDefault();
