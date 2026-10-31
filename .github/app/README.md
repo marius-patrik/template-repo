@@ -150,3 +150,6 @@ document relationships are derived from authored Markdown links to tracked paths
 The application remains in user-controlled prototyping. CI must pass typecheck,
 lint, formatting, standalone Pages build and browser smoke before a preview is
 considered technically verified; CI passing is not final design approval.
+
+Build uses Rsbuild 2 to inline Monaco's local worker entrypoints. The Pages HTML
+is validated after compilation for correct mount/script order and browser behavior.

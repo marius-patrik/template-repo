@@ -39,7 +39,7 @@ jobs:
           bun install --frozen-lockfile
           bun run context
           bun run typecheck
-          bunx biome lint . --max-diagnostics=100
+          bun run lint
           bun run format:check
           bun run build
       - name: Check compiled Pages application HTML

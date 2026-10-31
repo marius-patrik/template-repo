@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "bun run context && rsbuild dev",
     "context": "node scripts/generate-context.mjs",
-    "build": "bun run context && rsbuild build && node scripts/finalize-build.mjs ../../.canvas-dist/index.html",
+    "build": "bun run context && rsbuild build",
     "typecheck": "bun run context && tsc --noEmit",
     "check": "bun run context && bun run typecheck && bun run lint && bun run format:check && bun run build",
     "lint": "biome lint .",
