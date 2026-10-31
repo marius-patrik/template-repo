@@ -10,7 +10,16 @@ import { CanvasContextMenu } from "./components/ui/ContextMenu";
 import Monaco from "./Monaco";
 import PreferencesPanel from "./PreferencesPanel";
 import { useProfiles } from "./profiles";
-import { Navigator, NavigationTree, OmnibarTrigger, ActivityBar, SidebarContents, Notepad, Library, SurfaceMenu } from "./ShellComponents";
+import {
+  Navigator,
+  NavigationTree,
+  OmnibarTrigger,
+  ActivityBar,
+  SidebarContents,
+  Notepad,
+  Library,
+  SurfaceMenu,
+} from "./ShellComponents";
 import { NotificationCenter, Notifications, notify } from "./notifications";
 import { VIEWS as nav, type CanvasView as View, viewFromRoute } from "./views";
 import { version as appVersion } from "../package.json";
@@ -304,15 +313,20 @@ export default function App() {
   const [collapsed, setCollapsed] = useState(false);
   const resizing = useRef(false);
   const currentProfileId = useProfiles((state) => state.currentId);
-  const activeProfile = useProfiles((state) => state.profiles.find((p) => p.id === state.currentId));
+  const activeProfile = useProfiles((state) =>
+    state.profiles.find((p) => p.id === state.currentId),
+  );
   const setRoute = useProfiles((state) => state.setRoute);
   const togglePin = useProfiles((state) => state.togglePin);
   const [floatingDrag, setFloatingDrag] = useState(false);
   const floatOrigin = useRef({ pointerX: 0, pointerY: 0, x: 0, y: 0 });
-  useEffect(() => () => {
-    document.body.classList.remove("resizing-sidebar");
-    document.body.classList.remove("dragging-omnibar");
-  }, []);
+  useEffect(
+    () => () => {
+      document.body.classList.remove("resizing-sidebar");
+      document.body.classList.remove("dragging-omnibar");
+    },
+    [],
+  );
   const [mobileOpen, setMobileOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -321,8 +335,11 @@ export default function App() {
   const page = viewFromRoute(path);
 
   useEffect(() => {
-    const profile = useProfiles.getState().profiles.find((p) => p.id === useProfiles.getState().currentId);
-    if (path === "/" && profile?.route && profile.route !== "/") navigate(profile.route, { replace: true });
+    const profile = useProfiles
+      .getState()
+      .profiles.find((p) => p.id === useProfiles.getState().currentId);
+    if (path === "/" && profile?.route && profile.route !== "/")
+      navigate(profile.route, { replace: true });
   }, []);
   const dark = prefs.theme === "system" ? systemDark : prefs.theme === "dark";
   useEffect(() => {
@@ -353,9 +370,7 @@ export default function App() {
   const filtered = useMemo(
     () =>
       nav.filter((x) =>
-        (context.name + " " + t(x.label))
-          .toLowerCase()
-          .includes(search.toLowerCase()),
+        (context.name + " " + t(x.label)).toLowerCase().includes(search.toLowerCase()),
       ),
     [search, t],
   );
@@ -408,109 +423,203 @@ export default function App() {
     <div className="app-root">
       <div className="window-titlebar">
         <div className="title-left">
-          <Button size="icon" className="mobile-toggle" aria-label={t("Toggle navigation")}
-            onClick={() => setMobileOpen((v) => !v)}>{icon("expand")}</Button>
-          <Button size="icon" className="desktop-toggle"
+          <Button
+            size="icon"
+            className="mobile-toggle"
+            aria-label={t("Toggle navigation")}
+            onClick={() => setMobileOpen((v) => !v)}
+          >
+            {icon("expand")}
+          </Button>
+          <Button
+            size="icon"
+            className="desktop-toggle"
             title={t(collapsed ? "Expand sidebar" : "Collapse sidebar")}
             aria-label={t(collapsed ? "Expand sidebar" : "Collapse sidebar")}
-            onClick={() => setCollapsed((value) => !value)}>{icon(collapsed ? "expand" : "collapse")}</Button>
-          {prefs.navigationPosition === "titlebar" &&
-            <CanvasContextMenu actions={POSITIONS.navigation.map((position) => ({
-              label: t("Navigation position") + " · " + t(position),
-              icon: "move", action: () => updatePreferences({ navigationPosition: position }),
-            }))}>
-              <div><Navigator current={page} onNavigate={go} onProfile={switchProfile} /></div>
-            </CanvasContextMenu>}
+            onClick={() => setCollapsed((value) => !value)}
+          >
+            {icon(collapsed ? "expand" : "collapse")}
+          </Button>
+          {prefs.navigationPosition === "titlebar" && (
+            <CanvasContextMenu
+              actions={POSITIONS.navigation.map((position) => ({
+                label: t("Navigation position") + " · " + t(position),
+                icon: "move",
+                action: () => updatePreferences({ navigationPosition: position }),
+              }))}
+            >
+              <div>
+                <Navigator current={page} onNavigate={go} onProfile={switchProfile} />
+              </div>
+            </CanvasContextMenu>
+          )}
         </div>
         <div className="title-center">
-          {prefs.omnibarPosition === "titlebar" ?
-            <SurfaceMenu kind="omnibar"><div><OmnibarTrigger open={() => setPaletteOpen(true)} /></div></SurfaceMenu> :
-            <strong>Canvas</strong>}
+          {prefs.omnibarPosition === "titlebar" ? (
+            <SurfaceMenu kind="omnibar">
+              <div>
+                <OmnibarTrigger open={() => setPaletteOpen(true)} />
+              </div>
+            </SurfaceMenu>
+          ) : (
+            <strong>Canvas</strong>
+          )}
         </div>
         <div className="title-actions">
           <NotificationCenter />
-          {prefs.settingsPosition === "titlebar" &&
+          {prefs.settingsPosition === "titlebar" && (
             <SurfaceMenu kind="settings">
-              <Button size="icon" aria-label={t("Settings")} title={t("Settings")}
-                onClick={() => go("/settings")}>{icon("settings")}</Button>
-            </SurfaceMenu>}
+              <Button
+                size="icon"
+                aria-label={t("Settings")}
+                title={t("Settings")}
+                onClick={() => go("/settings")}
+              >
+                {icon("settings")}
+              </Button>
+            </SurfaceMenu>
+          )}
         </div>
       </div>
       <div className="window-main">
-        {mobileOpen && <button type="button" aria-label={t("Close navigation")}
-          className="sidebar-scrim" onClick={() => setMobileOpen(false)} />}
+        {mobileOpen && (
+          <button
+            type="button"
+            aria-label={t("Close navigation")}
+            className="sidebar-scrim"
+            onClick={() => setMobileOpen(false)}
+          />
+        )}
         <div className={`work-area activity-position-${prefs.activityBarPosition}`}>
-          {prefs.activityBarPosition !== "hidden" &&
-            <ActivityBar current={page} onNavigate={go} showSettings={prefs.settingsPosition === "activitybar"} />}
+          {prefs.activityBarPosition !== "hidden" && (
+            <ActivityBar
+              current={page}
+              onNavigate={go}
+              showSettings={prefs.settingsPosition === "activitybar"}
+            />
+          )}
           <div className={`primary-content sidebar-${prefs.sidebarPosition}`}>
-            {(prefs.navigationPosition === "sidebar" || (
-              page !== null && ["library", "monaco", "artifacts", "context", "agents", "roadmap"].includes(page)
-            )) && <>
-              <aside className={`sidebar ${collapsed ? "collapsed" : ""} ${mobileOpen ? "mobile-open" : ""}`}
-                aria-label="Main navigation"
-                style={{ "--sidebar-width": `${prefs.sidebarWidth}px` } as CSSProperties}>
-                {(!collapsed || mobileOpen) && <>
-                  {prefs.omnibarPosition === "sidebar" &&
-                    <SurfaceMenu kind="omnibar"><div className="sidebar-omnibar">
-                      <OmnibarTrigger open={() => setPaletteOpen(true)} />
-                    </div></SurfaceMenu>}
-                  <SidebarContents current={page} onNavigate={go} />
-                </>}
-              </aside>
-              <div className={`sidebar-resizer ${collapsed ? "disabled" : ""}`}
-                role="separator" aria-label={t("Resize sidebar")} aria-orientation="vertical"
-                aria-valuenow={prefs.sidebarWidth} aria-valuemin={180} aria-valuemax={480}
-                tabIndex={collapsed ? -1 : 0}
-                onPointerDown={(event) => {
-                  if (collapsed || event.button !== 0) return;
-                  event.preventDefault();
-                  resizing.current = true;
-                  event.currentTarget.setPointerCapture(event.pointerId);
-                  document.body.classList.add("resizing-sidebar");
-                }}
-                onPointerMove={(event) => {
-                  if (resizing.current) updatePreferences({ sidebarWidth: Math.min(480, Math.max(180,
-                    Math.round(prefs.sidebarPosition === "left" ? event.clientX : window.innerWidth - event.clientX))) });
-                }}
-                onLostPointerCapture={() => {
-                  resizing.current = false;
-                  document.body.classList.remove("resizing-sidebar");
-                }}
-                onPointerUp={(event) => {
-                  if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
-                }}
-                onPointerCancel={(event) => {
-                  if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
-                }}
-                onDoubleClick={() => updatePreferences({ sidebarWidth: 228 })}
-                onKeyDown={(event) => {
-                  const direction = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
-                  if (direction) {
+            {(prefs.navigationPosition === "sidebar" ||
+              (page !== null &&
+                ["library", "monaco", "artifacts", "context", "agents", "roadmap"].includes(
+                  page,
+                ))) && (
+              <>
+                <aside
+                  className={`sidebar ${collapsed ? "collapsed" : ""} ${mobileOpen ? "mobile-open" : ""}`}
+                  aria-label="Main navigation"
+                  style={{ "--sidebar-width": `${prefs.sidebarWidth}px` } as CSSProperties}
+                >
+                  {(!collapsed || mobileOpen) && (
+                    <>
+                      {prefs.omnibarPosition === "sidebar" && (
+                        <SurfaceMenu kind="omnibar">
+                          <div className="sidebar-omnibar">
+                            <OmnibarTrigger open={() => setPaletteOpen(true)} />
+                          </div>
+                        </SurfaceMenu>
+                      )}
+                      <SidebarContents current={page} onNavigate={go} />
+                    </>
+                  )}
+                </aside>
+                <div
+                  className={`sidebar-resizer ${collapsed ? "disabled" : ""}`}
+                  role="separator"
+                  aria-label={t("Resize sidebar")}
+                  aria-orientation="vertical"
+                  aria-valuenow={prefs.sidebarWidth}
+                  aria-valuemin={180}
+                  aria-valuemax={480}
+                  tabIndex={collapsed ? -1 : 0}
+                  onPointerDown={(event) => {
+                    if (collapsed || event.button !== 0) return;
                     event.preventDefault();
-                    updatePreferences({ sidebarWidth: Math.min(480, Math.max(180, prefs.sidebarWidth +
-                      direction * (prefs.sidebarPosition === "right" ? -16 : 16))) });
-                  }
-                  if (event.key === "Home") { event.preventDefault(); updatePreferences({ sidebarWidth: 180 }); }
-                  if (event.key === "End") { event.preventDefault(); updatePreferences({ sidebarWidth: 480 }); }
-                }}
-                onContextMenu={(event) => {
-                  event.preventDefault();
-                  updatePreferences({ sidebarPosition: prefs.sidebarPosition === "left" ? "right" : "left" });
-                  notify.info(t("Primary sidebar position updated"));
-                }}
-              />
-            </>}
+                    resizing.current = true;
+                    event.currentTarget.setPointerCapture(event.pointerId);
+                    document.body.classList.add("resizing-sidebar");
+                  }}
+                  onPointerMove={(event) => {
+                    if (resizing.current)
+                      updatePreferences({
+                        sidebarWidth: Math.min(
+                          480,
+                          Math.max(
+                            180,
+                            Math.round(
+                              prefs.sidebarPosition === "left"
+                                ? event.clientX
+                                : window.innerWidth - event.clientX,
+                            ),
+                          ),
+                        ),
+                      });
+                  }}
+                  onLostPointerCapture={() => {
+                    resizing.current = false;
+                    document.body.classList.remove("resizing-sidebar");
+                  }}
+                  onPointerUp={(event) => {
+                    if (event.currentTarget.hasPointerCapture(event.pointerId))
+                      event.currentTarget.releasePointerCapture(event.pointerId);
+                  }}
+                  onPointerCancel={(event) => {
+                    if (event.currentTarget.hasPointerCapture(event.pointerId))
+                      event.currentTarget.releasePointerCapture(event.pointerId);
+                  }}
+                  onDoubleClick={() => updatePreferences({ sidebarWidth: 228 })}
+                  onKeyDown={(event) => {
+                    const direction =
+                      event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
+                    if (direction) {
+                      event.preventDefault();
+                      updatePreferences({
+                        sidebarWidth: Math.min(
+                          480,
+                          Math.max(
+                            180,
+                            prefs.sidebarWidth +
+                              direction * (prefs.sidebarPosition === "right" ? -16 : 16),
+                          ),
+                        ),
+                      });
+                    }
+                    if (event.key === "Home") {
+                      event.preventDefault();
+                      updatePreferences({ sidebarWidth: 180 });
+                    }
+                    if (event.key === "End") {
+                      event.preventDefault();
+                      updatePreferences({ sidebarWidth: 480 });
+                    }
+                  }}
+                  onContextMenu={(event) => {
+                    event.preventDefault();
+                    updatePreferences({
+                      sidebarPosition: prefs.sidebarPosition === "left" ? "right" : "left",
+                    });
+                    notify.info(t("Primary sidebar position updated"));
+                  }}
+                />
+              </>
+            )}
             <div className="main-column">
               <main className="dock-content">
-                <DockCanvas key={currentProfileId} profileId={currentProfileId} route={path}
-                  onNavigate={go} dark={dark}
-                  pinned={activeProfile?.pinned ?? []} onPin={togglePin}
+                <DockCanvas
+                  key={currentProfileId}
+                  profileId={currentProfileId}
+                  route={path}
+                  onNavigate={go}
+                  dark={dark}
+                  pinned={activeProfile?.pinned ?? []}
+                  onPin={togglePin}
                   showSettings={prefs.settingsPosition === "tabbar"}
                   renderView={(view) => {
                     if (view === "overview") return <Overview to={go} />;
                     if (view === "settings") return <PreferencesPanel />;
                     return <SimplePage id={view} to={go} />;
-                  }} />
+                  }}
+                />
               </main>
             </div>
           </div>
@@ -521,45 +630,82 @@ export default function App() {
           <span className="snapshot-desktop">{t("Repository snapshot · read-only")}</span>
           <span className="snapshot-mobile">{t("Read-only snapshot")}</span>
         </span>
-        {prefs.navigationPosition === "statusbar" &&
-          <Navigator current={page} onNavigate={go} onProfile={switchProfile} />}
-        {prefs.omnibarPosition === "statusbar" &&
-          <SurfaceMenu kind="omnibar"><div className="status-omnibar">
-            <OmnibarTrigger open={() => setPaletteOpen(true)} />
-          </div></SurfaceMenu>}
-        {prefs.settingsPosition === "statusbar" &&
+        {prefs.navigationPosition === "statusbar" && (
+          <Navigator current={page} onNavigate={go} onProfile={switchProfile} />
+        )}
+        {prefs.omnibarPosition === "statusbar" && (
+          <SurfaceMenu kind="omnibar">
+            <div className="status-omnibar">
+              <OmnibarTrigger open={() => setPaletteOpen(true)} />
+            </div>
+          </SurfaceMenu>
+        )}
+        {prefs.settingsPosition === "statusbar" && (
           <SurfaceMenu kind="settings">
-            <button type="button" className="status-settings" aria-label={t("Settings")}
-              onClick={() => go("/settings")}><AnimatedIcon name="settings" size={15} /></button>
-          </SurfaceMenu>}
-        <span className="version">{t("Version")}: {appVersion} · {t("Prototype")}</span>
-        <span>{context.repository} / {context.revision}</span>
+            <button
+              type="button"
+              className="status-settings"
+              aria-label={t("Settings")}
+              onClick={() => go("/settings")}
+            >
+              <AnimatedIcon name="settings" size={15} />
+            </button>
+          </SurfaceMenu>
+        )}
+        <span className="version">
+          {t("Version")}: {appVersion} · {t("Prototype")}
+        </span>
+        <span>
+          {context.repository} / {context.revision}
+        </span>
       </footer>
       {prefs.omnibarPosition === "floating" && (
-        <div className={`floating-omnibar ${floatingDrag ? "dragging" : ""}`}
-          style={{ left: prefs.floatingX, top: prefs.floatingY }}>
-          <button type="button" className="floating-handle" title={t("Drag omnibar")}
+        <div
+          className={`floating-omnibar ${floatingDrag ? "dragging" : ""}`}
+          style={{ left: prefs.floatingX, top: prefs.floatingY }}
+        >
+          <button
+            type="button"
+            className="floating-handle"
+            title={t("Drag omnibar")}
             aria-label={t("Drag omnibar")}
             onPointerDown={(event) => {
               event.preventDefault();
-              floatOrigin.current = { pointerX: event.clientX, pointerY: event.clientY, x: prefs.floatingX, y: prefs.floatingY };
+              floatOrigin.current = {
+                pointerX: event.clientX,
+                pointerY: event.clientY,
+                x: prefs.floatingX,
+                y: prefs.floatingY,
+              };
               event.currentTarget.setPointerCapture(event.pointerId);
               setFloatingDrag(true);
             }}
             onPointerMove={(event) => {
               if (!floatingDrag) return;
               updatePreferences({
-                floatingX: Math.min(Math.max(0, floatOrigin.current.x + event.clientX - floatOrigin.current.pointerX), window.innerWidth - 120),
-                floatingY: Math.min(Math.max(0, floatOrigin.current.y + event.clientY - floatOrigin.current.pointerY), window.innerHeight - 35),
+                floatingX: Math.min(
+                  Math.max(0, floatOrigin.current.x + event.clientX - floatOrigin.current.pointerX),
+                  window.innerWidth - 120,
+                ),
+                floatingY: Math.min(
+                  Math.max(0, floatOrigin.current.y + event.clientY - floatOrigin.current.pointerY),
+                  window.innerHeight - 35,
+                ),
               });
             }}
             onPointerUp={(event) => {
-              if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+              if (event.currentTarget.hasPointerCapture(event.pointerId))
+                event.currentTarget.releasePointerCapture(event.pointerId);
             }}
-            onLostPointerCapture={() => setFloatingDrag(false)}>
+            onLostPointerCapture={() => setFloatingDrag(false)}
+          >
             <AnimatedIcon name="move" size={15} />
           </button>
-          <SurfaceMenu kind="omnibar"><div><OmnibarTrigger open={() => setPaletteOpen(true)} /></div></SurfaceMenu>
+          <SurfaceMenu kind="omnibar">
+            <div>
+              <OmnibarTrigger open={() => setPaletteOpen(true)} />
+            </div>
+          </SurfaceMenu>
         </div>
       )}
       <Notifications />
@@ -613,8 +759,9 @@ export default function App() {
                 <kbd>ESC</kbd>
               </div>
               <div className="palette-tree">
-                {prefs.navigationPosition === "omnibar" &&
-                  <NavigationTree current={page} onNavigate={go} />}
+                {prefs.navigationPosition === "omnibar" && (
+                  <NavigationTree current={page} onNavigate={go} />
+                )}
                 {filtered.map((n, i) => (
                   <button
                     type="button"

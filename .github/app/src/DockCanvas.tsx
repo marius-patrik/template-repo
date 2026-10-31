@@ -1,12 +1,24 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {
-  createContext, useCallback, useContext, useEffect, useMemo, useRef, useState,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
   type ReactNode,
 } from "react";
 import {
-  DockviewReact, DockviewDefaultTab, themeDark, themeLight,
-  type DockviewApi, type DockviewReadyEvent, type IDockviewPanelProps,
-  type IDockviewPanelHeaderProps, type IDockviewHeaderActionsProps,
+  DockviewReact,
+  DockviewDefaultTab,
+  themeDark,
+  themeLight,
+  type DockviewApi,
+  type DockviewReadyEvent,
+  type IDockviewPanelProps,
+  type IDockviewPanelHeaderProps,
+  type IDockviewHeaderActionsProps,
 } from "dockview-react";
 import { useTranslation } from "react-i18next";
 import i18n from "./i18n";
@@ -33,7 +45,9 @@ function viewFromId(id: string): CanvasView {
   const candidate = id.split(":")[1] ?? "";
   return isCanvasView(candidate) ? candidate : "overview";
 }
-function title(view: CanvasView) { return i18n.t(viewLabel(view)); }
+function title(view: CanvasView) {
+  return i18n.t(viewLabel(view));
+}
 
 function CanvasTab(props: IDockviewPanelHeaderProps) {
   const shell = useContext(PaneContext);
@@ -41,19 +55,33 @@ function CanvasTab(props: IDockviewPanelHeaderProps) {
   const view = viewFromId(props.api.id);
   const pinned = shell?.pinned.includes(view) ?? false;
   return (
-    <CanvasContextMenu actions={[
-      { label: t(pinned ? "Unpin from activity bar" : "Pin to activity bar"), icon: "pin", action: () => shell?.pin(view) },
-      { label: t("Split right"), icon: "split", action: () => shell?.split(view, props.api.id) },
-      { label: t("Close tab"), icon: "close", action: () => props.api.close() },
-      { type: "separator" },
-      { label: t("Reset layout"), icon: "reset", action: () => shell?.reset() },
-    ]}>
+    <CanvasContextMenu
+      actions={[
+        {
+          label: t(pinned ? "Unpin from activity bar" : "Pin to activity bar"),
+          icon: "pin",
+          action: () => shell?.pin(view),
+        },
+        { label: t("Split right"), icon: "split", action: () => shell?.split(view, props.api.id) },
+        { label: t("Close tab"), icon: "close", action: () => props.api.close() },
+        { type: "separator" },
+        { label: t("Reset layout"), icon: "reset", action: () => shell?.reset() },
+      ]}
+    >
       <div className="canvas-dock-tab" data-canvas-tab={view} data-animated-icon-trigger>
         <AnimatedIcon name={view} size={14} />
         <DockviewDefaultTab {...props} hideClose />
-        <button type="button" className="canvas-tab-close" title={t("Close tab")}
-          aria-label={t("Close tab")} onPointerDown={(event) => event.stopPropagation()}
-          onClick={(event) => { event.stopPropagation(); props.api.close(); }}>
+        <button
+          type="button"
+          className="canvas-tab-close"
+          title={t("Close tab")}
+          aria-label={t("Close tab")}
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => {
+            event.stopPropagation();
+            props.api.close();
+          }}
+        >
           <AnimatedIcon name="close" size={14} />
         </button>
       </div>
@@ -64,7 +92,11 @@ function Panel({ params }: IDockviewPanelProps) {
   const shell = useContext(PaneContext);
   const requested = (params as { view?: string }).view ?? "overview";
   const view = isCanvasView(requested) ? requested : "overview";
-  return <div className="dock-route-page" data-dock-view={view}>{shell?.render(view)}</div>;
+  return (
+    <div className="dock-route-page" data-dock-view={view}>
+      {shell?.render(view)}
+    </div>
+  );
 }
 const components = { page: Panel };
 const tabComponents = { canvas: CanvasTab };
@@ -79,11 +111,24 @@ function TabPicker({ add, label }: { add: (view: CanvasView) => void; label: str
         </button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
-        <DropdownMenu.Content className="menu-content dock-add-menu" align="end" side="bottom" sideOffset={5} collisionPadding={10}>
-          <DropdownMenu.Label className="dock-add-group-label">{t("Available tabs")}</DropdownMenu.Label>
+        <DropdownMenu.Content
+          className="menu-content dock-add-menu"
+          align="end"
+          side="bottom"
+          sideOffset={5}
+          collisionPadding={10}
+        >
+          <DropdownMenu.Label className="dock-add-group-label">
+            {t("Available tabs")}
+          </DropdownMenu.Label>
           {VIEWS.map((item) => (
-            <DropdownMenu.Item key={item.id} className="menu-item dock-add-item" onSelect={() => add(item.id)}>
-              <AnimatedIcon name={item.id} size={16} /><span>{t(item.label)}</span>
+            <DropdownMenu.Item
+              key={item.id}
+              className="menu-item dock-add-item"
+              onSelect={() => add(item.id)}
+            >
+              <AnimatedIcon name={item.id} size={16} />
+              <span>{t(item.label)}</span>
             </DropdownMenu.Item>
           ))}
         </DropdownMenu.Content>
@@ -94,32 +139,53 @@ function TabPicker({ add, label }: { add: (view: CanvasView) => void; label: str
 function HeaderActions({ containerApi, group }: IDockviewHeaderActionsProps) {
   const shell = useContext(PaneContext);
   const { t } = useTranslation();
-  const active = containerApi.panels.find((p) => p.group.id === group.id && p.api.isVisible)
-    ?? containerApi.panels.find((p) => p.group.id === group.id);
+  const active =
+    containerApi.panels.find((p) => p.group.id === group.id && p.api.isVisible) ??
+    containerApi.panels.find((p) => p.group.id === group.id);
   const current = active ? viewFromId(active.id) : "overview";
   return (
     <div className="dock-header-actions" onPointerDown={(event) => event.stopPropagation()}>
       <TabPicker label={t("Add tab")} add={(view) => shell?.add(view, group.id)} />
-      {shell?.showSettings && <button className="dock-add-trigger" type="button"
-        aria-label={t("Settings")} title={t("Settings")} onClick={() => shell.navigate("/settings")}>
-        <AnimatedIcon name="settings" size={16} />
-      </button>}
+      {shell?.showSettings && (
+        <button
+          className="dock-add-trigger"
+          type="button"
+          aria-label={t("Settings")}
+          title={t("Settings")}
+          onClick={() => shell.navigate("/settings")}
+        >
+          <AnimatedIcon name="settings" size={16} />
+        </button>
+      )}
       <DropdownMenu.Root>
         <DropdownMenu.Trigger asChild>
-          <button className="dock-more-trigger" type="button" title={t("More tab actions")} aria-label={t("More tab actions")}>
+          <button
+            className="dock-more-trigger"
+            type="button"
+            title={t("More tab actions")}
+            aria-label={t("More tab actions")}
+          >
             <AnimatedIcon name="more" size={17} />
           </button>
         </DropdownMenu.Trigger>
         <DropdownMenu.Portal>
           <DropdownMenu.Content className="menu-content dock-more-menu" align="end" sideOffset={5}>
-            <DropdownMenu.Item className="menu-item dock-action-item" onSelect={() => {
-              if (active) shell?.split(current, active.id);
-            }}>
-              <AnimatedIcon name="split" size={16} /><span>{t("Split right")}</span>
+            <DropdownMenu.Item
+              className="menu-item dock-action-item"
+              onSelect={() => {
+                if (active) shell?.split(current, active.id);
+              }}
+            >
+              <AnimatedIcon name="split" size={16} />
+              <span>{t("Split right")}</span>
             </DropdownMenu.Item>
             <DropdownMenu.Separator className="dock-add-separator" />
-            <DropdownMenu.Item className="menu-item dock-action-item" onSelect={() => shell?.reset()}>
-              <AnimatedIcon name="reset" size={16} /><span>{t("Reset layout")}</span>
+            <DropdownMenu.Item
+              className="menu-item dock-action-item"
+              onSelect={() => shell?.reset()}
+            >
+              <AnimatedIcon name="reset" size={16} />
+              <span>{t("Reset layout")}</span>
             </DropdownMenu.Item>
           </DropdownMenu.Content>
         </DropdownMenu.Portal>
@@ -140,7 +206,14 @@ type Props = {
 };
 
 export default function DockCanvas({
-  profileId, route, dark, pinned, showSettings, onPin, onNavigate, renderView,
+  profileId,
+  route,
+  dark,
+  pinned,
+  showSettings,
+  onPin,
+  onNavigate,
+  renderView,
 }: Props) {
   const { t } = useTranslation();
   const apiRef = useRef<DockviewApi | null>(null);
@@ -148,18 +221,28 @@ export default function DockCanvas({
   const [empty, setEmpty] = useState(true);
   const latest = useRef({ route, onNavigate });
   latest.current = { route, onNavigate };
-  const save = useCallback((api: DockviewApi) => {
-    try {
-      localStorage.setItem(keyFor(profileId), JSON.stringify({ schema: 2, layout: api.toJSON() }));
-    } catch { /* Storage may be disabled. */ }
-    setEmpty(api.panels.length === 0);
-  }, [profileId]);
+  const save = useCallback(
+    (api: DockviewApi) => {
+      try {
+        localStorage.setItem(
+          keyFor(profileId),
+          JSON.stringify({ schema: 2, layout: api.toJSON() }),
+        );
+      } catch {
+        /* Storage may be disabled. */
+      }
+      setEmpty(api.panels.length === 0);
+    },
+    [profileId],
+  );
   const add = useCallback((view: CanvasView, groupId?: string) => {
     const api = apiRef.current;
     if (!api) return;
     api.addPanel({
       id: `tab:${view}:${++sequence}`,
-      component: "page", tabComponent: "canvas", title: title(view),
+      component: "page",
+      tabComponent: "canvas",
+      title: title(view),
       params: { view },
       ...(groupId ? { position: { referenceGroup: groupId } } : {}),
     });
@@ -167,12 +250,16 @@ export default function DockCanvas({
     notify.info(i18n.t("Tab opened"));
   }, []);
   const split = useCallback((view: CanvasView, panelId: string) => {
-    const api = apiRef.current, panel = api?.getPanel(panelId);
+    const api = apiRef.current,
+      panel = api?.getPanel(panelId);
     if (!api || !panel) return;
     api.addPanel({
       id: `split:${view}:${++sequence}`,
-      component: "page", tabComponent: "canvas", title: title(view),
-      params: { view }, position: { referenceGroup: panel.group.id, direction: "right" },
+      component: "page",
+      tabComponent: "canvas",
+      title: title(view),
+      params: { view },
+      position: { referenceGroup: panel.group.id, direction: "right" },
     });
     latest.current.onNavigate(`/${view}`);
     notify.info(i18n.t("Panel split to the right"));
@@ -185,19 +272,36 @@ export default function DockCanvas({
     latest.current.onNavigate("/");
     notify.success(i18n.t("Layout reset"));
   }, [save]);
-  const shell = useMemo(() => ({
-    render: renderView, navigate: onNavigate, add, split, reset,
-    pin: onPin, pinned, showSettings,
-  }), [renderView, onNavigate, add, split, reset, onPin, pinned, showSettings]);
+  const shell = useMemo(
+    () => ({
+      render: renderView,
+      navigate: onNavigate,
+      add,
+      split,
+      reset,
+      pin: onPin,
+      pinned,
+      showSettings,
+    }),
+    [renderView, onNavigate, add, split, reset, onPin, pinned, showSettings],
+  );
 
   useEffect(() => {
     const api = apiRef.current;
     const view = viewFromRoute(route);
     if (!api || !view) return;
     const existing = api.panels.find((panel) => panel.api.getParameters().view === view);
-    if (existing) { existing.api.setActive(); return; }
-    api.addPanel({ id: `route:${view}:${++sequence}`, component: "page", tabComponent: "canvas",
-      title: title(view), params: { view } });
+    if (existing) {
+      existing.api.setActive();
+      return;
+    }
+    api.addPanel({
+      id: `route:${view}:${++sequence}`,
+      component: "page",
+      tabComponent: "canvas",
+      title: title(view),
+      params: { view },
+    });
   }, [route]);
   useEffect(() => {
     const api = apiRef.current;
@@ -207,16 +311,20 @@ export default function DockCanvas({
       if (typeof view === "string" && isCanvasView(view)) panel.api.setTitle(t(viewLabel(view)));
     }
   }, [t]);
-  useEffect(() => () => {
-    for (const listener of disposables.current) listener.dispose();
-    disposables.current = [];
-    apiRef.current = null;
-  }, []);
+  useEffect(
+    () => () => {
+      for (const listener of disposables.current) listener.dispose();
+      disposables.current = [];
+      apiRef.current = null;
+    },
+    [],
+  );
 
   const onReady = ({ api }: DockviewReadyEvent) => {
     apiRef.current = api;
     try {
-      const raw = localStorage.getItem(keyFor(profileId)) ??
+      const raw =
+        localStorage.getItem(keyFor(profileId)) ??
         (profileId === "global" ? localStorage.getItem("canvas-dockview-layout-v1") : null);
       if (raw) {
         const state: unknown = JSON.parse(raw);
@@ -224,7 +332,11 @@ export default function DockCanvas({
           api.fromJSON(state.layout as Parameters<DockviewApi["fromJSON"]>[0]);
       }
     } catch {
-      try { localStorage.removeItem(keyFor(profileId)); } catch { /* no-op */ }
+      try {
+        localStorage.removeItem(keyFor(profileId));
+      } catch {
+        /* no-op */
+      }
     }
     for (const listener of disposables.current) listener.dispose();
     disposables.current = [
@@ -232,7 +344,11 @@ export default function DockCanvas({
         if (origin !== "user") return;
         if (!panel && api.panels.length === 0) latest.current.onNavigate("/");
         const view: unknown = panel?.api.getParameters().view;
-        if (typeof view === "string" && isCanvasView(view) && viewFromRoute(latest.current.route) !== view)
+        if (
+          typeof view === "string" &&
+          isCanvasView(view) &&
+          viewFromRoute(latest.current.route) !== view
+        )
           latest.current.onNavigate(`/${view}`);
       }),
       api.onDidLayoutChange(() => {
@@ -242,8 +358,13 @@ export default function DockCanvas({
     ];
     const view = viewFromRoute(latest.current.route);
     if (view && !api.panels.some((panel) => panel.api.getParameters().view === view)) {
-      api.addPanel({ id: `route:${view}:${++sequence}`, component: "page",
-        tabComponent: "canvas", title: title(view), params: { view } });
+      api.addPanel({
+        id: `route:${view}:${++sequence}`,
+        component: "page",
+        tabComponent: "canvas",
+        title: title(view),
+        params: { view },
+      });
     }
     save(api);
   };
@@ -251,20 +372,33 @@ export default function DockCanvas({
   return (
     <PaneContext.Provider value={shell}>
       <div className="dock-workspace" data-testid="dockview-workspace">
-        <section className={`dock-grid ${empty ? "dock-grid-empty" : ""}`} aria-label="Dockview panels">
-          <DockviewReact theme={dark ? themeDark : themeLight}
-            components={components} tabComponents={tabComponents}
+        <section
+          className={`dock-grid ${empty ? "dock-grid-empty" : ""}`}
+          aria-label="Dockview panels"
+        >
+          <DockviewReact
+            theme={dark ? themeDark : themeLight}
+            components={components}
+            tabComponents={tabComponents}
             defaultTabComponent={CanvasTab}
-            rightHeaderActionsComponent={HeaderActions} onReady={onReady} />
+            rightHeaderActionsComponent={HeaderActions}
+            onReady={onReady}
+          />
           {empty && (
             <div className="dock-empty-shell" data-testid="empty-workspace">
               <div className="dock-empty-tabbar">
                 <span>{t("No open tabs")}</span>
                 <TabPicker label={t("Add tab")} add={add} />
-                {showSettings && <button type="button" className="dock-add-trigger"
-                  onClick={() => onNavigate("/settings")} aria-label={t("Settings")}>
-                  <AnimatedIcon name="settings" size={16} />
-                </button>}
+                {showSettings && (
+                  <button
+                    type="button"
+                    className="dock-add-trigger"
+                    onClick={() => onNavigate("/settings")}
+                    aria-label={t("Settings")}
+                  >
+                    <AnimatedIcon name="settings" size={16} />
+                  </button>
+                )}
               </div>
               <div className="dock-welcome">
                 <p className="eyebrow">{t("Your workspace")}</p>
