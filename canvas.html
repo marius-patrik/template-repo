@@ -5297,7 +5297,7 @@ if __name__ == &quot;__main__&quot;:
         print(f&quot;error: {error}&quot;, file=sys.stderr)
         sys.exit(1)
 </pre></section>
-<section class="file" id="file-0080"><h3>.github/tests/smoke_canvas.mjs</h3><p class="meta">Git mode 100644 · ae73ab24f64c604df1a0aa899ea699bf187568b4</p><pre>import { createRequire } from &quot;node:module&quot;;
+<section class="file" id="file-0080"><h3>.github/tests/smoke_canvas.mjs</h3><p class="meta">Git mode 100644 · 39b1794987501af55aa90de63cde404295f5ceb2</p><pre>import { createRequire } from &quot;node:module&quot;;
 import { resolve } from &quot;node:path&quot;;
 import { pathToFileURL } from &quot;node:url&quot;;
 
@@ -5314,6 +5314,24 @@ try {
   await page.locator(&quot;#root .app-root&quot;).waitFor({ timeout: 15000 });
   await page.locator(&quot;.window-titlebar&quot;).waitFor();
   await page.locator(&quot;.window-statusbar&quot;).waitFor();
+  await page.locator(&#x27;.dock-grid [data-dock-view=&quot;overview&quot;]&#x27;).waitFor();
+  if ((await page.locator(&quot;.dockview-theme-dark, .dockview-theme-light&quot;).count()) !== 1)
+    throw new Error(&quot;Expected exactly one root Dockview compositor&quot;);
+  await page.getByRole(&quot;button&quot;, { name: &quot;Split active panel right&quot; }).click();
+  await page.waitForFunction(() =&gt; document.querySelectorAll(&quot;.dock-grid .dv-groupview&quot;).length &gt;= 2);
+  if (!(await page.evaluate(() =&gt; !!localStorage.getItem(&quot;canvas-dockview-layout-v1&quot;))))
+    throw new Error(&quot;Dockview layout was not saved&quot;);
+  await page.reload({ waitUntil: &quot;load&quot; });
+  await page.locator(&#x27;.dock-grid [data-dock-view=&quot;overview&quot;]&#x27;).first().waitFor();
+  await page.waitForFunction(() =&gt; document.querySelectorAll(&quot;.dock-grid .dv-groupview&quot;).length &gt;= 2);
+  await page.getByRole(&quot;button&quot;, { name: &quot;Reset panel layout&quot; }).click();
+  await page.waitForFunction(() =&gt; document.querySelectorAll(&quot;.dock-grid .dv-groupview&quot;).length === 1);
+  await page.getByRole(&quot;button&quot;, { name: &quot;Open knowledge graph&quot; }).click();
+  await page.locator(&#x27;.dock-grid [data-dock-view=&quot;graph&quot;]&#x27;).waitFor();
+  await page.waitForFunction(() =&gt; location.hash.includes(&quot;/graph&quot;));
+  await page.locator(&#x27;.sidebar a[href=&quot;/overview&quot;]&#x27;).click();
+  await page.locator(&#x27;.dock-grid [data-dock-view=&quot;overview&quot;]&#x27;).first().waitFor();
+  await page.waitForFunction(() =&gt; location.hash.includes(&quot;/overview&quot;));
   if (await page.locator(&quot;.sidebar-footer&quot;).count()) throw new Error(&quot;Redundant sidebar snapshot footer remains&quot;);
   if (await page.locator(&quot;.sidebar&quot;).getByText(&quot;Repository snapshot&quot;).count()) throw new Error(&quot;Snapshot information duplicated in sidebar&quot;);
   if (await page.locator(&quot;.window-statusbar .snapshot-desktop&quot;).count() !== 1)
@@ -5363,7 +5381,7 @@ try {
   await page.locator(&quot;.sidebar.mobile-open&quot;).waitFor();
 
   if (errors.length) throw new Error(`Browser uncaught errors: ${errors.join(&quot;; &quot;)}`);
-  console.log(&quot;Canvas Chromium smoke passed: mount, chrome, Ctrl+B, settings, accent picker, keybinding recorder and mobile.&quot;);
+  console.log(&quot;Canvas Chromium smoke passed: one Dockview compositor, split/restore/reset, route panels, chrome, shortcuts, settings and mobile.&quot;);
 } finally {
   await browser.close();
 }
