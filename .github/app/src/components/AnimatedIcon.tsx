@@ -20,7 +20,7 @@ import {
   ArrowRightIcon,
 } from "lucide-animated";
 
-const registry: Record<string, ComponentType<any>> = {
+const registry: Record<string, ComponentType<{ size?: number }>> = {
   overview: LayoutGridIcon,
   workspace: BlocksIcon,
   projects: FolderOpenIcon,

@@ -26,8 +26,8 @@ export default function Graph() {
       [".agents/AGENTS.md", ".agents/README.md"],
       ["AGENTS.md", ".agents/GOAL.md"],
     ].filter(([a, b]) => present.includes(a) && present.includes(b));
-    present.forEach((id) => g.setNode(id, { width: 170, height: 58 }));
-    links.forEach(([a, b]) => g.setEdge(a, b));
+    present.forEach((id) => { g.setNode(id, { width: 170, height: 58 }); });
+    links.forEach(([a, b]) => { g.setEdge(a, b); });
     dagre.layout(g);
     const nodes: Node[] = present.map((id) => {
       const pos = g.node(id);
@@ -59,7 +59,7 @@ export default function Graph() {
     return { nodes, edges };
   }, []);
   return (
-    <div className="graph-pane" aria-label="Repository document relationships">
+    <div className="graph-pane" role="region" aria-label="Repository document relationships">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -78,7 +78,7 @@ export default function Graph() {
         <div className="graph-selected">
           <strong>{labels[selected] || selected}</strong>
           <span>{selected}</span>
-          <button aria-label="Close selection" onClick={() => setSelected(null)}>
+          <button type="button" aria-label="Close selection" onClick={() => setSelected(null)}>
             ×
           </button>
         </div>

@@ -68,7 +68,7 @@ function SourceIndex({ onOpen }: { onOpen: (id: string) => void }) {
   return (
     <div className="source-index">
       {context.documents.map((d) => (
-        <button key={d.path} className="doc-row" onClick={() => onOpen(d.path)}>
+        <button type="button" key={d.path} className="doc-row" onClick={() => onOpen(d.path)}>
           <span>
             <AnimatedIcon name="artifacts" />
             {d.path}
@@ -297,7 +297,7 @@ function Settings({ prefs, setPrefs }: { prefs: Preferences; setPrefs: (p: Prefe
       </div>
       <div className="segmented">
         {values.map((v) => (
-          <button
+          <button type="button"
             key={String(v)}
             className={prefs[key] === v ? "selected" : ""}
             onClick={() => setPrefs({ ...prefs, [key]: v })}
@@ -407,7 +407,7 @@ export default function App() {
           <span className="title-product">{context.name}</span>
         </div>
         <div className="omnibar-area">
-          <button
+          <button type="button"
             className="omnibar-trigger"
             aria-label="Open navigation tree"
             onClick={() => setPaletteOpen(true)}
@@ -434,7 +434,7 @@ export default function App() {
 
       <div className="window-main">
         {mobileOpen && (
-          <button
+          <button type="button"
             aria-label="Close navigation"
             className="sidebar-scrim"
             onClick={() => setMobileOpen(false)}
@@ -489,7 +489,7 @@ export default function App() {
             <div className="selector-group">
               <DropdownMenu.Root>
                 <DropdownMenu.Trigger asChild>
-                  <button className="context-selector">
+                  <button type="button" className="context-selector">
                     <span className="eyebrow">Workspace</span>
                     <strong>Personal workspace</strong>
                     {icon("down", 13)}
@@ -504,7 +504,7 @@ export default function App() {
               {icon("right", 13)}
               <DropdownMenu.Root>
                 <DropdownMenu.Trigger asChild>
-                  <button className="context-selector">
+                  <button type="button" className="context-selector">
                     <span className="eyebrow">Project</span>
                     <strong>{context.name}</strong>
                     {icon("down", 13)}
@@ -597,7 +597,7 @@ export default function App() {
                   Personal workspace {icon("right", 13)} {context.name}
                 </div>
                 {filtered.map((n, i) => (
-                  <button
+                  <button type="button"
                     key={n.id}
                     className={"palette-result " + (i === selection ? "focused" : "")}
                     onMouseEnter={() => setSelection(i)}
