@@ -97,7 +97,7 @@ function Overview({ to }: { to: (p: string) => void }) {
             {t("{{documents}} source documents · {{records}} documented records", {
               documents: context.documents.length,
               records: context.paths.length,
-            })
+            })}
           </div>
         </section>
         <div className="stack">
