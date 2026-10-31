@@ -69,7 +69,7 @@ function Choice({
 }) {
   const { t } = useTranslation();
   return (
-    <label className="setting-row settings-choice">
+    <div className="setting-row settings-choice">
       <span>{t(label)}</span>
       <CanvasSelect
         label={t(label)}
@@ -78,7 +78,7 @@ function Choice({
         onValueChange={onChange}
         className="settings-choice-select"
       />
-    </label>
+    </div>
   );
 }
 function NumberPreference({

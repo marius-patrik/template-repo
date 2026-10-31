@@ -284,6 +284,7 @@ export function ActivityBar({
   return (
     <div
       className={`activity-bar activity-${prefs.activityBarDensity}`}
+      role="toolbar"
       aria-label={t("Activity bar")}
       data-testid="activity-bar"
     >
