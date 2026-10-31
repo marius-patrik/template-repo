@@ -98,10 +98,13 @@ try {
   await page.waitForFunction(
     () => Number(document.querySelector(".sidebar-resizer")?.getAttribute("aria-valuenow")) >= 250,
   );
+  const resizedWidth = Number(await resize.getAttribute("aria-valuenow"));
   await page.waitForFunction(
-    () => (document.querySelector(".sidebar")?.getBoundingClientRect().width ?? 0) >= 245,
+    (expected) => Math.abs(
+      (document.querySelector(".sidebar")?.getBoundingClientRect().width ?? 0) - expected,
+    ) <= 2,
+    resizedWidth,
   );
-  const resizedWidth = await page.locator(".sidebar").evaluate((el) => el.getBoundingClientRect().width);
   await page.keyboard.press("Control+b");
   await page.locator(".sidebar.collapsed").waitFor();
   await page.keyboard.press("Control+b");
