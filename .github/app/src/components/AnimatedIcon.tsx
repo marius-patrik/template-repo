@@ -46,7 +46,11 @@ const BookshelfIcon = forwardRef<IconHandle, { size?: number }>(function Bookshe
         { duration: 240, easing: "ease-out" },
       );
     },
-    stopAnimation: () => node.current?.getAnimations().forEach((animation) => animation.cancel()),
+    stopAnimation: () => {
+      node.current?.getAnimations().forEach((animation) => {
+        animation.cancel();
+      });
+    },
   }));
   return (
     <svg ref={node} width={size} height={size} viewBox="0 0 24 24" fill="none"
