@@ -74,7 +74,7 @@ try {
   await page.locator(".sidebar:not(.collapsed)").waitFor();
 
   await page.getByRole("button", { name: "Open navigation tree" }).click();
-  await page.getByRole("dialog", { name: "Omnibar navigation tree" }).waitFor();
+  await page.getByRole("dialog", { name: "Open navigation tree" }).waitFor();
   await page.keyboard.press("Escape");
   await page.locator(".palette-cover").waitFor({ state: "hidden" });
 
