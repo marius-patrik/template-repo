@@ -251,7 +251,10 @@ export default function Canvas() {
     const seedSet = new Set(seeds);
     const nearby = edgesOfDocuments
       .filter(([from, to]) => seedSet.has(from) || seedSet.has(to))
-      .flatMap(([from, to]) => [from, to])
+      .reduce<string[]>((acc, [from, to]) => {
+        acc.push(from, to);
+        return acc;
+      }, [])
       .filter((path) => !seedSet.has(path));
     const members = [...seeds, ...new Set(nearby)].slice(0, 9);
     const included = new Set(members);
