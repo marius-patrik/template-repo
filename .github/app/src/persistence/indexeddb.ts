@@ -54,6 +54,15 @@ type InitOptions = {
 function errorResult<T>(cause: unknown, fallback: StorageError["code"] = "INTERNAL"): Result<T> {
   return { ok: false, error: fromException(cause, fallback) };
 }
+/** Abort any already queued requests before reporting a synchronous IndexedDB failure. */
+function requestFailure<T>(tx: IDBTransaction, cause: unknown): Result<T> {
+  try {
+    tx.abort();
+  } catch {
+    // The transaction may already have aborted or completed.
+  }
+  return errorResult(cause, "STORAGE_UNAVAILABLE");
+}
 function validateMutation(m: Mutation): Result<RecordRef> {
   if (!m || typeof m !== "object" || typeof m.kind !== "string")
     return fail("INVALID_INPUT", "Mutation is not an object");
@@ -191,7 +200,8 @@ export class CanvasPersistence {
           db.close();
           return;
         }
-        if (
+        try {
+          if (
           db.version !== INDEXED_DB_VERSION ||
           STORES.some((s) => !db.objectStoreNames.contains(s)) ||
           !db
@@ -212,6 +222,11 @@ export class CanvasPersistence {
         ) {
           db.close();
           finish(fail("UNSUPPORTED_SCHEMA", "Missing required IndexedDB stores or indexes"));
+          return;
+          }
+        } catch (cause) {
+          db.close();
+          finish(errorResult(cause, "STORAGE_UNAVAILABLE"));
           return;
         }
         this.db = db;
@@ -376,7 +391,15 @@ export class CanvasPersistence {
       let failure: StorageError | null = null;
       let workspace: WorkspaceRecord | null = null;
       const docs: EditableDocument[] = [];
-      const p = tx.objectStore("workspaces").get(workspaceId);
+      let p: IDBRequest;
+      let r: IDBRequest;
+      try {
+        p = tx.objectStore("workspaces").get(workspaceId);
+        r = tx.objectStore("documents").index("byWorkspace").getAll(workspaceId);
+      } catch (cause) {
+        resolve(requestFailure(tx, cause));
+        return;
+      }
       p.onsuccess = () => {
         if (p.result !== undefined) {
           const parsed = validateWorkspace(p.result);
@@ -386,7 +409,6 @@ export class CanvasPersistence {
           } else workspace = parsed.value;
         }
       };
-      const r = tx.objectStore("documents").index("byWorkspace").getAll(workspaceId);
       r.onsuccess = () => {
         for (const raw of r.result) {
           const parsed = validateDocument(raw);
@@ -863,8 +885,14 @@ export class CanvasPersistence {
       }
       let failure: StorageError | null = null;
       const records: MigrationRecord[] = [];
-      const store = tx.objectStore("migration");
-      const req = status ? store.index("byStatus").getAll(status) : store.getAll();
+      let req: IDBRequest;
+      try {
+        const store = tx.objectStore("migration");
+        req = status ? store.index("byStatus").getAll(status) : store.getAll();
+      } catch (cause) {
+        resolve(requestFailure(tx, cause));
+        return;
+      }
       req.onsuccess = () => {
         for (const raw of req.result) {
           const parsed = validateMigration(raw);
@@ -904,7 +932,13 @@ export class CanvasPersistence {
       let failure: StorageError | null = null;
       let written: MigrationRecord | null = null;
       const id = migrationId(key);
-      const r = tx.objectStore("migration").get(id);
+      let r: IDBRequest;
+      try {
+        r = tx.objectStore("migration").get(id);
+      } catch (cause) {
+        resolve(requestFailure(tx, cause));
+        return;
+      }
       r.onsuccess = () => {
         if (r.result === undefined) {
           failure = { code: "NOT_FOUND", message: "Migration attempt is absent" };
@@ -937,7 +971,12 @@ export class CanvasPersistence {
           return;
         }
         written = { ...parsed.value, status: "failed", revision: next.value, updatedAt: now() };
-        tx.objectStore("migration").put(written);
+        try {
+          tx.objectStore("migration").put(written);
+        } catch (cause) {
+          failure = fromException(cause);
+          tx.abort();
+        }
       };
       tx.oncomplete = () => {
         if (!written) {
@@ -1030,16 +1069,28 @@ export class CanvasPersistence {
           revision: 0 as Revision,
           schemaVersion: APPLICATION_SCHEMA_VERSION,
         };
-        if (backupRaw === undefined) tx.objectStore("backups").put(backup);
-        tx.objectStore("migration").put(migration);
-        lease = { key, revision: migration.revision, backupId: id };
+        try {
+          if (backupRaw === undefined) tx.objectStore("backups").put(backup);
+          tx.objectStore("migration").put(migration);
+          lease = { key, revision: migration.revision, backupId: id };
+        } catch (cause) {
+          failure = fromException(cause);
+          tx.abort();
+        }
       };
-      const a = tx.objectStore("backups").get(id);
+      let a: IDBRequest;
+      let b: IDBRequest;
+      try {
+        a = tx.objectStore("backups").get(id);
+        b = tx.objectStore("migration").get(id);
+      } catch (cause) {
+        resolve(requestFailure(tx, cause));
+        return;
+      }
       a.onsuccess = () => {
         backupRaw = a.result;
         finishReads();
       };
-      const b = tx.objectStore("migration").get(id);
       b.onsuccess = () => {
         migrationRaw = b.result;
         finishReads();
@@ -1116,10 +1167,23 @@ export class CanvasPersistence {
           status: "started",
           updatedAt: now(),
         };
-        tx.objectStore("migration").put(updated);
-        lease = { key, backupId: id, revision: next.value };
+        try {
+          tx.objectStore("migration").put(updated);
+          lease = { key, backupId: id, revision: next.value };
+        } catch (cause) {
+          failure = fromException(cause);
+          tx.abort();
+        }
       };
-      const a = tx.objectStore("migration").get(id);
+      let a: IDBRequest;
+      let b: IDBRequest;
+      try {
+        a = tx.objectStore("migration").get(id);
+        b = tx.objectStore("backups").get(id);
+      } catch (cause) {
+        resolve(requestFailure(tx, cause));
+        return;
+      }
       a.onsuccess = () => {
         if (a.result !== undefined) {
           const v = validateMigration(a.result);
@@ -1131,7 +1195,6 @@ export class CanvasPersistence {
         }
         act();
       };
-      const b = tx.objectStore("backups").get(id);
       b.onsuccess = () => {
         if (b.result !== undefined) {
           const v = validateBackup(b.result);
