@@ -33,9 +33,33 @@ jobs:
         working-directory: .github/app
         run: bunx playwright install --with-deps chromium
       - name: Verify real IndexedDB transactions in Chromium
+        timeout-minutes: 3
         run: node .github/tests/persistence/canvas-persistence.mjs
       - name: D01 temporary Biome output proof (branch-scoped)
         if: ${{ always() && github.head_ref == 'agent/canvas-c01-idb-foundation' }}
+        working-directory: .github/app
+        run: |
+          bunx biome format --write src/domain src/persistence
+          for path in src/domain/errors.ts src/domain/types.ts src/persistence/README.md src/persistence/index.ts src/persistence/indexeddb.ts src/persistence/validation.ts; do
+            printf 'D01_BLOB %s ' "$path"
+            base64 -w0 "$path"
+            printf '\n'
+          done
+
+  d01-format-proof:
+    if: ${{ github.event_name == 'pull_request' && github.head_ref == 'agent/canvas-c01-idb-foundation' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.3.11'
+      - name: Install pinned Biome
+        working-directory: .github/app
+        run: bun install --frozen-lockfile
+      - name: Run actual Biome and emit strictly-scoped formatted sources
         working-directory: .github/app
         run: |
           bunx biome format --write src/domain src/persistence
