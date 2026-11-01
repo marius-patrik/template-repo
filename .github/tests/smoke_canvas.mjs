@@ -136,6 +136,13 @@ try {
   const sourceGraphEdges = await page.locator(".cx-graph-canvas .react-flow__edge").count();
   if (sourceGraphNodes < 3 || sourceGraphNodes > 9 || sourceGraphEdges === 0)
     throw new Error("Graph must show a bounded readable neighborhood with real document links");
+  const graphFile = page.locator(".cx-graph-canvas .react-flow__node").filter({ hasText: "GOAL" }).first();
+  await graphFile.click();
+  await page.locator(".cx-graph-detail").getByText("GOAL", { exact: true }).waitFor();
+  if (await page.locator(".cx-graph-canvas").count() !== 1)
+    throw new Error("Selecting a graph node must preserve spatial context");
+  await page.locator(".cx-inspector-open").click();
+  await page.locator(".cx-document-reader").waitFor();
   await page.locator(".canvas-perspectives").getByRole("button", { name: "Overview" }).click();
   await page.locator(".canvas-perspectives").getByRole("button", { name: "Agents" }).click();
   await page.locator(".canvas-inspector").getByText("AGENTS.md").first().waitFor();

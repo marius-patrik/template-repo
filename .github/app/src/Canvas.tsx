@@ -235,6 +235,15 @@ export default function Canvas() {
       basename(doc.path).toLowerCase().includes(filter.trim().toLowerCase()),
   );
   const focus = byPath.get(selected ?? "") ?? available[0] ?? documents[0];
+  const inspectedPath = mode === "graph" ? selected : focus?.path;
+  const inspectedDocument = inspectedPath ? byPath.get(inspectedPath) : undefined;
+  const inbound = inspectedPath
+    ? edgesOfDocuments.filter(([, target]) => target === inspectedPath).map(([source]) => source)
+    : [];
+  const outbound = inspectedPath
+    ? edgesOfDocuments.filter(([source]) => source === inspectedPath).map(([, target]) => target)
+    : [];
+  const related = [...new Set([...outbound, ...inbound])];
   const graph = useMemo(() => {
     // Keep graph legible: show a focused, source-backed subgraph rather than
     // shrinking the entire repository into an unreadable vertical hairline.
@@ -285,6 +294,11 @@ export default function Canvas() {
     return { nodes, edges, members };
   }, [graphGroup, selected]);
   const choose = (path: string) => {
+    if (!byPath.has(path)) {
+      setSelected(path);
+      setMode("graph");
+      return;
+    }
     setSelected(path);
     setPerspective("artifacts");
     setMode("documents");
@@ -547,7 +561,7 @@ export default function Canvas() {
                       type="button"
                       key={entry.name}
                       className={entry.name === graphGroup ? "active" : ""}
-                      onClick={() => setGraphGroup(entry.name)}
+                      onClick={() => { setGraphGroup(entry.name); setSelected(null); }}
                     >
                       {entry.name} <small>{entry.count}</small>
                     </button>
@@ -563,7 +577,8 @@ export default function Canvas() {
                     fitViewOptions={{ padding: 0.23, maxZoom: 1.15 }}
                     minZoom={0.22}
                     maxZoom={1.8}
-                    onNodeClick={(_, node) => choose(node.id)}
+                    onNodeClick={(_, node) => setSelected(node.id)}
+                    onNodeDoubleClick={(_, node) => choose(node.id)}
                     nodesConnectable={false}
                     nodesDraggable={false}
                     colorMode={theme === "system" ? (systemDark ? "dark" : "light") : theme}
@@ -588,48 +603,101 @@ export default function Canvas() {
         </section>
         <aside className="canvas-inspector cx-repo-aside" aria-label={t("Repository context")}>
           <header className="canvas-inspector-heading cx-inspector-head">
-            <span className="cx-overline">CONTEXT PANEL</span>
-            <strong>
-              {perspective === "overview"
-                ? t("Overview")
-                : t(panes.find((p) => p.id === perspective)?.label ?? "Overview")}
-            </strong>
+            <span className="cx-overline">{mode === "graph" ? "GRAPH INSPECTOR" : "SOURCE CONTEXT"}</span>
+            <strong>{mode === "graph"
+              ? inspectedPath ? basename(inspectedPath) : t("Select a node")
+              : perspective === "overview" ? t("Overview")
+              : t(panes.find((p) => p.id === perspective)?.label ?? "Overview")}</strong>
           </header>
           <div className="canvas-inspector-body cx-inspector-body">
-            <div className="cx-fact">
-              <span className="cx-fact-label">{t("Project identity")}</span>
-              <strong>{context.name}</strong>
-              <span>{context.repository}</span>
-            </div>
-            <div className="cx-fact">
-              <span className="cx-fact-label">{t("Source revision")}</span>
-              <div className="cx-mono">{context.revision}</div>
-              <span>{context.branch}</span>
-            </div>
-            {focus && perspective !== "overview" && (
-              <div className="cx-fact">
-                <span className="cx-fact-label">{t("Current source")}</span>
-                <strong>{basename(focus.path)}</strong>
-                <span>{focus.path}</span>
-                <p>{extractSummary(focus.content, 190) || t("No source documents available.")}</p>
-                <button type="button" className="cx-text-action" onClick={() => choose(focus.path)}>
-                  {t("Open source")} <AnimatedIcon name="right" size={14} />
-                </button>
-              </div>
-            )}
-            <div className="cx-fact">
-              <span className="cx-fact-label">{t("Publication")}</span>
-              <div className="cx-readonly">
-                <span className="cx-live-dot" /> {t("Static · read-only")}
-              </div>
-              <p>
-                {t(
-                  "Built from allowlisted Git-tracked documents. Local changes do not modify the repository.",
+            {mode === "graph" ? (
+              inspectedPath ? (
+                <>
+                  <div className="cx-fact cx-graph-detail">
+                    <span className="cx-fact-label">{t("Selected source")}</span>
+                    <strong>{basename(inspectedPath)}</strong>
+                    <div className="cx-mono">{inspectedPath}</div>
+                    <div className="cx-inspector-tags">
+                      <span>{categoryOf(inspectedPath)}</span>
+                      <span>{inspectedDocument ? t("Source document") : t("Indexed path")}</span>
+                    </div>
+                    <p>{inspectedDocument
+                      ? extractSummary(inspectedDocument.content, 225)
+                      : t("This path is indexed in the repository snapshot, but its content is not part of the published allowlist.")}</p>
+                    {inspectedDocument && (
+                      <button type="button" className="cx-inspector-open" onClick={() => choose(inspectedPath)}>
+                        <AnimatedIcon name="artifacts" size={15} /> {t("Open document")} <AnimatedIcon name="right" size={15} />
+                      </button>
+                    )}
+                  </div>
+                  <div className="cx-fact">
+                    <span className="cx-fact-label">{t("Relationships")}</span>
+                    <div className="cx-connection-counts">
+                      <div><strong>{inbound.length}</strong><span>{t("Incoming")}</span></div>
+                      <div><strong>{outbound.length}</strong><span>{t("Outgoing")}</span></div>
+                    </div>
+                    {related.length > 0 ? (
+                      <div className="cx-related-sources">
+                        {related.slice(0, 8).map((path) => (
+                          <button type="button" key={path} onClick={() => setSelected(path)}>
+                            <AnimatedIcon name="artifacts" size={14} />
+                            <span>{basename(path)}<small>{outbound.includes(path) ? t("Referenced by this source") : t("References this source")}</small></span>
+                            <AnimatedIcon name="right" size={13} />
+                          </button>
+                        ))}
+                      </div>
+                    ) : <p>{t("No resolved source links for this path in the current snapshot.")}</p>}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="cx-inspector-empty">
+                    <div className="cx-inspector-empty-icon"><AnimatedIcon name="canvas" size={24} /></div>
+                    <strong>{t("Explore relationships")}</strong>
+                    <p>{t("Select any node to inspect its source, incoming references and outgoing links. Double-click a published document to open it.")}</p>
+                  </div>
+                  <div className="cx-fact">
+                    <span className="cx-fact-label">{t("Visible graph")}</span>
+                    <div className="cx-connection-counts">
+                      <div><strong>{graph.members.length}</strong><span>{t("Indexed paths")}</span></div>
+                      <div><strong>{graph.edges.length}</strong><span>{t("Document links")}</span></div>
+                    </div>
+                  </div>
+                </>
+              )
+            ) : (
+              <>
+                {focus && mode === "documents" && (
+                  <div className="cx-fact">
+                    <span className="cx-fact-label">{t("Current source")}</span>
+                    <strong>{basename(focus.path)}</strong>
+                    <div className="cx-mono">{focus.path}</div>
+                    <div className="cx-inspector-tags"><span>{categoryOf(focus.path)}</span><span>Markdown</span></div>
+                    <p>{extractSummary(focus.content, 155)}</p>
+                    <button type="button" className="cx-text-action" onClick={() => void copy(focus.path)}>
+                      <AnimatedIcon name="copy" size={14} /> {t("Copy source path")}
+                    </button>
+                  </div>
                 )}
-              </p>
-            </div>
+                <div className="cx-fact">
+                  <span className="cx-fact-label">{t("Project identity")}</span>
+                  <strong>{context.name}</strong>
+                  <span>{context.repository}</span>
+                </div>
+                <div className="cx-fact">
+                  <span className="cx-fact-label">{t("Publication")}</span>
+                  <div className="cx-readonly"><span className="cx-live-dot" /> {t("Static · read-only")}</div>
+                  <p>{t("Built from allowlisted Git-tracked documents. Local changes do not modify the repository.")}</p>
+                </div>
+                <div className="cx-fact">
+                  <span className="cx-fact-label">{t("Source revision")}</span>
+                  <div className="cx-mono">{context.revision}</div>
+                  <span>{context.branch}</span>
+                </div>
+              </>
+            )}
             <div className="cx-inspector-footer">
-              {documents.length} {t("Source documents").toLowerCase()} <span>·</span>{" "}
+              {documents.length} {t("Source documents").toLowerCase()} <span>·</span>
               {context.paths.length} {t("Indexed paths").toLowerCase()}
             </div>
           </div>
