@@ -59,7 +59,7 @@ def content_for(directory: str, required_status: str, heading: str) -> str:
 
 
 def validate_layout() -> list[str]:
-    """Validate real root directories, symlinks, submodule and sole test location."""
+    """Validate root directories, single Canvas implementation and test ownership."""
     errors: list[str] = []
     for directory in (".agents", ".github"):
         root_directory = ROOT / directory
@@ -121,20 +121,17 @@ def validate_layout() -> list[str]:
             if is_test_directory or is_test_filename:
                 errors.append(f"Repository tests must live in .github/tests/: {path}")
 
-    submodule = subprocess.run(
-        ["git", "ls-files", "--stage", "--", ".darkfactory"],
-        cwd=ROOT, capture_output=True, text=True, check=False,
-    )
-    if submodule.returncode != 0 or not re.fullmatch(
-        r"160000 [0-9a-f]{40} 0\t\.darkfactory\n", submodule.stdout
-    ):
-        errors.append(".darkfactory must be a pinned root Git submodule (mode 160000)")
-    if not (ROOT / ".gitmodules").is_file():
-        errors.append("Missing .gitmodules entry for .darkfactory")
-    else:
-        submodules_text = (ROOT / ".gitmodules").read_text(encoding="utf-8")
-        if "path = .darkfactory" not in submodules_text or "https://github.com/marius-patrik/DarkFactory.git" not in submodules_text:
-            errors.append(".gitmodules must declare the DarkFactory root submodule")
+    # Validate the Git index, not the worktree: old checkout directories
+    # may remain locally after a submodule gitlink is removed.
+    if tracked.returncode == 0:
+        retired = {
+            ".darkfactory", ".gitmodules", "canvas.html",
+            ".agents/canvas-template.html", ".agents/tools/canvas.py",
+            ".github/workflows/canvas-sync.yml",
+        }
+        tracked_paths = set(filter(None, tracked.stdout.split("\0")))
+        for path in sorted(retired & tracked_paths):
+            errors.append(f"Retired Canvas/submodule path is still tracked: {path}")
 
     version = ROOT / "VERSION"
     try:
@@ -176,7 +173,7 @@ def main() -> int:
     for error in errors:
         print(f"error: {error}", file=sys.stderr)
     if args.check and not errors:
-        print("Generated documents, native directories, submodule, tests and versioning are consistent.")
+        print("Generated documents, native directories, single Canvas, tests and versioning are consistent.")
     return int(bool(errors))
 
 

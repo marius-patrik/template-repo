@@ -1,0 +1,311 @@
+/* Preferences content design: one scannable navigation rail and a controlled editor column. */
+.cx-shell .cx-preferences.settings-page {
+  max-width: none;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: block;
+  overflow: auto;
+  padding: 0;
+  background: var(--bg);
+}
+.cx-preferences-layout {
+  display: grid;
+  grid-template-columns: clamp(190px, 19vw, 240px) minmax(0, 1fr);
+  width: 100%;
+  max-width: 1450px;
+  min-height: 100%;
+  margin-inline: auto;
+}
+.cx-preferences-nav {
+  position: sticky;
+  top: 0;
+  height: 100%;
+  max-height: 100dvh;
+  min-width: 0;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 29px 12px 16px;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+}
+.cx-preferences-nav-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 0 calc(var(--ui-spacing) * 2.4);
+  padding: 0 calc(var(--ui-spacing) * 1.2);
+}
+.cx-preferences-nav-head strong {
+  font-size: calc(var(--app-font-size) * 1.12);
+  font-weight: 620;
+  letter-spacing: -0.03em;
+}
+.cx-preferences-nav button {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--ui-spacing) * 1.2);
+  text-align: left;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  border-radius: calc(var(--ui-radius) * 0.7);
+  padding: 0 calc(var(--ui-spacing) * 1.2);
+  min-height: 36px;
+  width: 100%;
+  font-size: calc(var(--app-font-size) * 0.81);
+}
+.cx-preferences-nav button:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+.cx-preferences-nav button > span:nth-child(2) {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.cx-preferences-nav button > .app-icon:last-child {
+  color: var(--subtle);
+}
+.cx-preferences-nav p {
+  margin: auto 9px 0;
+  padding-top: 24px;
+  font-size: calc(var(--app-font-size) * 0.72);
+  color: var(--subtle);
+  line-height: 1.6;
+}
+.cx-preferences-content {
+  min-width: 0;
+  width: 100%;
+  max-width: 960px;
+  padding: clamp(26px, 3.4vw, 56px) clamp(24px, 3.7vw, 58px) 100px;
+}
+.cx-shell .cx-preferences .page-intro {
+  display: block;
+  padding-bottom: calc(var(--ui-spacing) * 2.7);
+  margin: 0 0 calc(var(--ui-spacing) * 2.6);
+  border-bottom: 1px solid var(--border);
+}
+.cx-shell .cx-preferences .page-intro h1 {
+  font-size: clamp(24px, 2.2vw, 33px);
+  font-weight: 585;
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+  margin: 8px 0;
+}
+.cx-shell .cx-preferences .page-intro .eyebrow {
+  color: var(--subtle);
+}
+.cx-shell .cx-preferences .page-intro .muted {
+  font-size: calc(var(--app-font-size) * 0.85);
+  color: var(--muted);
+}
+.cx-shell .cx-preferences .settings-group {
+  padding: 10px 0 32px;
+  margin: 0 0 30px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  scroll-margin-top: 22px;
+  background: transparent;
+}
+.cx-shell .cx-preferences .settings-group h2 {
+  margin: 0 0 calc(var(--ui-spacing) * 1.6);
+  font-size: calc(var(--app-font-size) * 1.08);
+  font-weight: 615;
+  letter-spacing: -0.025em;
+}
+.cx-shell .cx-preferences .settings-group h3 {
+  font-size: calc(var(--app-font-size) * 0.91);
+  font-weight: 595;
+  margin: 22px 0 8px;
+}
+.cx-shell .cx-preferences .settings-group > .muted {
+  font-size: calc(var(--app-font-size) * 0.81);
+  line-height: 1.6;
+  margin: 0 0 17px;
+}
+.cx-shell .cx-preferences .setting-row {
+  min-height: 46px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: calc(var(--ui-spacing) * 1.8);
+  padding: calc(var(--ui-spacing) * 0.75) 0;
+  border: 0;
+  margin: 0;
+  background: transparent;
+}
+.cx-shell .cx-preferences .setting-row > span:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 320px;
+  color: var(--muted);
+  font-weight: 490;
+  font-size: calc(var(--app-font-size) * 0.86);
+}
+.cx-shell .cx-preferences .settings-choice-select {
+  flex: 0 1 240px;
+  min-width: 160px;
+  width: min(240px, 36vw);
+  height: 32px;
+  background: var(--surface);
+}
+.cx-shell .cx-preferences .settings-number {
+  width: 110px;
+  height: 32px;
+  min-height: 32px;
+  border-radius: calc(var(--ui-radius) * 0.7);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.cx-shell .cx-preferences .settings-subgrid {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 clamp(18px, 2vw, 28px);
+}
+.cx-shell .cx-preferences .settings-subgrid .setting-row {
+  min-width: 0;
+}
+.cx-shell .cx-preferences .settings-subgrid .setting-row > span:first-child {
+  max-width: 120px;
+}
+.cx-shell .cx-preferences .settings-subgrid .settings-choice-select {
+  width: min(150px, 100%);
+  min-width: 108px;
+}
+.cx-shell .cx-preferences .token-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: calc(var(--ui-spacing) * 1.15);
+  margin-top: 14px;
+}
+.cx-shell .cx-preferences .token-color-trigger {
+  display: flex;
+  min-width: 0;
+  min-height: 51px;
+  height: auto;
+  gap: calc(var(--ui-spacing) * 0.9);
+  justify-content: space-between;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--ui-radius) * 0.8);
+  padding: calc(var(--ui-spacing) * 1.05);
+  font-size: calc(var(--app-font-size) * 0.78);
+}
+.cx-shell .cx-preferences .token-color-trigger:hover {
+  border-color: var(--muted);
+  background: var(--raised);
+}
+.cx-shell .cx-preferences .token-color-trigger code {
+  font-size: calc(var(--app-font-size) * 0.66);
+  color: var(--subtle);
+}
+.cx-shell .cx-preferences .component-token-table {
+  width: 100%;
+  overflow-x: auto;
+  border-top: 1px solid var(--border);
+}
+.cx-shell .cx-preferences .component-token-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: calc(var(--ui-spacing) * 1.1);
+  border-bottom: 1px solid var(--border);
+  padding: calc(var(--ui-spacing) * 1.65) 0;
+}
+.cx-shell .cx-preferences .component-token-row > strong {
+  grid-column: 1 / -1;
+  font-size: calc(var(--app-font-size) * 0.84);
+  font-weight: 610;
+  color: var(--text);
+  padding-bottom: 3px;
+}
+.cx-shell .cx-preferences .component-token-cell {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 6px;
+}
+.cx-shell .cx-preferences .component-token-cell > span {
+  color: var(--subtle);
+  font-size: calc(var(--app-font-size) * 0.71);
+}
+.cx-shell .cx-preferences .component-token-cell .canvas-select-trigger {
+  width: 100%;
+  min-width: 0;
+  height: 30px;
+  background: var(--surface);
+}
+.cx-preferences #cx-preference-controls {
+  scroll-margin-top: 25px;
+}
+.cx-shell .cx-preferences #cx-preference-controls .settings-group {
+  border-bottom: 1px solid var(--border);
+}
+/* The active token palette must remain useful on laptop and mobile widths. */
+@media (max-width: 1150px) {
+  .cx-preferences-layout {
+    grid-template-columns: 184px minmax(0, 1fr);
+  }
+  .cx-preferences-content {
+    padding: 30px 28px 90px;
+  }
+  .cx-shell .cx-preferences .token-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .cx-shell .cx-preferences .settings-subgrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 700px) {
+  .cx-preferences-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cx-preferences-nav {
+    position: relative;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    max-height: none;
+    height: auto;
+    padding: 8px;
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .cx-preferences-nav-head,
+  .cx-preferences-nav p {
+    display: none;
+  }
+  .cx-preferences-nav button {
+    width: auto;
+    flex: 0 0 auto;
+    min-height: 32px;
+    padding: 0 10px;
+  }
+  .cx-preferences-nav button > .app-icon:last-child {
+    display: none;
+  }
+  .cx-preferences-content {
+    padding: 24px 17px 70px;
+  }
+  .cx-shell .cx-preferences .settings-subgrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cx-shell .cx-preferences .token-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .cx-shell .cx-preferences .component-token-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .cx-shell .cx-preferences .settings-choice-select {
+    min-width: 120px;
+    width: min(175px, 42vw);
+  }
+}

@@ -1,4 +1,4 @@
-"""Behavior tests for native GitHub layout, independent docs, submodule, tests."""
+"""Behavior tests for native GitHub layout, one Canvas application and test ownership."""
 
 from __future__ import annotations
 
@@ -28,13 +28,20 @@ class WorkspaceLayoutTests(unittest.TestCase):
             self.assertTrue(link.is_symlink(), alias)
             self.assertEqual(link.readlink().as_posix(), target)
 
-    def test_darkfactory_is_git_submodule(self) -> None:
+    def test_legacy_canvas_and_submodule_are_absent(self) -> None:
         result = subprocess.run(
-            ["git", "ls-files", "--stage", "--", ".darkfactory"],
+            ["git", "ls-files", "-z"],
             cwd=ROOT, capture_output=True, text=True, check=True,
         )
-        self.assertRegex(result.stdout, r"^160000 [0-9a-f]{40} 0\t\.darkfactory\n$")
-        self.assertIn("path = .darkfactory", (ROOT / ".gitmodules").read_text(encoding="utf-8"))
+        tracked = set(filter(None, result.stdout.split("\0")))
+        retired = {
+            ".darkfactory", ".gitmodules", "canvas.html",
+            ".agents/canvas-template.html", ".agents/tools/canvas.py",
+            ".github/workflows/canvas-sync.yml",
+        }
+        self.assertFalse(tracked & retired, sorted(tracked & retired))
+        self.assertTrue((ROOT / ".github/app/src/main.tsx").is_file())
+        self.assertTrue((ROOT / ".github/workflows/canvas-pages.yml").is_file())
 
     def test_generated_documents_are_identical_to_approved_records(self) -> None:
         for directory, status, output, title in generator.PROJECTIONS:
@@ -67,8 +74,7 @@ class WorkspaceLayoutTests(unittest.TestCase):
             args=["git", "ls-files", "-z"], returncode=0,
             stdout="package/tests/test_bad.py\0other/fixtures/data.json\0", stderr="",
         )
-        with patch.object(generator.subprocess, "run", side_effect=lambda command, **kwargs:
-                          fake if "-z" in command else subprocess.CompletedProcess(command, 0, stdout="160000 " + "a"*40 + " 0\t.darkfactory\n", stderr="")):
+        with patch.object(generator.subprocess, "run", return_value=fake):
             errors = generator.validate_layout()
         self.assertTrue(any("package/tests/test_bad.py" in e for e in errors), errors)
         self.assertTrue(any("other/fixtures/data.json" in e for e in errors), errors)

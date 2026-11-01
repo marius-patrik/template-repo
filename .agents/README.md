@@ -5,17 +5,19 @@
 
 ## Overview
 
-This repository is a technology-neutral starting point for projects coordinated by human contributors and AI coding agents. It supplies source-controlled product intent, architectural decisions, agent operating rules, reusable roles and procedures, and a minimal GitHub delivery pipeline. **It is a template, not an implemented application.**
+This repository is a reusable starting point for projects coordinated by human contributors and AI coding agents. It supplies source-controlled requirements, architecture decisions, operating rules, portable agent roles and skills, and a native GitHub delivery pipeline.
 
-The public README is an overview of the repository and onboarding process, **not** the product requirements document. Requirements are authored in `.agents/requests/` and compiled into `.agents/PRD.md`; architecture is authored in `.agents/decisions/` and compiled into `.agents/ARCHITECTURE.md`.
+Its **only Canvas application** is the React workspace in `.github/app/`, currently in an **open prototyping phase**. GitHub Pages publishes the compiled application; its screens are a source-backed design prototype, not evidence of live autonomous agents or execution telemetry.
+
+The public README introduces the repository; it is not a competing requirements document. Approved requests generate `.agents/PRD.md`, accepted decisions generate `.agents/ARCHITECTURE.md`, active rules generate `.agents/AGENTS.md`, and published notes generate `.agents/README.md`.
 
 ### Getting started
 
-1. Replace the starter goal in `.agents/GOAL.md` with a specific outcome and measurable acceptance criteria.
-2. Add an approved request to `.agents/requests/` and accepted architectural choices to `.agents/decisions/`.
-3. Adjust `.agents/rules/` for project-specific conventions, then select the relevant role and skill instructions.
-4. Regenerate committed docs: `python3 .github/scripts/generate_documents.py --write`.
-5. Verify: `python3 .github/scripts/generate_documents.py --check`, then the project's own build/test commands when an application exists.
+1. Describe the target project's goal in `.agents/GOAL.md` and approved requirements in `.agents/requests/`.
+2. Record architecture choices in `.agents/decisions/`, and adjust `.agents/rules/` as needed.
+3. Run `python3 .github/scripts/generate_documents.py --write` and `--check` to validate generated documentation.
+4. For the Canvas prototype, enter `.github/app/`, run `bun install`, then `bun run dev`; use `bun run check` before proposing changes.
+5. Keep prototyping open until its completion is explicitly approved; do not treat a successful build or deployment as design sign-off.
 
 _Source: [0001-overview.md](notes/0001-overview.md)_
 
@@ -25,33 +27,35 @@ _Source: [0001-overview.md](notes/0001-overview.md)_
 | Path | Purpose |
 | --- | --- |
 | `.agents/GOAL.md` | Authored project goal and acceptance criteria |
-| `.agents/PLAN.md`, `.agents/TODO.md`, `.agents/SCRATCHPAD.md` | Authored execution and working state |
+| `.agents/PLAN.md`, `.agents/TODO.md`, `.agents/SCRATCHPAD.md` | Authored planning and working state |
 | `.agents/PRD.md` | Generated from approved `.agents/requests/` |
 | `.agents/ARCHITECTURE.md` | Generated from accepted `.agents/decisions/` |
 | `.agents/AGENTS.md` | Generated from active `.agents/rules/` |
 | `.agents/README.md` | Generated from published `.agents/notes/` |
-| `.agents/agents/`, `.agents/skills/` | Reusable agent roles and task-specific procedures |
-| `.github/workflows/` | Native, discoverable GitHub Actions workflows |
-| `.github/scripts/` | Repository automation implementation |
-| `.github/tests/` | **Only** location for repository tests, fixtures, snapshots and helpers |
-| `.darkfactory` | Git submodule pointing to `marius-patrik/DarkFactory` |
-| `.gitmodules` | Submodule identity and URL |
-| `repo.dfconfig` | Repository identity, protection and versioning mode |
-| `VERSION` | Optional version file, present only in `file` mode |
+| `.agents/agents/`, `.agents/skills/` | Agent roles and reusable procedures |
+| `.github/app/` | Sole React/TypeScript Canvas implementation |
+| `.github/app/scripts/generate-context.mjs` | Allowlisted repository-to-UI build snapshot |
+| `.github/workflows/canvas-pages.yml` | Build, browser verification and GitHub Pages publication |
+| `.github/scripts/`, `.github/workflows/` | Native repository automation |
+| `.github/tests/` | Sole location for tests, fixtures, snapshots and helpers |
+| `repo.dfconfig` | Repository identity, external integrations, protection and versioning |
+| `VERSION` | Optional version file, only in `file` mode |
 | `LICENSE` | GPL-3.0 |
 
-Root `README.md` and `CONTRIBUTING.md` are symlinks to generated files under `.agents/`; the `.agents/` and `.github/` directories themselves are real and tracked.
+The compiled Pages entrypoint is `.canvas-dist/index.html`, an untracked build output. There is no root `canvas.html` renderer and no local DarkFactory Git submodule. External DarkFactory workflow integration is independent of a submodule.
+
+Root `README.md` and `CONTRIBUTING.md` are Git symlinks to generated documents in `.agents/`. The `.agents/` and `.github/` directories are real, tracked directories.
 
 _Source: [0002-layout.md](notes/0002-layout.md)_
 
 
 ## Contribution and releases
 
-Propose focused changes into `development`. After review and required checks, promote `development` to `main` through a release PR. GitHub workflow definitions live directly at `.github/workflows/`.
+Propose focused source changes into `development`. After review and required checks, promote `development` to `main` through a release PR. Native GitHub workflow definitions live at `.github/workflows/`.
 
-The default version mode is **tags only**. There is no `VERSION` file and PRs do not bump a version. A push to `main` computes the next SemVer patch from existing release tags, then publishes an immutable tag and GitHub Release. Projects can select `file` mode in `repo.dfconfig` and add `VERSION`; that mode uses the PR version-bump workflow and releases exactly the checked-in version.
+The default version mode is **tags only**. A push to `main` computes the next SemVer patch from existing release tags and publishes an immutable tag and GitHub Release. Projects may opt into `file` mode through `repo.dfconfig` and a `VERSION` file.
 
-Verify locally:
+Verify repository source records and tests:
 
 ```bash
 python3 .github/scripts/generate_documents.py --write
@@ -59,7 +63,14 @@ python3 .github/scripts/generate_documents.py --check
 python3 -m unittest discover -s .github/tests -p 'test_*.py'
 ```
 
-When access to the DarkFactory dependency is needed, run `git submodule update --init --recursive`. A submodule is pinned to an exact commit; it is not a replacement for the repository's own `.agents/` or `.github/`.
+Verify the single Canvas implementation from `.github/app/`:
+
+```bash
+bun install
+bun run check
+```
+
+The Pages workflow also runs a compiled-HTML Chromium smoke test. DarkFactory automation uses external workflows and artifacts; no local submodule initialization is needed.
 
 _Source: [0003-contribution.md](notes/0003-contribution.md)_
 
@@ -78,30 +89,27 @@ The script reads `repo.dfconfig` and refuses unapproved replacement of existing 
 _Source: [0004-administration.md](notes/0004-administration.md)_
 
 
-## DarkFactory integration and test ownership
+## External DarkFactory integration and test ownership
 
-The repository's own agent guidance is in `.agents/` and GitHub automation is in `.github/`; neither is a symlink. The reusable DarkFactory project is pinned as a root submodule at `.darkfactory`. Update its commit pointer explicitly and keep the `.gitmodules` URL in sync.
+The repository's agent guidance is maintained in `.agents/`, while native GitHub automation belongs in `.github/`. Both are independent physical directories. **No DarkFactory Git submodule is installed or required.**
 
-All repository tests, fixtures, mocks, snapshots and test helpers are owned by `.github/tests/`. Do not put them in application packages, under the DarkFactory submodule or in separate root test folders.
+Managed DarkFactory workflows and pinned external artifacts may remain configured in `.github/workflows/`, `.github/darkfactory-installation.json`, and `repo.dfconfig`; these are external integrations rather than a second local copy of the project.
 
-The default release strategy uses Git tags as the sole version authority. The optional `VERSION` file belongs to opt-in `file` mode and is automatically maintained by the PR workflow. GitHub Actions workflows are discoverable under `.github/workflows/`.
+All repository tests, fixtures, mocks, snapshots and helpers belong exclusively under `.github/tests/`, including Canvas browser smoke tests. GitHub Actions workflows are discoverable under `.github/workflows/`.
+
+The default release strategy uses Git tags. The optional `VERSION` file is maintained only when explicitly configured in `file` mode.
 
 _Source: [0005-darkfactory-structure.md](notes/0005-darkfactory-structure.md)_
 
 
-## Single repository Canvas
+## Single published React Canvas
 
-Root `canvas.html` is the complete, deterministic and static human-readable view of Git-tracked repository content. It embeds readable tracked source files; binary files are represented with checksums, symlinks as targets, and the pinned DarkFactory submodule by commit identifier. The Canvas excludes itself from its input list to avoid recursion. No external API calls or independent browser state are used.
+The **sole Canvas application** is the React/TypeScript workspace in `.github/app/`. Rsbuild compiles its code, styles, and allowlisted Git-tracked repository documentation into `.canvas-dist/index.html`. GitHub Pages publishes that artifact. There is no separately maintained root HTML renderer, Python Canvas CLI, or competing generated application.
 
-Agent-side interaction lives in the repo-local `.agents/plugin.json`, `.agents/skills/repository-canvas/SKILL.md`, `.agents/tools/canvas.py` and optional `.agents/hooks/`. Agents read and modify source files with authorized tools; after any change they regenerate `canvas.html` and verify it. The interface remains read-only for human visitors.
+The build-time `.github/app/scripts/generate-context.mjs` produces the untracked `src/generated/context.json`; only explicitly allowlisted source documents and structural paths are embedded. The published UI is a read-only repository snapshot, not an agent backend or a live repository editor. Browser-local theme, locale, keyboard and Dockview layout settings are UI preferences, never authoritative project state.
 
-```bash
-python3 .agents/tools/canvas.py snapshot
-python3 .agents/tools/canvas.py render
-python3 .agents/tools/canvas.py check
-bash .agents/hooks/session-start.sh
-```
+Authorized agents operate on tracked source via the repository host and follow the existing review policy. Canonical Markdown projections are updated with `python3 .github/scripts/generate_documents.py --write`. To build and verify Canvas, use `bun run check` within `.github/app/`; GitHub Actions additionally runs Chromium smoke coverage.
 
-The hook manifest is a portable repo convention rather than an automatically installed ChatGPT plugin. Native Git hooks require explicit local opt-in. Private repository information embedded in the Canvas must not be deployed publicly without a privacy audit.
+The repository-local `.agents/plugin.json`, skill and optional hooks describe supported build-time interaction conventions. They do not register universal ChatGPT hooks or silently grant write authority. **Prototype design remains open until explicitly approved.**
 
 _Source: [0006-repository-canvas.md](notes/0006-repository-canvas.md)_

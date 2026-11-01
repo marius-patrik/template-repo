@@ -76,38 +76,41 @@ A project may add or remove roles and skills based on actual needs. Keep them sm
 _Source: [0003-agent-roles-and-skills.md](decisions/0003-agent-roles-and-skills.md)_
 
 
-## Native repository directories and a pinned DarkFactory submodule
+## Native repository directories without a DarkFactory submodule
 
 ### Decision
 
-Root `.agents/` and `.github/` are independent physical Git directories, not symlinks. `.agents/` owns project documentation, source records, role instructions and portable skills. `.github/` owns native GitHub Actions workflows, scripts, PR templates and the **sole test directory** `.github/tests/`.
+Root `.agents/` and `.github/` are independent physical Git directories, not symlinks. `.agents/` owns project knowledge, records, role guidance and skills. `.github/` owns discoverable workflows, scripts, templates, the sole test directory `.github/tests/`, and the Canvas application `.github/app/`.
 
-The root path `.darkfactory` is reserved exclusively for the pinned Git submodule `https://github.com/marius-patrik/DarkFactory.git`. It is a Git tree entry with mode `160000`, not a locally authored metadata directory. Project tests and GitHub workflows are not stored in the submodule.
+There is **no** root `.darkfactory` Git submodule or `.gitmodules`. Managed DarkFactory operations may use explicit external reusable GitHub Actions workflows, versioned artifacts and configuration without mirroring or pinning a local checkout.
 
 ### Rationale
 
-GitHub workflow discovery requires an actual `.github/workflows/` tree. A symlinked `.github` broke CI dispatch, releases and automatic preservation of the `development` branch. Restoring native directories fixes the discovery contract. A submodule retains reusable DarkFactory code without conflating external and local repository ownership.
+GitHub workflow discovery requires a real `.github/workflows/` tree; symlinked root directories previously broke CI and release automation. A pinned submodule duplicated an external integration that already resolves its executable workflows and artifacts independently, adding checkout complexity without an application owner.
 
 ### Consequences
 
-Do not put test files outside `.github/tests/`. Ensure all internal workflow/script paths use native root locations. Advance the pinned submodule commit explicitly and reviewably, and use `git submodule update --init --recursive` if local tooling needs its content.
+Do not reintroduce a DarkFactory gitlink, mirrored sources or duplicate test locations. Keep integration pins reviewable in their existing configuration/workflow contracts; removing the submodule does **not** disable the independent DarkFactory workflows. Verify that all paths use the real root directories.
 
 _Source: [0004-single-darkfactory-root.md](decisions/0004-single-darkfactory-root.md)_
 
 
-## Static repository Canvas and agent-owned interaction
+## Single published React Canvas and agent-owned source changes
 
 ### Decision
 
-A single root `canvas.html` is generated from `git ls-files` and the local worktree. It is the **human view**, not a writable data source. Ordinary UTF-8 files are represented in full, while gitlinks, symlinks and binary files are described without dereferencing external sources. The renderer is deterministic and excludes its own output from source traversal.
+The canonical Canvas frontend is the React/TypeScript project under `.github/app/`. Its `generate-context.mjs` script constructs an explicit, deterministic, allowlisted snapshot of Git-tracked context. Rsbuild compiles the application to `.canvas-dist/index.html`, which is the **only** GitHub Pages application entrypoint. The former root `canvas.html` generator and Python CLI are retired.
 
-The agent interface is implemented through repo-local procedures and tools in `.agents/`, not custom runtime JavaScript in HTML. A repository-specific context hook offers a compact turn snapshot; no automatic ChatGPT hook is assumed.
+Repository content remains authoritative in its reviewed source records. Generated Markdown, build-time JSON and the compiled application are derived products, not competing writable models. Presentation-only browser preferences and Dockview layouts may persist locally without changing project truth.
+
+Agent operations occur through explicitly authorized repository tools and host integrations. Optional local skill/hook conventions can invoke real documentation/build commands, but they do not provide automatic ChatGPT hooks, a live backend or a browser-side write path.
 
 ### Consequences
 
-- Actual data must already exist in Git-tracked files before Canvas displays it. External facts and user reports require evidence-aware repository updates first.
-- Generated-document projections stay derived from canonical notes, requests, decisions and rules, and the Canvas includes their checked-in projections.
-- Source edits require Canvas regeneration and an automated check. The template retains no project-specific vehicle facts.
-- The plugin manifest is opt-in for agent hosts that support its explicit command/skill/hook convention, not a generally installed ChatGPT connector.
+- Never introduce a second Canvas renderer, UI source tree or publication pipeline.
+- Prevent arbitrary repository files, credentials and unpublished archives from entering public Pages assets; test the allowlist and actual browser behavior.
+- Do not label simulated agent activity as telemetry or report unmerged prototypes as released.
+- Keep generated-document tests, app build checks and Chromium smoke tests under the existing repository verification contract.
+- Continue the user-controlled prototyping phase until explicitly approved; a successful Pages deployment alone is not completion.
 
 _Source: [0005-repository-canvas.md](decisions/0005-repository-canvas.md)_

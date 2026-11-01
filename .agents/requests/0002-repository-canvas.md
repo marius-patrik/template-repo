@@ -3,9 +3,11 @@ status: approved
 ---
 # Repository Canvas and interactive agent interface
 
-- Generate a root `canvas.html` static, non-editable view from all Git-tracked repository source entries. Do not add remote data feeds, hand-written Canvas facts or browser-side persistent state.
-- Embed full UTF-8 text for ordinary tracked files; represent symlinks as paths, gitlinks by pinned commit and nontext files by length and content checksum. Exclude `canvas.html` from itself.
-- Provide a readable project overview, file navigation, source listing and structured vehicle facts only if such data is present in the repository.
-- Provide repository-local agent plugin instructions, a documented read/write/render/check command-line tool and opt-in hooks under `.agents/`. Agent changes must update canonical repository sources and regenerate the Canvas.
-- Provide a compact snapshot command intended for agent turn summaries; repeat invocation requires host integration and may not be claimed automatic in ChatGPT.
-- Verify deterministic output and security boundaries with tests strictly under `.github/tests/` and normal repository CI. Maintain existing generated-document ownership and PR review rules.
+- Maintain **one** Canvas app in `.github/app/` using React/TypeScript and Rsbuild. Its compiled `.canvas-dist/index.html` is the GitHub Pages artifact. Do not maintain a root `canvas.html`, Python HTML renderer, second frontend or duplicate publishing pipeline.
+- Produce a deterministic build-time `src/generated/context.json` from allowlisted, Git-tracked repository documents and structural paths. Do not expose arbitrary files, binary archives, credentials, private data or unverified third-party facts in public Pages output.
+- Represent repository identity, available documents, authoring relationships and source-backed views without inventing agent telemetry, task completion, external repositories or project-specific facts.
+- Browser-local appearance, language, hotkeys and Dockview layouts are allowed as **presentation state**, never an independent source of project truth.
+- Preserve the agent-side interaction boundary: authorized agents edit canonical source with review/approval, regenerate Markdown projections, and rebuild the React app. The public compiled UI stays read-only until an explicit approved design changes that contract.
+- Retain optional repository-local agent conventions and hooks only where they invoke real supported build/documentation commands. Do not claim automatic ChatGPT hooks or a remote agent backend.
+- Keep tests under `.github/tests/` and require build/typecheck/Biome plus Chromium interaction acceptance for Pages publication.
+- Keep the application in the **user-controlled prototyping phase** until its completion is expressly approved. A passing deployment does not close the phase.

@@ -1,0 +1,1343 @@
+/* Canvas interface v2 — single-owned chrome styles.
+   Legacy styles.css contains content primitives; polish.css owns Canvas content.
+   This file alone owns the workspace shell, command surface, tabs and settings chrome.
+   Color, spacing, typography and component overrides come only from config.ts. */
+:root {
+  --titlebar-height: 32px;
+  --statusbar-height: 32px;
+  --cx-sidebar-width: 228px;
+  --cx-rail-width: 52px;
+  --cx-control: max(26px, calc(var(--titlebar-height) - 6px));
+  --cx-stroke: color-mix(in srgb, var(--text) 8%, var(--border));
+  --cx-raised: var(--raised);
+  --cx-selection: color-mix(in srgb, var(--text) 6%, var(--bg));
+  --cx-focus: color-mix(in srgb, var(--accent) 55%, transparent);
+  --cx-muted: var(--muted);
+  --cx-shadow: 0 12px 34px color-mix(in srgb, var(--shadow) 38%, transparent);
+}
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+body {
+  margin: 0;
+}
+.cx-shell,
+.cx-shell * {
+  box-sizing: border-box;
+}
+.cx-shell {
+  width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font:
+    400 var(--app-font-size) / 1.45 Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    system-ui,
+    sans-serif;
+  letter-spacing: -0.008em;
+  color-scheme: dark;
+}
+:root[data-theme="light"] .cx-shell {
+  color-scheme: light;
+}
+.cx-shell button,
+.cx-shell input,
+.cx-shell select {
+  font: inherit;
+}
+.cx-shell :is(button, input, [role="button"], [role="option"], [role="separator"]):focus-visible {
+  outline: 2px solid var(--cx-focus);
+  outline-offset: 2px;
+}
+.cx-shell .app-icon svg {
+  width: var(--app-icon-size);
+  height: var(--app-icon-size);
+  stroke-width: 1.7;
+  flex: 0 0 auto;
+}
+.cx-shell .app-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.cx-shell button {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.cx-shell .muted {
+  color: var(--muted);
+}
+.cx-shell .eyebrow {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: calc(var(--app-font-size) * 0.68);
+  font-weight: 600;
+}
+/* App chrome: one quiet header, content viewport, and status line. */
+.cx-shell .cx-topbar.window-titlebar {
+  height: var(--titlebar-height);
+  min-height: var(--titlebar-height);
+  max-height: none;
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(170px, 1fr) minmax(175px, min(42vw, 560px)) minmax(170px, 1fr);
+  gap: calc(var(--ui-spacing) * 1.25);
+  padding: 0 calc(var(--ui-spacing) * 1.25);
+  background: var(--component-titlebar-bg, var(--surface));
+  border: 0;
+  border-bottom: 1px solid var(--component-titlebar-border, var(--border));
+  color: var(--component-titlebar-text, var(--text));
+  z-index: 70;
+  position: relative;
+  align-items: center;
+}
+.cx-topbar-start,
+.cx-topbar-center,
+.cx-topbar-end {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  min-width: 0;
+}
+.cx-topbar-start {
+  gap: calc(var(--ui-spacing) * 0.8);
+}
+.cx-topbar-center {
+  justify-content: center;
+}
+.cx-topbar-end {
+  justify-content: flex-end;
+  gap: calc(var(--ui-spacing) * 0.45);
+}
+.cx-shell .cx-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--cx-control);
+  height: var(--cx-control);
+  min-height: 24px;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  padding: 0;
+  border-radius: calc(var(--ui-radius) * 0.65);
+  flex: none;
+}
+.cx-shell .cx-icon-button:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+.cx-brand-mark {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--ui-radius) * 0.65);
+  background: var(--raised);
+  color: var(--text);
+  font-size: calc(var(--app-font-size) * 0.9);
+  font-weight: 650;
+  letter-spacing: -0.1em;
+}
+.cx-brand-label {
+  color: var(--text);
+  font-weight: 630;
+  font-size: calc(var(--app-font-size) * 0.9);
+}
+.cx-header-rule {
+  height: 17px;
+  width: 1px;
+  background: var(--border);
+  margin-inline: calc(var(--ui-spacing) * 0.4);
+  flex: none;
+}
+.cx-center-label {
+  font-size: calc(var(--app-font-size) * 0.8);
+  font-weight: 520;
+  color: var(--muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.cx-navigation-slot {
+  min-width: 0;
+  display: flex;
+}
+.cx-shell .title-navigation {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: calc(var(--ui-spacing) * 0.55);
+}
+.cx-shell .title-navigation > .app-icon {
+  color: var(--subtle);
+}
+.cx-shell .title-navigation .canvas-select-trigger {
+  min-height: 24px;
+  height: max(24px, calc(var(--statusbar-height) - 6px));
+  width: auto;
+  max-width: 160px;
+  min-width: 0;
+  padding: 0 calc(var(--ui-spacing) * 0.6);
+  font-size: calc(var(--app-font-size) * 0.78);
+  font-weight: 500;
+  background: transparent;
+  border: 1px solid transparent;
+}
+.cx-shell .title-navigation .title-profile-select {
+  max-width: 140px;
+}
+.cx-shell .title-navigation .title-repository-select {
+  max-width: 180px;
+}
+.cx-shell .title-navigation .title-view-select {
+  max-width: 125px;
+}
+.cx-shell .title-navigation .canvas-select-trigger:hover {
+  background: var(--hover);
+}
+.cx-shell .notification-trigger,
+.cx-shell .title-actions > button {
+  height: var(--cx-control);
+  width: var(--cx-control);
+}
+/* Content viewport has no nested outer cards. */
+.cx-shell .cx-body.window-main {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+}
+.cx-shell .cx-workarea.work-area {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  background: var(--bg);
+  position: relative;
+}
+.cx-shell .cx-workarea.activity-position-right {
+  flex-direction: row-reverse;
+}
+.cx-shell .cx-workarea.activity-position-top {
+  flex-direction: column;
+}
+.cx-shell .cx-workarea.activity-position-bottom {
+  flex-direction: column-reverse;
+}
+.cx-shell .cx-workspace-row.primary-content {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  background: var(--bg);
+}
+.cx-shell .cx-workspace-row.sidebar-right {
+  flex-direction: row-reverse;
+}
+.cx-dock.main-column {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+.cx-dock .dock-content {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+.cx-shell .cx-sidebar-wrap {
+  display: flex;
+  flex: 0 0 auto;
+  min-width: 0;
+  min-height: 0;
+  background: var(--component-sidebar-bg, var(--surface));
+  border-right: 1px solid var(--border);
+}
+.cx-shell .sidebar-right .cx-sidebar-wrap {
+  flex-direction: row-reverse;
+  border-right: 0;
+  border-left: 1px solid var(--border);
+}
+.cx-shell .cx-sidebar.sidebar {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 var(--cx-sidebar-width);
+  width: var(--cx-sidebar-width);
+  min-width: 0;
+  max-width: 480px;
+  height: 100%;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: var(--component-sidebar-bg, var(--surface));
+  color: var(--component-sidebar-text, var(--text));
+}
+.cx-sidebar-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(var(--ui-spacing) * 1.2) calc(var(--ui-spacing) * 1.3);
+  border-bottom: 1px solid var(--border);
+}
+.cx-sidebar-overline {
+  font-size: calc(var(--app-font-size) * 0.7);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--subtle);
+}
+.cx-sidebar-foot {
+  flex: none;
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding: var(--ui-spacing) calc(var(--ui-spacing) * 1.4);
+  color: var(--subtle);
+  font-size: calc(var(--app-font-size) * 0.68);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.cx-shell .cx-add-tab.sidebar-new-tab {
+  display: flex;
+  align-items: center;
+  width: calc(100% - var(--ui-spacing) * 2.2);
+  margin: calc(var(--ui-spacing) * 1.2) calc(var(--ui-spacing) * 1.1);
+  padding: calc(var(--ui-spacing) * 0.85) calc(var(--ui-spacing) * 1.1);
+  border-radius: calc(var(--ui-radius) * 0.8);
+  border: 1px solid var(--border);
+  background: var(--raised);
+  color: var(--text);
+  font-size: calc(var(--app-font-size) * 0.85);
+  gap: var(--ui-spacing);
+  min-height: 34px;
+  text-align: left;
+}
+.cx-add-tab:hover {
+  background: var(--hover);
+}
+.cx-add-tab span:nth-child(2) {
+  flex: 1;
+}
+.cx-add-shortcut {
+  color: var(--subtle);
+  font-size: calc(var(--app-font-size) * 0.72);
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}
+.cx-shell .cx-resizer.sidebar-resizer {
+  width: 4px;
+  flex: 0 0 4px;
+  margin: 0;
+  background: transparent;
+  cursor: col-resize;
+  border: 0;
+  z-index: 12;
+  position: relative;
+  touch-action: none;
+}
+.cx-shell .cx-resizer.sidebar-resizer:hover,
+body.cx-resizing .cx-resizer.sidebar-resizer {
+  background: var(--border);
+}
+body.cx-resizing {
+  user-select: none;
+  cursor: col-resize;
+}
+.cx-shell .cx-rail-toggle.mobile-toggle {
+  display: none;
+}
+/* Collapsed navigation uses only the activity rail; no shadow sidebar underneath. */
+.cx-shell .activity-bar {
+  flex: 0 0 var(--cx-rail-width);
+  width: var(--cx-rail-width);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: calc(var(--ui-spacing) * 0.55);
+  padding: calc(var(--ui-spacing) * 1.1) 0;
+  background: var(--component-activitybar-bg, var(--surface));
+  border: 0;
+  border-right: 1px solid var(--border);
+  color: var(--component-activitybar-text, var(--text));
+}
+.cx-shell .activity-position-right > .activity-bar {
+  border-right: 0;
+  border-left: 1px solid var(--border);
+}
+.cx-shell .activity-position-top > .activity-bar,
+.cx-shell .activity-position-bottom > .activity-bar {
+  width: 100%;
+  height: var(--cx-rail-width);
+  flex-basis: var(--cx-rail-width);
+  flex-direction: row;
+  justify-content: flex-start;
+  padding: 0 var(--ui-spacing);
+  border: 0;
+  border-bottom: 1px solid var(--border);
+}
+.cx-shell .activity-position-bottom > .activity-bar {
+  border-bottom: 0;
+  border-top: 1px solid var(--border);
+}
+.cx-shell .activity-bar .activity-button {
+  flex: none;
+  position: relative;
+  width: 38px;
+  height: 38px;
+  min-width: 32px;
+  min-height: 32px;
+  border: 0;
+  border-radius: calc(var(--ui-radius) * 0.8);
+  background: transparent;
+  color: var(--muted);
+}
+.cx-shell .activity-bar .activity-button:hover {
+  color: var(--text);
+  background: var(--hover);
+}
+.cx-shell .activity-bar .activity-button.active {
+  color: var(--text);
+  background: var(--cx-selection);
+}
+.cx-shell .activity-bar .activity-button.active::before {
+  content: "";
+  position: absolute;
+  left: -5px;
+  top: 25%;
+  height: 50%;
+  width: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+.cx-shell .activity-position-right > .activity-bar .activity-button.active::before {
+  left: auto;
+  right: -5px;
+}
+.cx-shell .activity-position-top .activity-button.active::before,
+.cx-shell .activity-position-bottom .activity-button.active::before {
+  left: 25%;
+  right: 25%;
+  width: auto;
+  height: 2px;
+  top: auto;
+  bottom: -5px;
+}
+.cx-shell .activity-new-tab {
+  color: var(--muted);
+}
+.cx-shell .activity-separator {
+  width: 24px;
+  height: 1px;
+  background: var(--border);
+  margin: var(--ui-spacing) auto;
+}
+.cx-shell .activity-position-top .activity-separator,
+.cx-shell .activity-position-bottom .activity-separator {
+  width: 1px;
+  height: 24px;
+  margin: auto var(--ui-spacing);
+}
+.cx-shell .navigation-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 calc(var(--ui-spacing) * 1.1);
+}
+.cx-shell .navigation-tree-item {
+  border: 0;
+  border-radius: calc(var(--ui-radius) * 0.7);
+  background: transparent;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  padding: calc(var(--ui-spacing) * 0.7);
+  font-size: calc(var(--app-font-size) * 0.86);
+}
+.cx-shell .navigation-tree-item:hover {
+  color: var(--text);
+  background: var(--hover);
+}
+.cx-shell .navigation-tree-item.active {
+  color: var(--text);
+  background: var(--cx-selection);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+/* Native Dockview is one workspace and one source of tab state. */
+.cx-shell .dock-workspace {
+  background: var(--bg);
+}
+.cx-shell .dock-grid .dockview-theme-dark,
+.cx-shell .dock-grid .dockview-theme-light {
+  --dv-background-color: var(--bg);
+  --dv-group-view-background-color: var(--bg);
+  --dv-tabs-and-actions-container-background-color: var(--surface);
+  --dv-activegroup-visiblepanel-tab-background-color: var(--raised);
+  --dv-inactivegroup-visiblepanel-tab-background-color: var(--raised);
+  --dv-activegroup-hiddenpanel-tab-background-color: var(--surface);
+  --dv-inactivegroup-hiddenpanel-tab-background-color: var(--surface);
+  --dv-activegroup-visiblepanel-tab-color: var(--text);
+  --dv-inactivegroup-visiblepanel-tab-color: var(--text);
+  --dv-activegroup-hiddenpanel-tab-color: var(--muted);
+  --dv-inactivegroup-hiddenpanel-tab-color: var(--muted);
+  --dv-separator-border: 1px solid var(--border);
+  --dv-tab-divider-color: var(--border);
+  --dv-icon-hover-background-color: var(--raised);
+  --dv-active-sash-color: var(--accent);
+  --dv-tabs-and-actions-container-height: 36px;
+  --dv-tabs-and-actions-container-font-size: calc(var(--app-font-size) * 0.83);
+}
+.cx-shell .dock-grid .dv-tabs-and-actions-container {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.cx-shell .dock-grid .dv-tab {
+  font-size: calc(var(--app-font-size) * 0.82);
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding-inline: calc(var(--ui-spacing) * 0.55);
+}
+.cx-shell .dock-grid .dv-tab:hover {
+  color: var(--text);
+  background: var(--hover);
+}
+.cx-shell
+  .dock-grid
+  .dv-tab:is(.dv-active-tab, .dv-activegroup-visiblepanel-tab, .dv-inactivegroup-visiblepanel-tab),
+.cx-shell .dock-grid .dv-tab[aria-selected="true"] {
+  color: var(--component-tabs-text, var(--text));
+  background: var(--component-tabs-bg, var(--raised));
+  box-shadow: inset 0 -2px 0 var(--component-tabs-accent, var(--accent));
+}
+.cx-shell
+  .dock-grid
+  .dv-tab:is(.dv-active-tab, .dv-activegroup-visiblepanel-tab, .dv-inactivegroup-visiblepanel-tab)
+  .app-icon {
+  color: inherit;
+}
+.cx-shell .dock-grid .dv-tab .canvas-tab-close {
+  color: var(--muted);
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.cx-shell .dock-grid .dv-tab:hover .canvas-tab-close,
+.cx-shell .dock-grid .dv-tab:focus-within .canvas-tab-close {
+  opacity: 1;
+}
+.cx-shell .dock-grid .canvas-dock-tab {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--ui-spacing) * 0.75);
+}
+.cx-shell .dock-route-page {
+  background: var(--bg);
+  height: 100%;
+  min-height: 0;
+}
+.cx-shell .dock-route-page:has(.monaco-pane) {
+  overflow: hidden;
+}
+.cx-shell .dock-route-page > .monaco-pane {
+  display: grid;
+  grid-template-rows: 42px minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+}
+.cx-shell .monaco-editor-host {
+  grid-row: 2;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+.cx-shell .monaco-editor-host > section {
+  height: 100%;
+}
+.cx-shell .dock-welcome {
+  display: flex;
+  flex-direction: column;
+  max-width: 700px;
+  margin: min(10vh, 72px) auto 0;
+  padding: calc(var(--ui-spacing) * 2);
+  color: var(--text);
+}
+.cx-shell .dock-welcome .eyebrow {
+  margin: 0 0 calc(var(--ui-spacing) * 1.1);
+}
+.cx-shell .dock-welcome h1 {
+  font-weight: 575;
+  letter-spacing: -0.035em;
+  font-size: clamp(25px, 3vw, 38px);
+  margin: 0;
+}
+.cx-shell .dock-welcome .muted {
+  margin: calc(var(--ui-spacing) * 0.9) 0 calc(var(--ui-spacing) * 3);
+  font-size: calc(var(--app-font-size) * 0.9);
+}
+.cx-shell .dock-welcome-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ui-spacing);
+}
+.cx-shell .dock-welcome-options button {
+  display: flex;
+  gap: var(--ui-spacing);
+  min-height: 57px;
+  align-items: center;
+  text-align: left;
+  padding: calc(var(--ui-spacing) * 1.5);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--ui-radius) * 0.8);
+  color: var(--text);
+  font-size: calc(var(--app-font-size) * 0.92);
+}
+.cx-shell .dock-welcome-options button span:nth-child(2) {
+  flex: 1;
+}
+.cx-shell .dock-welcome-options button:hover {
+  border-color: var(--muted);
+  background: var(--hover);
+}
+/* Footer is quiet telemetry, never a navigation card. */
+.cx-shell .cx-statusbar.window-statusbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  min-height: var(--statusbar-height);
+  height: var(--statusbar-height);
+  padding: 0 calc(var(--ui-spacing) * 1.15);
+  width: 100%;
+  gap: var(--ui-spacing);
+  background: var(--component-statusbar-bg, var(--surface));
+  color: var(--component-statusbar-text, var(--muted));
+  border: 0;
+  border-top: 1px solid var(--border);
+  font-size: calc(var(--app-font-size) * 0.73);
+  z-index: 55;
+  overflow: visible;
+  position: relative;
+}
+.cx-shell .cx-status-group {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--ui-spacing) * 0.7);
+  min-width: 0;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.cx-shell .cx-status-group:has(.omnibar-open),
+.cx-shell .cx-status-group:has(.title-navigation) {
+  overflow: visible;
+}
+.cx-shell .status-group-left {
+  justify-content: flex-start;
+}
+.cx-shell .status-group-center {
+  justify-content: center;
+}
+.cx-shell .status-group-right {
+  justify-content: flex-end;
+}
+.cx-status-group > :not(.status-delimiter) {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.cx-status-group > span:not(.status-delimiter) {
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cx-status-group .status-delimiter {
+  flex: none;
+  opacity: 0.4;
+  color: var(--subtle);
+}
+.cx-status-group .title-navigation {
+  max-width: min(34vw, 455px);
+  overflow: visible;
+}
+.cx-shell .cx-statusbar .title-navigation .canvas-select-trigger {
+  height: max(24px, calc(var(--statusbar-height) - 6px));
+}
+.cx-shell .cx-status-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+  min-width: 26px;
+  border: 0;
+  border-radius: calc(var(--ui-radius) * 0.65);
+  color: var(--muted);
+  background: transparent;
+  padding: 0;
+}
+.cx-shell .cx-status-control:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+.cx-snapshot {
+  color: var(--subtle);
+}
+.cx-status-version {
+  color: var(--muted);
+}
+.cx-revision {
+  max-width: 104px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  color: var(--subtle);
+}
+/* The command bar owns its listbox. One component; no detached input. */
+.cx-shell .omnibar-shell {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: calc(var(--ui-spacing) * 0.95);
+  height: max(26px, calc(var(--titlebar-height) - 6px));
+  min-width: 0;
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  padding-inline: calc(var(--ui-spacing) * 1.3);
+  border: 1px solid var(--component-omnibar-border, var(--border));
+  border-radius: calc(var(--ui-radius) * 0.8);
+  background: var(--component-omnibar-bg, var(--raised));
+  color: var(--component-omnibar-text, var(--text));
+  font-size: calc(var(--app-font-size) * 0.84);
+  overflow: visible;
+}
+.cx-shell .omnibar-shell.omnibar-open {
+  border-color: color-mix(in srgb, var(--accent) 38%, var(--border));
+  z-index: 500;
+}
+.cx-shell .omnibar-shell input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+}
+.cx-shell .omnibar-shell input::placeholder {
+  color: var(--subtle);
+  opacity: 1;
+}
+.cx-shell .omnibar-shell kbd {
+  flex: none;
+  font-size: calc(var(--app-font-size) * 0.65);
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--muted);
+  padding: 2px 5px;
+  margin: 0;
+}
+.cx-shell .omnibar-results {
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  top: calc(100% - 1px);
+  bottom: auto;
+  width: calc(100% + 2px);
+  max-height: var(--omnibar-results-max-height, 380px);
+  z-index: 500;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+  border-radius: 0 0 calc(var(--ui-radius) * 0.8) calc(var(--ui-radius) * 0.8);
+  background: var(--component-omnibar-bg, var(--raised));
+  color: var(--text);
+  box-shadow: var(--cx-shadow);
+}
+.cx-shell .omnibar-results-up {
+  top: auto;
+  bottom: calc(100% - 1px);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  border-radius: calc(var(--ui-radius) * 0.8) calc(var(--ui-radius) * 0.8) 0 0;
+}
+.cx-shell .omnibar-results-list {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  padding: calc(var(--ui-spacing) * 0.65);
+}
+.cx-shell .omnibar-results-list button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--ui-spacing);
+  min-height: 37px;
+  text-align: left;
+  padding: calc(var(--ui-spacing) * 0.9);
+  background: transparent;
+  border: 0;
+  border-radius: calc(var(--ui-radius) * 0.65);
+  color: var(--text);
+}
+.cx-shell .omnibar-results-list button.focused,
+.cx-shell .omnibar-results-list button:hover {
+  background: var(--hover);
+}
+.cx-shell .omnibar-results-list button span:nth-child(2) {
+  flex: 1;
+}
+.cx-shell .omnibar-results-list button small {
+  color: var(--subtle);
+}
+.cx-shell .omnibar-results-help {
+  border-top: 1px solid var(--border);
+  padding: calc(var(--ui-spacing) * 0.95);
+  color: var(--subtle);
+  font-size: calc(var(--app-font-size) * 0.7);
+}
+.omnibar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  background: color-mix(in srgb, var(--shadow) 18%, transparent);
+}
+.omnibar-backdrop.blurred {
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.cx-shell .omnibar-shell.floating-omnibar {
+  position: fixed;
+  z-index: 500;
+  display: flex;
+  width: min(420px, calc(100vw - 24px));
+  min-width: 240px;
+  height: 40px;
+  max-height: 40px;
+  padding-inline: 12px;
+  border-radius: calc(var(--ui-radius) * 0.85);
+  box-shadow: var(--cx-shadow);
+  will-change: transform;
+  contain: layout style;
+}
+.cx-shell .omnibar-shell.floating-omnibar .floating-handle {
+  order: 5;
+  flex: none;
+  width: 24px;
+  height: 32px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  color: var(--muted);
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+}
+.cx-shell .omnibar-shell.floating-omnibar .floating-handle:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+body.cx-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+.cx-shell .omnibar-shell.omnibar-fallback {
+  display: none;
+  position: fixed;
+  top: 15vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(580px, calc(100vw - 28px));
+  min-height: 40px;
+  z-index: 500;
+}
+.cx-shell .omnibar-shell.omnibar-fallback.omnibar-open {
+  display: flex;
+}
+.cx-shell .cx-status-group .omnibar-shell {
+  max-width: min(240px, 24vw);
+  height: 26px;
+}
+.cx-shell .cx-status-group .omnibar-shell kbd {
+  display: none;
+}
+/* Settings: one continuous scroll surface, no cards-inside-cards. */
+.cx-shell .settings-page {
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: calc(var(--ui-spacing) * 4);
+}
+.cx-shell .settings-page .page-intro {
+  padding-bottom: calc(var(--ui-spacing) * 3);
+  border-bottom: 1px solid var(--border);
+  margin: 0 0 calc(var(--ui-spacing) * 2.5);
+}
+.cx-shell .settings-page .page-intro h1 {
+  margin: 0;
+  font-weight: 560;
+  font-size: clamp(23px, 2vw, 30px);
+  letter-spacing: -0.03em;
+}
+.cx-shell .settings-page .page-intro .muted {
+  margin-top: var(--ui-spacing);
+}
+.cx-shell .settings-group {
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  padding: calc(var(--ui-spacing) * 1.6) 0 calc(var(--ui-spacing) * 3);
+  margin: 0 0 calc(var(--ui-spacing) * 2);
+  background: transparent;
+}
+.cx-shell .settings-group h2 {
+  margin: 0 0 calc(var(--ui-spacing) * 2);
+  font-size: calc(var(--app-font-size) * 1.05);
+  font-weight: 630;
+}
+.cx-shell .settings-group h3 {
+  font-size: calc(var(--app-font-size) * 0.9);
+  margin: calc(var(--ui-spacing) * 2.4) 0 var(--ui-spacing);
+}
+.cx-shell .setting-row {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--ui-spacing) * 2);
+  padding: calc(var(--ui-spacing) * 0.8) 0;
+  border: 0;
+  background: transparent;
+}
+.cx-shell .setting-row > span:first-child {
+  font-size: calc(var(--app-font-size) * 0.86);
+  color: var(--muted);
+}
+.cx-shell .settings-number {
+  width: 100px;
+  background: var(--raised);
+  border: 1px solid var(--border);
+}
+.cx-shell .settings-subgrid {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.cx-shell .token-grid {
+  gap: var(--ui-spacing);
+}
+.cx-shell .token-color-trigger {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--ui-radius) * 0.8);
+  padding: calc(var(--ui-spacing) * 1.2);
+  min-width: 0;
+  font-size: calc(var(--app-font-size) * 0.82);
+}
+.cx-shell .token-color-trigger:hover {
+  border-color: var(--muted);
+}
+.cx-shell .component-token-table {
+  overflow-x: auto;
+  width: 100%;
+}
+.cx-shell .component-token-row {
+  border-bottom: 1px solid var(--border);
+}
+/* Menu primitives use one consistent interaction surface. */
+.cx-shell .canvas-select-trigger,
+.cx-shell .menu-item,
+.cx-shell .canvas-button {
+  border-radius: calc(var(--ui-radius) * 0.65);
+}
+.cx-shell .canvas-select-trigger[data-state="open"] {
+  background: var(--raised);
+}
+.menu-content,
+.accent-popover,
+.canvas-select-content {
+  border: 1px solid var(--border);
+  border-radius: calc(var(--ui-radius) * 0.8);
+  background: var(--raised);
+  color: var(--text);
+  box-shadow: var(--cx-shadow);
+}
+.menu-item[data-highlighted],
+.canvas-select-item[data-highlighted] {
+  background: var(--hover);
+}
+.cx-shell .monaco-toolbar {
+  display: flex;
+  flex-wrap: nowrap;
+  grid-row: 1;
+  height: 42px;
+  min-height: 42px;
+  max-height: 42px;
+  padding: calc(var(--ui-spacing) * 0.6) calc(var(--ui-spacing) * 1.4);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.cx-shell .monaco-source-select {
+  min-width: 0;
+}
+.cx-shell .monaco-actions {
+  margin-left: auto;
+}
+.cx-shell .monaco-file-select {
+  max-width: min(370px, 38vw);
+}
+.cx-shell .monaco-disclaimer {
+  color: var(--subtle);
+}
+.cx-shell .library-page {
+  background: var(--bg);
+}
+.cx-shell .canvas-studio {
+  background: var(--bg);
+  color: var(--text);
+}
+.cx-shell .canvas-perspectives button.active,
+.cx-shell .canvas-mode-switch button.active,
+.cx-shell .canvas-source-row.active {
+  color: var(--text);
+  background: var(--cx-selection);
+}
+/* Responsive: no hidden important controls; navigation becomes an overlay. */
+@media (max-width: 950px) {
+  .cx-shell .cx-topbar.window-titlebar {
+    grid-template-columns: minmax(130px, 1fr) minmax(170px, 1.5fr) auto;
+  }
+  .cx-brand-label,
+  .cx-header-rule {
+    display: none;
+  }
+  .cx-shell .cx-revision {
+    display: none;
+  }
+  .cx-shell .cx-status-group .cx-snapshot {
+    display: none;
+  }
+}
+@media (max-width: 700px) {
+  /* Small screens use the full viewport width; the activity rail becomes a
+     horizontal dock above the status line rather than consuming 52px at left. */
+  .cx-shell .cx-workarea.work-area {
+    flex-direction: column-reverse;
+  }
+  .cx-shell .cx-workarea.work-area > .activity-bar {
+    flex: 0 0 48px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    min-height: 48px;
+    height: 48px;
+    padding: 0 calc(var(--ui-spacing) * 1.3);
+    gap: calc(var(--ui-spacing) * 0.6);
+    border: 0;
+    border-top: 1px solid var(--border);
+  }
+  .cx-shell .cx-workarea.work-area > .activity-bar .activity-button {
+    flex: 0 0 42px;
+    width: 42px;
+    height: 40px;
+    min-height: 40px;
+  }
+  .cx-shell .cx-workarea.work-area > .activity-bar .activity-button.active::before {
+    top: auto;
+    bottom: -4px;
+    left: 24%;
+    right: 24%;
+    width: auto;
+    height: 2px;
+  }
+  .cx-shell .cx-workarea.work-area > .activity-bar .activity-separator {
+    width: 1px;
+    height: 24px;
+    margin: 0 calc(var(--ui-spacing) * 0.65);
+  }
+  .cx-shell .cx-workarea.work-area > .activity-bar .activity-spacer {
+    flex: 1;
+  }
+  .cx-shell .cx-topbar.window-titlebar {
+    grid-template-columns: auto minmax(140px, 1fr) auto;
+    padding: 0 var(--ui-spacing);
+  }
+  .cx-shell .cx-rail-toggle.desktop-toggle {
+    display: none;
+  }
+  .cx-shell .mobile-toggle {
+    display: flex;
+  }
+  .cx-shell .cx-sidebar-wrap {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 88;
+    width: min(310px, 88vw);
+    border-right: 1px solid var(--border);
+    box-shadow: var(--cx-shadow);
+  }
+  .cx-shell .cx-sidebar.sidebar {
+    width: 100%;
+    flex-basis: 100%;
+    max-width: none;
+  }
+  .cx-shell .sidebar-right .cx-sidebar-wrap {
+    left: auto;
+    right: 0;
+  }
+  .cx-shell .cx-mobile-scrim {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 85;
+    border: 0;
+    background: color-mix(in srgb, var(--shadow) 45%, transparent);
+  }
+  .cx-shell .cx-statusbar.window-statusbar {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  }
+  .cx-shell .status-group-center {
+    display: none;
+  }
+  .cx-shell .cx-status-group .title-navigation {
+    max-width: 68vw;
+  }
+  .cx-shell .title-navigation .title-repository-select {
+    display: none;
+  }
+  .cx-shell .dock-welcome-options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cx-shell .dock-welcome {
+    margin-top: 3vh;
+  }
+  .cx-shell .settings-page {
+    padding: calc(var(--ui-spacing) * 2);
+  }
+  .cx-shell .monaco-disclaimer {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cx-shell *,
+  .cx-shell *::before,
+  .cx-shell *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Color and component preference editors retained, with a single stylesheet owner. */
+/* Advanced palette editor: HEX, RGB, HSL, swatches, recent selections and eyedropper. */
+.color-editor {
+  display: flex;
+  flex-direction: column;
+  width: min(330px, calc(100vw - 24px));
+  max-height: min(650px, calc(100dvh - 20px));
+  overflow-y: auto;
+  gap: var(--ui-spacing);
+  padding: calc(var(--ui-spacing) * 1.5);
+  z-index: 510;
+}
+.color-editor-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--ui-spacing);
+  align-items: center;
+}
+.color-editor-heading > span {
+  font:
+    500 calc(var(--app-font-size) * 0.8) ui-monospace,
+    monospace;
+  color: var(--muted);
+}
+.color-editor-preview {
+  height: calc(var(--ui-spacing) * 4);
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+  background-image: linear-gradient(45deg, #7773 25%, transparent 25%);
+}
+.color-editor .react-colorful {
+  width: 100%;
+  height: 175px;
+}
+.color-editor .react-colorful__saturation {
+  border-radius: var(--control-radius) var(--control-radius) 0 0;
+}
+.color-editor .react-colorful__pointer {
+  height: 14px;
+  width: 14px;
+}
+.color-editor-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: calc(var(--ui-spacing) * 0.5);
+}
+.color-editor-tabs button,
+.color-editor-actions button {
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+  padding: calc(var(--ui-spacing) * 0.7);
+  background: var(--bg);
+  color: var(--muted);
+  font-size: calc(var(--app-font-size) * 0.83);
+}
+.color-editor-tabs button.active {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--hover);
+}
+.color-editor .accent-hex-input {
+  width: 100%;
+  height: 34px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+  padding: var(--ui-spacing);
+  font-family: ui-monospace, monospace;
+}
+.color-channels {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--ui-spacing);
+}
+.color-channel {
+  display: flex;
+  gap: calc(var(--ui-spacing) * 0.5);
+  flex-direction: column;
+  color: var(--muted);
+  font-size: calc(var(--app-font-size) * 0.8);
+}
+.color-channel input {
+  width: 100%;
+  padding: var(--ui-spacing);
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+  background: var(--bg);
+  color: var(--text);
+}
+.color-palette-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--ui-spacing) * 0.45);
+}
+.color-palette-presets button {
+  flex: 0 0 20px;
+  height: 20px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+}
+.color-palette-presets button:hover,
+.color-palette-presets button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.color-editor-recent small {
+  display: block;
+  margin-bottom: calc(var(--ui-spacing) * 0.55);
+  color: var(--muted);
+}
+.color-editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: calc(var(--ui-spacing) * 0.7);
+  border-top: 1px solid var(--border);
+  padding-top: var(--ui-spacing);
+}
+.color-editor-actions button:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.color-editor-actions button:last-child {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  border-color: var(--accent);
+}
+/* No nested cards: a single table of semantic component bindings. */
+.component-token-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow-x: auto;
+}
+.component-token-row {
+  display: grid;
+  grid-template-columns: minmax(95px, 1.3fr) repeat(7, minmax(90px, 1fr));
+  align-items: center;
+  gap: calc(var(--ui-spacing) * 0.7);
+  min-width: 830px;
+  padding: var(--ui-spacing) 0;
+  border-bottom: 1px solid var(--border);
+}
+.component-token-row > strong {
+  overflow-wrap: anywhere;
+  font-size: calc(var(--app-font-size) * 0.86);
+}
+.component-token-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.component-token-cell > span {
+  color: var(--muted);
+  font-size: calc(var(--app-font-size) * 0.7);
+}
+.component-token-cell .canvas-select-trigger {
+  width: 100%;
+  border-color: var(--border);
+  background: var(--bg);
+  min-height: 30px;
+}
