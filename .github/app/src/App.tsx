@@ -91,10 +91,15 @@ export default function App() {
   const sidebarVisible = expanded || mobileOpen;
   const platformMod = /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘" : "Ctrl";
   const modifierLabel =
-    prefs.modifierKey === "control" ? "Ctrl"
-      : prefs.modifierKey === "command" ? "⌘"
+    prefs.modifierKey === "control"
+      ? "Ctrl"
+      : prefs.modifierKey === "command"
+        ? "⌘"
         : prefs.modifierKey === "custom"
-          ? prefs.customModifier.replaceAll("Meta", "⌘").replaceAll("Alt", "⌥").replaceAll("Shift", "⇧")
+          ? prefs.customModifier
+              .replaceAll("Meta", "⌘")
+              .replaceAll("Alt", "⌥")
+              .replaceAll("Shift", "⇧")
           : platformMod;
 
   const navActions = POSITIONS.navigation.map((position) => ({
