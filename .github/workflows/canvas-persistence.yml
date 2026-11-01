@@ -35,7 +35,7 @@ jobs:
       - name: Verify real IndexedDB transactions in Chromium
         run: node .github/tests/persistence/canvas-persistence.mjs
       - name: D01 temporary Biome output proof (branch-scoped)
-        if: ${{ github.head_ref == 'agent/canvas-c01-idb-foundation' }}
+        if: ${{ always() && github.head_ref == 'agent/canvas-c01-idb-foundation' }}
         working-directory: .github/app
         run: |
           bunx biome format --write src/domain src/persistence

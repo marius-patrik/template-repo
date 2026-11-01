@@ -346,6 +346,49 @@ try {
     }, unique());
     assert(result.ok && result.value.data.persists === true, JSON.stringify(result));
   });
+
+  await test("Unexpected synchronous IndexedDB get errors return typed Results", async () => {
+    const result = await inBrowser(page, async (name) => {
+      const c = window.C01; const a = new c.CanvasPersistence({ databaseName: name });
+      await a.initialize();
+      const original = IDBObjectStore.prototype.get;
+      IDBObjectStore.prototype.get = function(...args) {
+        if (this.name === "global") throw new DOMException("forced request failure", "InvalidStateError");
+        return original.apply(this, args);
+      };
+      let read, write;
+      try {
+        read = await a.readGlobal();
+        write = await a.commit({ mutations: [{ kind: "putGlobal", expectedRevision: 0, data: { shouldNotWrite: 1 } }] });
+      } finally {
+        IDBObjectStore.prototype.get = original;
+      }
+      const after = await a.readGlobal(); a.close(); return { read, write, after };
+    }, unique());
+    assert(!result.read.ok && result.read.error.code === "STORAGE_UNAVAILABLE", JSON.stringify(result));
+    assert(!result.write.ok && result.write.error.code === "STORAGE_UNAVAILABLE", JSON.stringify(result));
+    assert(result.after.ok && result.after.value.revision === 0, JSON.stringify(result));
+  });
+
+  await test("Global initialization aborts safely on synchronous put failure", async () => {
+    const result = await inBrowser(page, async (name) => {
+      const c = window.C01; const a = new c.CanvasPersistence({ databaseName: name });
+      const original = IDBObjectStore.prototype.put;
+      IDBObjectStore.prototype.put = function(...args) {
+        if (this.name === "global") throw new DOMException("forced quota failure", "QuotaExceededError");
+        return original.apply(this, args);
+      };
+      let first;
+      try { first = await a.initialize(); }
+      finally { IDBObjectStore.prototype.put = original; a.close(); }
+      const b = new c.CanvasPersistence({ databaseName: name });
+      const recovered = await b.initialize(), global = await b.readGlobal();
+      b.close(); return { first, recovered, global };
+    }, unique());
+    assert(!result.first.ok && result.first.error.code === "QUOTA_EXCEEDED", JSON.stringify(result));
+    assert(result.recovered.ok && result.global.ok && result.global.value.revision === 0, JSON.stringify(result));
+  });
+
   await page.close();
 } finally {
   await browser?.close();
