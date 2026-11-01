@@ -256,7 +256,9 @@ export class CanvasPersistence {
       } catch (cause) {
         try {
           tx.abort();
-        } catch {}
+        } catch {
+          // The transaction may already have closed.
+        }
         resolve(errorResult(cause, "STORAGE_UNAVAILABLE"));
         return;
       }
@@ -321,7 +323,9 @@ export class CanvasPersistence {
       } catch (cause) {
         try {
           tx.abort();
-        } catch {}
+        } catch {
+          // The transaction may already have closed.
+        }
         resolve(errorResult(cause, "STORAGE_UNAVAILABLE"));
         return;
       }
@@ -545,8 +549,173 @@ export class CanvasPersistence {
         try {
           const output = new Map<string, GlobalRecord | WorkspaceRecord | EditableDocument>();
           const parentStates = new Map<WorkspaceId, WorkspaceRecord | null>();
-          // Register completion and abort handlers before scheduling requests: an
-      // unexpected synchronous IDB exception must abort and return a typed Result.
+          for (const m of request.mutations) {
+            if (
+              m.kind === "createDocument" ||
+              m.kind === "updateDocument" ||
+              m.kind === "deleteDocument"
+            )
+              continue;
+            const store = m.kind === "putGlobal" ? "global" : "workspaces";
+            const id = m.kind === "putGlobal" ? "global" : m.id;
+            const parsed = requireRevision(
+              current.get(`${store}:${id}`),
+              m.expectedRevision,
+              store,
+            );
+            if (!parsed.ok) {
+              abort(parsed.error.code, parsed.error.message);
+              return;
+            }
+            const revision = m.kind === "createWorkspace" ? (0 as Revision) : parsed.value;
+            if (m.kind === "putGlobal") {
+              const row: GlobalRecord = {
+                id: "global",
+                schemaVersion: APPLICATION_SCHEMA_VERSION,
+                revision,
+                updatedAt: at,
+                data: m.data,
+              };
+              output.set(`global:${id}`, row);
+            } else {
+              const old = current.get(`workspaces:${id}`) as WorkspaceRecord | undefined;
+              const row: WorkspaceRecord = {
+                id: m.id,
+                schemaVersion: APPLICATION_SCHEMA_VERSION,
+                revision,
+                updatedAt: at,
+                data: m.kind === "deleteWorkspace" ? old!.data : m.data,
+                ...(m.kind === "deleteWorkspace" ? { deletedAt: at } : {}),
+              };
+              output.set(`workspaces:${id}`, row);
+              parentStates.set(m.id, m.kind === "deleteWorkspace" ? null : row);
+            }
+          }
+          // Validate every document and its owning workspace before any put.
+          for (const m of request.mutations) {
+            if (
+              m.kind !== "createDocument" &&
+              m.kind !== "updateDocument" &&
+              m.kind !== "deleteDocument"
+            )
+              continue;
+            const previous = current.get(`documents:${m.id}`);
+            const parsed = requireRevision(previous, m.expectedRevision, "documents");
+            if (!parsed.ok) {
+              abort(parsed.error.code, parsed.error.message);
+              return;
+            }
+            if (
+              previous !== undefined &&
+              (previous as EditableDocument).workspaceId !== m.workspaceId
+            ) {
+              abort("INVALID_STATE", "Document cannot change owning workspace");
+              return;
+            }
+            const parent = parentStates.has(m.workspaceId)
+              ? (parentStates.get(m.workspaceId) ??
+                (m.kind === "deleteDocument" ? current.get(`workspaces:${m.workspaceId}`) : null))
+              : current.get(`workspaces:${m.workspaceId}`);
+            if (!parent) {
+              abort("NOT_FOUND", "Document owner workspace does not exist");
+              return;
+            }
+            const checked = validateWorkspace(parent);
+            if (!checked.ok) {
+              abort(checked.error.code, checked.error.message);
+              return;
+            }
+            if (checked.value.deletedAt) {
+              abort("INVALID_STATE", "Document owner workspace is deleted");
+              return;
+            }
+            const row: EditableDocument = {
+              id: m.id,
+              workspaceId: m.workspaceId,
+              schemaVersion: APPLICATION_SCHEMA_VERSION,
+              revision: m.kind === "createDocument" ? (0 as Revision) : parsed.value,
+              updatedAt: at,
+              data: m.kind === "deleteDocument" ? (previous as EditableDocument).data : m.data,
+              ...(m.kind === "deleteDocument" ? { deletedAt: at } : {}),
+            };
+            output.set(`documents:${m.id}`, row);
+          }
+          // A workspace deletion must name every live child with its own expected
+          // revision. Implicit cascades would violate the CAS rule for each record.
+          for (const id of deleting) {
+            for (const raw of owned.get(id) ?? []) {
+              const parsed = validateDocument(raw);
+              if (!parsed.ok) {
+                abort(parsed.error.code, parsed.error.message);
+                return;
+              }
+              if (parsed.value.workspaceId !== id) {
+                abort("CORRUPT_RECORD", "Document owner index mismatch");
+                return;
+              }
+              if (parsed.value.deletedAt) continue;
+              const planned = output.get(`documents:${parsed.value.id}`) as
+                | EditableDocument
+                | undefined;
+              if (!planned?.deletedAt || planned.workspaceId !== id) {
+                abort(
+                  "INVALID_STATE",
+                  "Deleting a workspace requires explicit CAS deletion of every live document",
+                );
+                return;
+              }
+            }
+          }
+          if (request.migration) {
+            const raw = current.get(`migration:${migrationId(request.migration.key)}`);
+            const backupRaw = current.get(`backups:${migrationId(request.migration.key)}`);
+            if (raw === undefined || backupRaw === undefined) {
+              abort("MIGRATION_FAILED", "Migration lease or raw backup missing");
+              return;
+            }
+            const record = validateMigration(raw);
+            const backup = validateBackup(backupRaw);
+            if (!record.ok || !backup.ok) {
+              abort("CORRUPT_RECORD", "Migration record or backup corrupt");
+              return;
+            }
+            if (
+              record.value.status !== "started" ||
+              record.value.revision !== request.migration.expectedRevision
+            ) {
+              abort("CONFLICT", "Migration already completed or lease changed");
+              return;
+            }
+            const next = nextRevision(record.value.revision);
+            if (!next.ok) {
+              abort(next.error.code, next.error.message);
+              return;
+            }
+            const updated: MigrationRecord = {
+              ...record.value,
+              revision: next.value,
+              status: "imported",
+              completedAt: at,
+              updatedAt: at,
+            };
+            tx.objectStore("migration").put(updated);
+            add({ store: "migration", id: updated.id }, updated.revision);
+          }
+          for (const [key, record] of output) {
+            const store = key.slice(0, key.indexOf(":")) as "global" | "workspaces" | "documents";
+            tx.objectStore(store).put(record);
+            if (store === "global") add({ store, id: "global" }, record.revision);
+            else if (store === "workspaces")
+              add({ store, id: record.id as WorkspaceId }, record.revision);
+            else add({ store, id: record.id as DocumentId }, record.revision);
+          }
+        } catch (cause) {
+          const mapped = fromException(cause);
+          abort(mapped.code, mapped.message);
+        }
+      };
+      // Register transaction handlers before scheduling; even a synchronous
+      // IndexedDB request exception must produce a typed Result, not a rejected Promise.
       // Every valid request schedules at least one get; apply stays inside its last onsuccess.
       tx.oncomplete = () => {
         const receipt: CommitReceipt = { changed, revisions, committedAt: at };
@@ -558,171 +727,6 @@ export class CanvasPersistence {
           failure ? { ok: false, error: failure } : errorResult(tx.error, "TRANSACTION_ABORTED"),
         );
       try {
-        for (const m of request.mutations) {
-              if (
-                m.kind === "createDocument" ||
-                m.kind === "updateDocument" ||
-                m.kind === "deleteDocument"
-              )
-                continue;
-              const store = m.kind === "putGlobal" ? "global" : "workspaces";
-              const id = m.kind === "putGlobal" ? "global" : m.id;
-              const parsed = requireRevision(
-                current.get(`${store}:${id}`),
-                m.expectedRevision,
-                store,
-              );
-              if (!parsed.ok) {
-                abort(parsed.error.code, parsed.error.message);
-                return;
-              }
-              const revision = m.kind === "createWorkspace" ? (0 as Revision) : parsed.value;
-              if (m.kind === "putGlobal") {
-                const row: GlobalRecord = {
-                  id: "global",
-                  schemaVersion: APPLICATION_SCHEMA_VERSION,
-                  revision,
-                  updatedAt: at,
-                  data: m.data,
-                };
-                output.set(`global:${id}`, row);
-              } else {
-                const old = current.get(`workspaces:${id}`) as WorkspaceRecord | undefined;
-                const row: WorkspaceRecord = {
-                  id: m.id,
-                  schemaVersion: APPLICATION_SCHEMA_VERSION,
-                  revision,
-                  updatedAt: at,
-                  data: m.kind === "deleteWorkspace" ? old!.data : m.data,
-                  ...(m.kind === "deleteWorkspace" ? { deletedAt: at } : {}),
-                };
-                output.set(`workspaces:${id}`, row);
-                parentStates.set(m.id, m.kind === "deleteWorkspace" ? null : row);
-              }
-            }
-            // Validate every document and its owning workspace before any put.
-            for (const m of request.mutations) {
-              if (
-                m.kind !== "createDocument" &&
-                m.kind !== "updateDocument" &&
-                m.kind !== "deleteDocument"
-              )
-                continue;
-              const previous = current.get(`documents:${m.id}`);
-              const parsed = requireRevision(previous, m.expectedRevision, "documents");
-              if (!parsed.ok) {
-                abort(parsed.error.code, parsed.error.message);
-                return;
-              }
-              if (
-                previous !== undefined &&
-                (previous as EditableDocument).workspaceId !== m.workspaceId
-              ) {
-                abort("INVALID_STATE", "Document cannot change owning workspace");
-                return;
-              }
-              const parent = parentStates.has(m.workspaceId)
-                ? (parentStates.get(m.workspaceId) ??
-                  (m.kind === "deleteDocument" ? current.get(`workspaces:${m.workspaceId}`) : null))
-                : current.get(`workspaces:${m.workspaceId}`);
-              if (!parent) {
-                abort("NOT_FOUND", "Document owner workspace does not exist");
-                return;
-              }
-              const checked = validateWorkspace(parent);
-              if (!checked.ok) {
-                abort(checked.error.code, checked.error.message);
-                return;
-              }
-              if (checked.value.deletedAt) {
-                abort("INVALID_STATE", "Document owner workspace is deleted");
-                return;
-              }
-              const row: EditableDocument = {
-                id: m.id,
-                workspaceId: m.workspaceId,
-                schemaVersion: APPLICATION_SCHEMA_VERSION,
-                revision: m.kind === "createDocument" ? (0 as Revision) : parsed.value,
-                updatedAt: at,
-                data: m.kind === "deleteDocument" ? (previous as EditableDocument).data : m.data,
-                ...(m.kind === "deleteDocument" ? { deletedAt: at } : {}),
-              };
-              output.set(`documents:${m.id}`, row);
-            }
-            // A workspace deletion must name every live child with its own expected
-            // revision. Implicit cascades would violate the CAS rule for each record.
-            for (const id of deleting) {
-              for (const raw of owned.get(id) ?? []) {
-                const parsed = validateDocument(raw);
-                if (!parsed.ok) {
-                  abort(parsed.error.code, parsed.error.message);
-                  return;
-                }
-                if (parsed.value.workspaceId !== id) {
-                  abort("CORRUPT_RECORD", "Document owner index mismatch");
-                  return;
-                }
-                if (parsed.value.deletedAt) continue;
-                const planned = output.get(`documents:${parsed.value.id}`) as
-                  | EditableDocument
-                  | undefined;
-                if (!planned?.deletedAt || planned.workspaceId !== id) {
-                  abort(
-                    "INVALID_STATE",
-                    "Deleting a workspace requires explicit CAS deletion of every live document",
-                  );
-                  return;
-                }
-              }
-            }
-            if (request.migration) {
-              const raw = current.get(`migration:${migrationId(request.migration.key)}`);
-              const backupRaw = current.get(`backups:${migrationId(request.migration.key)}`);
-              if (raw === undefined || backupRaw === undefined) {
-                abort("MIGRATION_FAILED", "Migration lease or raw backup missing");
-                return;
-              }
-              const record = validateMigration(raw);
-              const backup = validateBackup(backupRaw);
-              if (!record.ok || !backup.ok) {
-                abort("CORRUPT_RECORD", "Migration record or backup corrupt");
-                return;
-              }
-              if (
-                record.value.status !== "started" ||
-                record.value.revision !== request.migration.expectedRevision
-              ) {
-                abort("CONFLICT", "Migration already completed or lease changed");
-                return;
-              }
-              const next = nextRevision(record.value.revision);
-              if (!next.ok) {
-                abort(next.error.code, next.error.message);
-                return;
-              }
-              const updated: MigrationRecord = {
-                ...record.value,
-                revision: next.value,
-                status: "imported",
-                completedAt: at,
-                updatedAt: at,
-              };
-              tx.objectStore("migration").put(updated);
-              add({ store: "migration", id: updated.id }, updated.revision);
-            }
-            for (const [key, record] of output) {
-              const store = key.slice(0, key.indexOf(":")) as "global" | "workspaces" | "documents";
-              tx.objectStore(store).put(record);
-              if (store === "global") add({ store, id: "global" }, record.revision);
-              else if (store === "workspaces")
-                add({ store, id: record.id as WorkspaceId }, record.revision);
-              else add({ store, id: record.id as DocumentId }, record.revision);
-            }
-          } catch (cause) {
-            const mapped = fromException(cause);
-            abort(mapped.code, mapped.message);
-          }
-        };
         for (const m of request.mutations) {
           if (m.kind === "putGlobal") get("global", "global");
           else if (
