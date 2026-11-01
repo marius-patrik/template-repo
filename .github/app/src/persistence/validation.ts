@@ -1,63 +1,30 @@
 import { fail, ok, type Result } from "../domain/errors";
 import {
-  APPLICATION_SCHEMA_VERSION,
-  type DocumentId,
-  type EditableDocument,
-  type GlobalRecord,
-  type JsonObject,
-  type MigrationRecord,
-  type PanelId,
-  type Revision,
-  type WindowId,
-  type WorkspaceId,
-  type WorkspaceRecord,
-  type LegacyBackup,
+  APPLICATION_SCHEMA_VERSION, type DocumentId, type EditableDocument, type GlobalRecord,
+  type JsonObject, type MigrationRecord, type PanelId, type Revision, type WindowId,
+  type WorkspaceId, type WorkspaceRecord, type LegacyBackup,
 } from "../domain/types";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-export function asWorkspaceId(value: unknown): Result<WorkspaceId> {
-  return parseUuid(value) as Result<WorkspaceId>;
-}
-export function asPanelId(value: unknown): Result<PanelId> {
-  return parseUuid(value) as Result<PanelId>;
-}
-export function asDocumentId(value: unknown): Result<DocumentId> {
-  return parseUuid(value) as Result<DocumentId>;
-}
-export function asWindowId(value: unknown): Result<WindowId> {
-  return parseUuid(value) as Result<WindowId>;
-}
+export function asWorkspaceId(value: unknown): Result<WorkspaceId> { return parseUuid(value) as Result<WorkspaceId>; }
+export function asPanelId(value: unknown): Result<PanelId> { return parseUuid(value) as Result<PanelId>; }
+export function asDocumentId(value: unknown): Result<DocumentId> { return parseUuid(value) as Result<DocumentId>; }
+export function asWindowId(value: unknown): Result<WindowId> { return parseUuid(value) as Result<WindowId>; }
 function parseUuid(value: unknown): Result<string> {
   return typeof value === "string" && UUID.test(value)
-    ? ok(value.toLowerCase())
-    : fail("INVALID_INPUT", "Identity must be a canonical UUID");
+    ? ok(value.toLowerCase()) : fail("INVALID_INPUT", "Identity must be a canonical UUID");
 }
-export function newWorkspaceId(): Result<WorkspaceId> {
-  return newId(asWorkspaceId);
-}
-export function newPanelId(): Result<PanelId> {
-  return newId(asPanelId);
-}
-export function newDocumentId(): Result<DocumentId> {
-  return newId(asDocumentId);
-}
-export function newWindowId(): Result<WindowId> {
-  return newId(asWindowId);
-}
+export function newWorkspaceId(): Result<WorkspaceId> { return newId(asWorkspaceId); }
+export function newPanelId(): Result<PanelId> { return newId(asPanelId); }
+export function newDocumentId(): Result<DocumentId> { return newId(asDocumentId); }
+export function newWindowId(): Result<WindowId> { return newId(asWindowId); }
 function newId<T>(parse: (value: unknown) => Result<T>): Result<T> {
-  try {
-    return parse(globalThis.crypto.randomUUID());
-  } catch {
-    return fail("STORAGE_UNAVAILABLE", "Secure UUID generation unavailable");
-  }
+  try { return parse(globalThis.crypto.randomUUID()); }
+  catch { return fail("STORAGE_UNAVAILABLE", "Secure UUID generation unavailable"); }
 }
 export function asRevision(value: unknown): Result<Revision> {
-  return typeof value === "number" &&
-    Number.isSafeInteger(value) &&
-    value >= 0 &&
-    value < Number.MAX_SAFE_INTEGER
-    ? ok(value as Revision)
-    : fail("INVALID_INPUT", "Revision must be a nonnegative safe integer");
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 && value < Number.MAX_SAFE_INTEGER
+    ? ok(value as Revision) : fail("INVALID_INPUT", "Revision must be a nonnegative safe integer");
 }
 export function nextRevision(value: Revision): Result<Revision> {
   return asRevision(value + 1);
@@ -78,59 +45,39 @@ export function asJsonObject(value: unknown): Result<JsonObject> {
     if (Array.isArray(v)) {
       seen.add(v);
       const keys = Reflect.ownKeys(v);
-      const good =
-        keys.length === v.length + 1 &&
-        keys.every((key) => {
-          if (key === "length") return true;
-          if (typeof key !== "string" || !/^(0|[1-9][0-9]*)$/.test(key) || Number(key) >= v.length)
-            return false;
-          const descriptor = Object.getOwnPropertyDescriptor(v, key);
-          return (
-            descriptor?.enumerable === true &&
-            "value" in descriptor &&
-            walk(descriptor.value, depth + 1)
-          );
-        });
+      const good = keys.length === v.length + 1 && keys.every((key) => {
+        if (key === "length") return true;
+        if (typeof key !== "string" || !/^(0|[1-9][0-9]*)$/.test(key) || Number(key) >= v.length) return false;
+        const descriptor = Object.getOwnPropertyDescriptor(v, key);
+        return descriptor?.enumerable === true && "value" in descriptor && walk(descriptor.value, depth + 1);
+      });
       seen.delete(v);
       return good;
     }
     if (proto !== Object.prototype && proto !== null) return false;
     seen.add(v);
     const good = Reflect.ownKeys(v).every((key) => {
-      if (typeof key !== "string" || ["__proto__", "constructor", "prototype"].includes(key))
-        return false;
+      if (typeof key !== "string" || ["__proto__", "constructor", "prototype"].includes(key)) return false;
       const descriptor = Object.getOwnPropertyDescriptor(v, key);
-      return (
-        descriptor?.enumerable === true &&
-        "value" in descriptor &&
-        walk(descriptor.value, depth + 1)
-      );
+      return descriptor?.enumerable === true && "value" in descriptor && walk(descriptor.value, depth + 1);
     });
     seen.delete(v);
     return good;
   }
   try {
     return value !== null && typeof value === "object" && !Array.isArray(value) && walk(value, 0)
-      ? ok(value as JsonObject)
-      : fail("INVALID_INPUT", "Data must be a plain, finite, acyclic JSON object");
+      ? ok(value as JsonObject) : fail("INVALID_INPUT", "Data must be a plain, finite, acyclic JSON object");
   } catch {
     return fail("INVALID_INPUT", "Data contains unreadable properties or unsupported proxies");
   }
 }
 function recordEnvelope(v: unknown): Result<Record<string, unknown>> {
-  if (!v || typeof v !== "object" || Array.isArray(v))
-    return fail("CORRUPT_RECORD", "Stored record is not an object");
+  if (!v || typeof v !== "object" || Array.isArray(v)) return fail("CORRUPT_RECORD", "Stored record is not an object");
   const record = v as Record<string, unknown>;
   if (record.schemaVersion !== APPLICATION_SCHEMA_VERSION) {
-    return fail("UNSUPPORTED_SCHEMA", "Stored record schema differs from 3", {
-      found: String(record.schemaVersion),
-    });
+    return fail("UNSUPPORTED_SCHEMA", "Stored record schema differs from 3", { found: String(record.schemaVersion) });
   }
-  if (
-    !asRevision(record.revision).ok ||
-    typeof record.updatedAt !== "string" ||
-    !Number.isFinite(Date.parse(record.updatedAt))
-  )
+  if (!asRevision(record.revision).ok || typeof record.updatedAt !== "string" || !Number.isFinite(Date.parse(record.updatedAt)))
     return fail("CORRUPT_RECORD", "Stored revision or timestamp is invalid");
   return ok(record);
 }
@@ -144,10 +91,8 @@ export function validateGlobal(value: unknown): Result<GlobalRecord> {
 export function validateWorkspace(value: unknown): Result<WorkspaceRecord> {
   const base = recordEnvelope(value);
   if (!base.ok) return base;
-  if (
-    !asWorkspaceId(base.value.id).ok ||
-    !asJsonObject(base.value.data).ok ||
-    (base.value.deletedAt !== undefined &&
+  if (!asWorkspaceId(base.value.id).ok || !asJsonObject(base.value.data).ok ||
+      (base.value.deletedAt !== undefined && (typeof base.value.deletedAt !== "string" || !Number.isFinite(Date.parse(base.value.deletedAt)))))
     return fail("CORRUPT_RECORD", "Invalid workspace record");
   return ok(value as WorkspaceRecord);
 }

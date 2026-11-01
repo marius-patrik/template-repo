@@ -1,40 +1,15 @@
 import { fail, fromException, ok, type Result, type StorageError } from "../domain/errors";
 import {
-  APPLICATION_SCHEMA_VERSION,
-  DATABASE_NAME,
-  INDEXED_DB_VERSION,
-  type CommitReceipt,
-  type DocumentId,
-  type EditableDocument,
-  type GlobalRecord,
-  type Invalidation,
-  type InvalidationListener,
-  type LegacyBackup,
-  type LegacyValue,
-  type MigrationLease,
-  type MigrationRecord,
-  type MigrationStatus,
-  type Mutation,
-  type RecordRef,
-  type Revision,
-  type TransactionRequest,
-  type WindowId,
-  type WorkspaceId,
+  APPLICATION_SCHEMA_VERSION, DATABASE_NAME, INDEXED_DB_VERSION,
+  type CommitReceipt, type DocumentId, type EditableDocument, type GlobalRecord,
+  type Invalidation, type InvalidationListener, type LegacyBackup, type LegacyValue,
+  type MigrationLease, type MigrationRecord, type MigrationStatus, type Mutation, type RecordRef,
+  type Revision, type TransactionRequest, type WindowId, type WorkspaceId,
   type WorkspaceRecord,
 } from "../domain/types";
 import {
-  asDocumentId,
-  asJsonObject,
-  asRevision,
-  asWindowId,
-  asWorkspaceId,
-  newWindowId,
-  nextRevision,
-  validKey,
-  validateBackup,
-  validateDocument,
-  validateGlobal,
-  validateMigration,
+  asDocumentId, asJsonObject, asRevision, asWindowId, asWorkspaceId, newWindowId, nextRevision,
+  validKey, validateBackup, validateDocument, validateGlobal, validateMigration,
   validateWorkspace,
 } from "./validation";
 
@@ -55,43 +30,26 @@ function errorResult<T>(cause: unknown, fallback: StorageError["code"] = "INTERN
   return { ok: false, error: fromException(cause, fallback) };
 }
 function validateMutation(m: Mutation): Result<RecordRef> {
-  if (!m || typeof m !== "object" || typeof m.kind !== "string")
-    return fail("INVALID_INPUT", "Mutation is not an object");
+  if (!m || typeof m !== "object" || typeof m.kind !== "string") return fail("INVALID_INPUT", "Mutation is not an object");
   if (m.kind === "putGlobal") {
     return asRevision(m.expectedRevision).ok && asJsonObject(m.data).ok
-      ? ok({ store: "global", id: "global" })
-      : fail("INVALID_INPUT", "Invalid global mutation");
+      ? ok({ store: "global", id: "global" }) : fail("INVALID_INPUT", "Invalid global mutation");
   }
-  if (
-    m.kind === "createWorkspace" ||
-    m.kind === "updateWorkspace" ||
-    m.kind === "deleteWorkspace"
-  ) {
-    if (!asWorkspaceId((m as { id: unknown }).id).ok)
-      return fail("INVALID_INPUT", "Workspace ID is not a UUID");
-    if (
-      (m.kind === "createWorkspace") !== (m.expectedRevision === null) ||
-      (m.expectedRevision !== null && !asRevision(m.expectedRevision).ok)
-    )
+  if (m.kind === "createWorkspace" || m.kind === "updateWorkspace" || m.kind === "deleteWorkspace") {
+    if (!asWorkspaceId((m as { id: unknown }).id).ok) return fail("INVALID_INPUT", "Workspace ID is not a UUID");
+    if ((m.kind === "createWorkspace") !== (m.expectedRevision === null) ||
+      (m.expectedRevision !== null && !asRevision(m.expectedRevision).ok))
       return fail("INVALID_INPUT", "Invalid expected workspace revision");
-    if (m.kind !== "deleteWorkspace" && !asJsonObject(m.data).ok)
-      return fail("INVALID_INPUT", "Invalid workspace data");
+    if (m.kind !== "deleteWorkspace" && !asJsonObject(m.data).ok) return fail("INVALID_INPUT", "Invalid workspace data");
     return ok({ store: "workspaces", id: m.id });
   }
   if (m.kind === "createDocument" || m.kind === "updateDocument" || m.kind === "deleteDocument") {
-    const d = m as Extract<
-      Mutation,
-      { kind: "createDocument" | "updateDocument" | "deleteDocument" }
-    >;
-    if (!asDocumentId(d.id).ok || !asWorkspaceId(d.workspaceId).ok)
-      return fail("INVALID_INPUT", "Invalid document or workspace UUID");
-    if (
-      (d.kind === "createDocument") !== (d.expectedRevision === null) ||
-      (d.expectedRevision !== null && !asRevision(d.expectedRevision).ok)
-    )
+    const d = m as Extract<Mutation, { kind: "createDocument" | "updateDocument" | "deleteDocument" }>;
+    if (!asDocumentId(d.id).ok || !asWorkspaceId(d.workspaceId).ok) return fail("INVALID_INPUT", "Invalid document or workspace UUID");
+    if ((d.kind === "createDocument") !== (d.expectedRevision === null) ||
+      (d.expectedRevision !== null && !asRevision(d.expectedRevision).ok))
       return fail("INVALID_INPUT", "Invalid expected document revision");
-    if (d.kind !== "deleteDocument" && !asJsonObject(d.data).ok)
-      return fail("INVALID_INPUT", "Invalid document data");
+    if (d.kind !== "deleteDocument" && !asJsonObject(d.data).ok) return fail("INVALID_INPUT", "Invalid document data");
     return ok({ store: "documents", id: d.id });
   }
   return fail("INVALID_INPUT", "Unknown mutation kind");
@@ -112,8 +70,7 @@ export class CanvasPersistence {
   constructor(options: InitOptions = {}) {
     this.databaseName = options.databaseName ?? DATABASE_NAME;
     this.factory = options.indexedDB ?? globalThis.indexedDB;
-    this.channelFactory =
-      options.broadcastChannelFactory ??
+    this.channelFactory = options.broadcastChannelFactory ??
       (typeof BroadcastChannel === "undefined" ? undefined : (name) => new BroadcastChannel(name));
     const id = options.windowId !== undefined ? asWindowId(options.windowId) : newWindowId();
     // Absent secure UUID source is a hard initialization error, never a shared sender ID.
@@ -121,41 +78,26 @@ export class CanvasPersistence {
   }
 
   initialize(): Promise<Result<void>> {
-    if (this.closed)
-      return Promise.resolve(fail("STORAGE_UNAVAILABLE", "Persistence adapter is closed"));
-    if (!this.windowId)
-      return Promise.resolve(fail("STORAGE_UNAVAILABLE", "Window UUID unavailable"));
-    if (!this.factory)
-      return Promise.resolve(fail("STORAGE_UNAVAILABLE", "IndexedDB is unavailable"));
+    if (this.closed) return Promise.resolve(fail("STORAGE_UNAVAILABLE", "Persistence adapter is closed"));
+    if (!this.windowId) return Promise.resolve(fail("STORAGE_UNAVAILABLE", "Window UUID unavailable"));
+    if (!this.factory) return Promise.resolve(fail("STORAGE_UNAVAILABLE", "IndexedDB is unavailable"));
     if (this.db) return Promise.resolve(ok(undefined));
     if (this.opening) return this.opening;
     this.opening = this.openDatabase();
-    return this.opening.finally(() => {
-      this.opening = null;
-    });
+    return this.opening.finally(() => { this.opening = null; });
   }
 
   private openDatabase(): Promise<Result<void>> {
     return new Promise((resolve) => {
       let request: IDBOpenDBRequest;
-      try {
-        request = this.factory!.open(this.databaseName, INDEXED_DB_VERSION);
-      } catch (error) {
-        resolve(errorResult(error, "STORAGE_UNAVAILABLE"));
-        return;
-      }
+      try { request = this.factory!.open(this.databaseName, INDEXED_DB_VERSION); }
+      catch (error) { resolve(errorResult(error, "STORAGE_UNAVAILABLE")); return; }
       let settled = false;
-      const finish = (r: Result<void>) => {
-        if (!settled) {
-          settled = true;
-          resolve(r);
-        }
-      };
+      const finish = (r: Result<void>) => { if (!settled) { settled = true; resolve(r); } };
       request.onupgradeneeded = () => {
         const db = request.result;
         // Schema version 1 is structural. Application records independently use schema 3.
-        if (!db.objectStoreNames.contains("global"))
-          db.createObjectStore("global", { keyPath: "id" });
+        if (!db.objectStoreNames.contains("global")) db.createObjectStore("global", { keyPath: "id" });
         if (!db.objectStoreNames.contains("workspaces")) {
           const s = db.createObjectStore("workspaces", { keyPath: "id" });
           s.createIndex("byDeletedAt", "deletedAt", { unique: false });

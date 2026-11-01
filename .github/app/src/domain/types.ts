@@ -49,43 +49,12 @@ export interface EditableDocument extends PersistentRecord {
 }
 export type Mutation =
   | { readonly kind: "putGlobal"; readonly expectedRevision: Revision; readonly data: JsonObject }
-  | {
-      readonly kind: "createWorkspace";
-      readonly id: WorkspaceId;
-      readonly expectedRevision: null;
-      readonly data: JsonObject;
-    }
-  | {
-      readonly kind: "updateWorkspace";
-      readonly id: WorkspaceId;
-      readonly expectedRevision: Revision;
-      readonly data: JsonObject;
-    }
-  | {
-      readonly kind: "deleteWorkspace";
-      readonly id: WorkspaceId;
-      readonly expectedRevision: Revision;
-    }
-  | {
-      readonly kind: "createDocument";
-      readonly id: DocumentId;
-      readonly workspaceId: WorkspaceId;
-      readonly expectedRevision: null;
-      readonly data: JsonObject;
-    }
-  | {
-      readonly kind: "updateDocument";
-      readonly id: DocumentId;
-      readonly workspaceId: WorkspaceId;
-      readonly expectedRevision: Revision;
-      readonly data: JsonObject;
-    }
-  | {
-      readonly kind: "deleteDocument";
-      readonly id: DocumentId;
-      readonly workspaceId: WorkspaceId;
-      readonly expectedRevision: Revision;
-    };
+  | { readonly kind: "createWorkspace"; readonly id: WorkspaceId; readonly expectedRevision: null; readonly data: JsonObject }
+  | { readonly kind: "updateWorkspace"; readonly id: WorkspaceId; readonly expectedRevision: Revision; readonly data: JsonObject }
+  | { readonly kind: "deleteWorkspace"; readonly id: WorkspaceId; readonly expectedRevision: Revision }
+  | { readonly kind: "createDocument"; readonly id: DocumentId; readonly workspaceId: WorkspaceId; readonly expectedRevision: null; readonly data: JsonObject }
+  | { readonly kind: "updateDocument"; readonly id: DocumentId; readonly workspaceId: WorkspaceId; readonly expectedRevision: Revision; readonly data: JsonObject }
+  | { readonly kind: "deleteDocument"; readonly id: DocumentId; readonly workspaceId: WorkspaceId; readonly expectedRevision: Revision };
 
 /** Completion is deliberately included in the *same* commit as converted records. */
 export type MigrationCompletion = {
@@ -109,10 +78,7 @@ export interface Invalidation {
 }
 export type InvalidationListener = (event: Invalidation) => void;
 
-export interface LegacyValue {
-  readonly key: string;
-  readonly raw: string | null;
-}
+export interface LegacyValue { readonly key: string; readonly raw: string | null }
 export interface LegacyBackup extends PersistentRecord {
   readonly id: string;
   readonly key: string;
@@ -129,8 +95,4 @@ export interface MigrationRecord extends PersistentRecord {
   readonly startedAt: string;
   readonly completedAt?: string;
 }
-export interface MigrationLease {
-  readonly key: string;
-  readonly revision: Revision;
-  readonly backupId: string;
-}
+export interface MigrationLease { readonly key: string; readonly revision: Revision; readonly backupId: string }
