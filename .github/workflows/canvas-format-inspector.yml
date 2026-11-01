@@ -1,0 +1,34 @@
+name: Normalize Canvas graph inspector
+on:
+  push:
+    branches: [feat/canvas-react-pages]
+    paths:
+      - '.github/workflows/canvas-format-inspector.yml'
+permissions:
+  contents: write
+concurrency:
+  group: canvas-format-inspector
+  cancel-in-progress: false
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.3.11'
+      - name: Normalize inspector source and styles
+        working-directory: .github/app
+        run: |
+          bun install --frozen-lockfile
+          bunx biome format --write src/Canvas.tsx src/canvas-content.css
+      - name: Commit formatting
+        run: |
+          if git diff --quiet -- .github/app/src; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/app/src
+          git commit -m 'style(canvas): normalize graph inspector implementation'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
