@@ -270,7 +270,7 @@ try {
   });
 
   await test("Cross-window invalidation carries IDs but not contents", async () => {
-    const p2 = await browser.newPage(); await p2.goto(origin);
+    const p2 = await page.context().newPage(); await p2.goto(origin);
     const name = unique();
     const result = await inBrowser(page, async (name) => {
       const a = new window.C01.CanvasPersistence({ databaseName: name }); await a.initialize();
