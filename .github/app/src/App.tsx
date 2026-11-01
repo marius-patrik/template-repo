@@ -89,6 +89,14 @@ export default function App() {
   const icon = (name: string, size = 18) => <AnimatedIcon name={name} size={size} />;
   const nav = () => <Navigator current={route} onNavigate={go} onProfile={selectProfile} />;
   const sidebarVisible = expanded || mobileOpen;
+  const platformMod = /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘" : "Ctrl";
+  const modifierLabel =
+    prefs.modifierKey === "control" ? "Ctrl"
+      : prefs.modifierKey === "command" ? "⌘"
+        : prefs.modifierKey === "custom"
+          ? prefs.customModifier.replaceAll("Meta", "⌘").replaceAll("Alt", "⌥").replaceAll("Shift", "⇧")
+          : platformMod;
+
   const navActions = POSITIONS.navigation.map((position) => ({
     label: `${t("Navigation position")} · ${t(position)}`,
     icon: "move",
@@ -242,7 +250,7 @@ export default function App() {
                   <button type="button" className="cx-add-tab sidebar-new-tab" onClick={newTab}>
                     {icon("plus", 16)}
                     <span>{t("New tab")}</span>
-                    <span className="cx-add-shortcut">⌘T</span>
+                    <span className="cx-add-shortcut">{modifierLabel}+T</span>
                   </button>
                   <SidebarContents current={route} onNavigate={go} />
                   <div className="cx-sidebar-foot">{context.repository}</div>

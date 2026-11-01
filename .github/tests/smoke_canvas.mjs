@@ -24,6 +24,11 @@ try {
   await mobile.locator(".cx-overview-scroll").waitFor();
   const mobileModes = await mobile.locator(".cx-viewbar-modes button .app-icon").count();
   if (mobileModes !== 3) throw new Error("Mobile Canvas modes must expose three icons");
+  const mobileDock = await mobile.getByTestId("activity-bar").boundingBox();
+  const mobileWorkArea = await mobile.locator(".cx-workarea").boundingBox();
+  if (!mobileDock || !mobileWorkArea || mobileDock.width < mobileWorkArea.width - 2 ||
+      mobileDock.y < mobileWorkArea.y + mobileWorkArea.height - 55)
+    throw new Error("Mobile activity navigation must use a full-width bottom dock");
   if (await mobile.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2))
     throw new Error("Mobile Canvas overflows the viewport horizontally");
   await mobile.close();
