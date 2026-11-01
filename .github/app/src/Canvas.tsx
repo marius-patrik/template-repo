@@ -71,7 +71,7 @@ function sourceLinks(): Array<readonly [string, string]> {
 const edgesOfDocuments = sourceLinks();
 const groupCounts = categories.map((name) => ({
   name,
-  count: documents.filter((doc) => categoryOf(doc.path) === name).length,
+  count: allPaths.filter((path) => categoryOf(path) === name).length,
 }));
 const relevant = (perspective: Perspective) => {
   if (perspective === "agents")
