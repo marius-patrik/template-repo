@@ -29,8 +29,6 @@ jobs:
       contents: read
       pull-requests: read
     uses: ./.github/workflows/darkfactory-control.yml
-    with:
-      mode: quality
 
   governed-agent:
     if: github.event_name == 'issues' || github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment'
@@ -40,9 +38,11 @@ jobs:
       pull-requests: write
       actions: write
       repository-projects: write
-    uses: ./.github/workflows/darkfactory-control.yml
+    uses: marius-patrik/DarkFactory/.github/workflows/agent.yml@fc5896c9ffbf9b1ac5762a271ec2b26ee0efafd4
     with:
-      mode: agent
+      pipeline-ref: "fc5896c9ffbf9b1ac5762a271ec2b26ee0efafd4"
+      pipeline-repo: marius-patrik/DarkFactory
+      agent-enabled: ${{ vars.AGENT_ENABLED }}
     secrets: inherit
 
   governed-approvals:
@@ -52,7 +52,8 @@ jobs:
       issues: write
       pull-requests: write
       repository-projects: write
-    uses: ./.github/workflows/darkfactory-control.yml
+    uses: marius-patrik/DarkFactory/.github/workflows/pr-approval-automerge.yml@fc5896c9ffbf9b1ac5762a271ec2b26ee0efafd4
     with:
-      mode: approvals
+      pipeline-ref: "fc5896c9ffbf9b1ac5762a271ec2b26ee0efafd4"
+      pipeline-repo: marius-patrik/DarkFactory
     secrets: inherit
