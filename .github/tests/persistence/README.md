@@ -1,0 +1,3 @@
+# C01 browser transaction suite
+
+Run from repository root: `node .github/tests/persistence/domain-contract.mjs` (offline validation suite) and `node .github/tests/persistence/canvas-persistence.mjs` (full browser suite). An installed Chromium may be selected with `CANVAS_TEST_CHROMIUM=/path/to/chromium`. Uses the installed `typescript` and `playwright` developer dependencies from `.github/app`, a temporary localhost server, and real Chromium IndexedDB. No IndexedDB mocking or application edits. The test harness transpiles C01 source files into an isolated temporary directory, so the candidate application remains untouched.
