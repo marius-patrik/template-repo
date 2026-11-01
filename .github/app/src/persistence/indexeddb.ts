@@ -745,7 +745,7 @@ export class CanvasPersistence {
           get("migration", migrationId(request.migration.key));
           get("backups", migrationId(request.migration.key));
         }
-        } catch (cause) {
+      } catch (cause) {
         const mapped = fromException(cause, "TRANSACTION_ABORTED");
         abort(mapped.code, mapped.message);
       }
