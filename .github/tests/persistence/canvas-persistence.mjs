@@ -389,6 +389,99 @@ try {
     assert(result.recovered.ok && result.global.ok && result.global.value.revision === 0, JSON.stringify(result));
   });
 
+
+  await test("Document indexed-read request failures return typed Results", async () => {
+    const result = await inBrowser(page, async (name) => {
+      const c = window.C01; const a = new c.CanvasPersistence({ databaseName: name }); await a.initialize();
+      const ws = c.newWorkspaceId().value, doc = c.newDocumentId().value;
+      await a.commit({ mutations: [
+        { kind: "createWorkspace", id: ws, expectedRevision: null, data: {} },
+        { kind: "createDocument", id: doc, workspaceId: ws, expectedRevision: null, data: { original: true } },
+      ] });
+      const original = IDBIndex.prototype.getAll;
+      IDBIndex.prototype.getAll = function(...args) {
+        if (this.name === "byWorkspace") throw new DOMException("forced getAll failure", "InvalidStateError");
+        return original.apply(this, args);
+      };
+      let failed;
+      try { failed = await a.readDocuments(ws); }
+      finally { IDBIndex.prototype.getAll = original; }
+      const restored = await a.readDocuments(ws);
+      a.close(); return { failed, restored };
+    }, unique());
+    assert(!result.failed.ok && result.failed.error.code === "STORAGE_UNAVAILABLE", JSON.stringify(result));
+    assert(result.restored.ok && result.restored.value.length === 1, JSON.stringify(result));
+  });
+
+  await test("Migration query failures remain typed and cannot create backups", async () => {
+    const key = `legacy:${crypto.randomUUID()}`;
+    const result = await inBrowser(page, async ({ name, key }) => {
+      const c = window.C01; const a = new c.CanvasPersistence({ databaseName: name }); await a.initialize();
+      localStorage.setItem(key, "migration raw");
+      const original = IDBObjectStore.prototype.get;
+      IDBObjectStore.prototype.get = function(...args) {
+        if (this.name === "migration") throw new DOMException("forced get failure", "InvalidStateError");
+        return original.apply(this, args);
+      };
+      let begin, mark, resume;
+      try {
+        begin = await a.beginLegacyMigration(key);
+        mark = await a.markLegacyMigrationFailed(key, 0);
+        resume = await a.resumeLegacyMigration(key, 0);
+      } finally { IDBObjectStore.prototype.get = original; }
+      const originalAll = IDBObjectStore.prototype.getAll;
+      IDBObjectStore.prototype.getAll = function(...args) {
+        if (this.name === "migration") throw new DOMException("forced getAll failure", "InvalidStateError");
+        return originalAll.apply(this, args);
+      };
+      let listed;
+      try { listed = await a.listMigrations(); }
+      finally { IDBObjectStore.prototype.getAll = originalAll; }
+      const backup = await a.readBackup(key), marker = await a.readMigration(key);
+      localStorage.removeItem(key); a.close(); return { begin, mark, resume, listed, backup, marker };
+    }, { name: unique(), key });
+    for (const op of ["begin", "mark", "resume", "listed"]) {
+      assert(!result[op].ok && result[op].error.code === "STORAGE_UNAVAILABLE", JSON.stringify(result));
+    }
+    assert(result.backup.ok && result.backup.value === null && result.marker.ok && result.marker.value === null, JSON.stringify(result));
+  });
+
+  await test("Migration write failures preserve atomic backups and revision leases", async () => {
+    const key = `legacy:${crypto.randomUUID()}`;
+    const result = await inBrowser(page, async ({ name, key }) => {
+      const c = window.C01; const a = new c.CanvasPersistence({ databaseName: name }); await a.initialize();
+      localStorage.setItem(key, "immutable original");
+      const original = IDBObjectStore.prototype.put;
+      IDBObjectStore.prototype.put = function(...args) {
+        if (this.name === "migration") throw new DOMException("forced quota failure", "QuotaExceededError");
+        return original.apply(this, args);
+      };
+      let initial;
+      try { initial = await a.beginLegacyMigration(key); }
+      finally { IDBObjectStore.prototype.put = original; }
+      const firstBackup = await a.readBackup(key);
+      const begun = await a.beginLegacyMigration(key);
+      IDBObjectStore.prototype.put = function(...args) {
+        if (this.name === "migration") throw new DOMException("forced quota failure", "QuotaExceededError");
+        return original.apply(this, args);
+      };
+      let mark, resume;
+      try {
+        mark = await a.markLegacyMigrationFailed(key, begun.value.revision);
+        resume = await a.resumeLegacyMigration(key, begun.value.revision);
+      } finally { IDBObjectStore.prototype.put = original; }
+      const marker = await a.readMigration(key), backup = await a.readBackup(key);
+      localStorage.removeItem(key); a.close();
+      return { initial, firstBackup, begun, mark, resume, marker, backup };
+    }, { name: unique(), key });
+    assert(!result.initial.ok && result.initial.error.code === "QUOTA_EXCEEDED", JSON.stringify(result));
+    assert(result.firstBackup.ok && result.firstBackup.value === null && result.begun.ok, JSON.stringify(result));
+    assert(!result.mark.ok && result.mark.error.code === "QUOTA_EXCEEDED", JSON.stringify(result));
+    assert(!result.resume.ok && result.resume.error.code === "QUOTA_EXCEEDED", JSON.stringify(result));
+    assert(result.marker.value.revision === 0 && result.marker.value.status === "started", JSON.stringify(result));
+    assert(result.backup.value.raw === "immutable original", JSON.stringify(result));
+  });
+
   await page.close();
 } finally {
   await browser?.close();
