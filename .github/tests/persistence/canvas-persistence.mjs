@@ -49,7 +49,8 @@ async function test(name, fn) {
 const inBrowser = (page, f, arg) => page.evaluate(f, arg);
 try {
   browser = await chromium.launch({ headless: true, executablePath: process.env.CANVAS_TEST_CHROMIUM || undefined });
-  const page = await browser.newPage();
+  const context = await browser.newContext();
+  const page = await context.newPage();
   await page.goto(origin);
   await page.evaluate(async () => { window.C01 = await import("/persistence/index.js"); });
 
