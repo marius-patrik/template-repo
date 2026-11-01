@@ -564,7 +564,10 @@ export default function Canvas() {
                       type="button"
                       key={entry.name}
                       className={entry.name === graphGroup ? "active" : ""}
-                      onClick={() => { setGraphGroup(entry.name); setSelected(null); }}
+                      onClick={() => {
+                        setGraphGroup(entry.name);
+                        setSelected(null);
+                      }}
                     >
                       {entry.name} <small>{entry.count}</small>
                     </button>
@@ -606,11 +609,18 @@ export default function Canvas() {
         </section>
         <aside className="canvas-inspector cx-repo-aside" aria-label={t("Repository context")}>
           <header className="canvas-inspector-heading cx-inspector-head">
-            <span className="cx-overline">{mode === "graph" ? "GRAPH INSPECTOR" : "SOURCE CONTEXT"}</span>
-            <strong>{mode === "graph"
-              ? inspectedPath ? basename(inspectedPath) : t("Select a node")
-              : perspective === "overview" ? t("Overview")
-              : t(panes.find((p) => p.id === perspective)?.label ?? "Overview")}</strong>
+            <span className="cx-overline">
+              {mode === "graph" ? "GRAPH INSPECTOR" : "SOURCE CONTEXT"}
+            </span>
+            <strong>
+              {mode === "graph"
+                ? inspectedPath
+                  ? basename(inspectedPath)
+                  : t("Select a node")
+                : perspective === "overview"
+                  ? t("Overview")
+                  : t(panes.find((p) => p.id === perspective)?.label ?? "Overview")}
+            </strong>
           </header>
           <div className="canvas-inspector-body cx-inspector-body">
             {mode === "graph" ? (
@@ -624,46 +634,82 @@ export default function Canvas() {
                       <span>{categoryOf(inspectedPath)}</span>
                       <span>{inspectedDocument ? t("Source document") : t("Indexed path")}</span>
                     </div>
-                    <p>{inspectedDocument
-                      ? extractSummary(inspectedDocument.content, 225)
-                      : t("This path is indexed in the repository snapshot, but its content is not part of the published allowlist.")}</p>
+                    <p>
+                      {inspectedDocument
+                        ? extractSummary(inspectedDocument.content, 225)
+                        : t(
+                            "This path is indexed in the repository snapshot, but its content is not part of the published allowlist.",
+                          )}
+                    </p>
                     {inspectedDocument && (
-                      <button type="button" className="cx-inspector-open" onClick={() => choose(inspectedPath)}>
-                        <AnimatedIcon name="artifacts" size={15} /> {t("Open document")} <AnimatedIcon name="right" size={15} />
+                      <button
+                        type="button"
+                        className="cx-inspector-open"
+                        onClick={() => choose(inspectedPath)}
+                      >
+                        <AnimatedIcon name="artifacts" size={15} /> {t("Open document")}{" "}
+                        <AnimatedIcon name="right" size={15} />
                       </button>
                     )}
                   </div>
                   <div className="cx-fact">
                     <span className="cx-fact-label">{t("Relationships")}</span>
                     <div className="cx-connection-counts">
-                      <div><strong>{inbound.length}</strong><span>{t("Incoming")}</span></div>
-                      <div><strong>{outbound.length}</strong><span>{t("Outgoing")}</span></div>
+                      <div>
+                        <strong>{inbound.length}</strong>
+                        <span>{t("Incoming")}</span>
+                      </div>
+                      <div>
+                        <strong>{outbound.length}</strong>
+                        <span>{t("Outgoing")}</span>
+                      </div>
                     </div>
                     {related.length > 0 ? (
                       <div className="cx-related-sources">
                         {related.slice(0, 8).map((path) => (
                           <button type="button" key={path} onClick={() => setSelected(path)}>
                             <AnimatedIcon name="artifacts" size={14} />
-                            <span>{basename(path)}<small>{outbound.includes(path) ? t("Referenced by this source") : t("References this source")}</small></span>
+                            <span>
+                              {basename(path)}
+                              <small>
+                                {outbound.includes(path)
+                                  ? t("Referenced by this source")
+                                  : t("References this source")}
+                              </small>
+                            </span>
                             <AnimatedIcon name="right" size={13} />
                           </button>
                         ))}
                       </div>
-                    ) : <p>{t("No resolved source links for this path in the current snapshot.")}</p>}
+                    ) : (
+                      <p>{t("No resolved source links for this path in the current snapshot.")}</p>
+                    )}
                   </div>
                 </>
               ) : (
                 <>
                   <div className="cx-inspector-empty">
-                    <div className="cx-inspector-empty-icon"><AnimatedIcon name="canvas" size={24} /></div>
+                    <div className="cx-inspector-empty-icon">
+                      <AnimatedIcon name="canvas" size={24} />
+                    </div>
                     <strong>{t("Explore relationships")}</strong>
-                    <p>{t("Select any node to inspect its source, incoming references and outgoing links. Double-click a published document to open it.")}</p>
+                    <p>
+                      {t(
+                        "Select any node to inspect its source, incoming references and outgoing links. Double-click a published document to open it.",
+                      )}
+                    </p>
                   </div>
                   <div className="cx-fact">
                     <span className="cx-fact-label">{t("Visible graph")}</span>
                     <div className="cx-connection-counts">
-                      <div><strong>{graph.members.length}</strong><span>{t("Indexed paths")}</span></div>
-                      <div><strong>{graph.edges.length}</strong><span>{t("Document links")}</span></div>
+                      <div>
+                        <strong>{graph.members.length}</strong>
+                        <span>{t("Indexed paths")}</span>
+                      </div>
+                      <div>
+                        <strong>{graph.edges.length}</strong>
+                        <span>{t("Document links")}</span>
+                      </div>
                     </div>
                   </div>
                 </>
@@ -675,9 +721,16 @@ export default function Canvas() {
                     <span className="cx-fact-label">{t("Current source")}</span>
                     <strong>{basename(focus.path)}</strong>
                     <div className="cx-mono">{focus.path}</div>
-                    <div className="cx-inspector-tags"><span>{categoryOf(focus.path)}</span><span>Markdown</span></div>
+                    <div className="cx-inspector-tags">
+                      <span>{categoryOf(focus.path)}</span>
+                      <span>Markdown</span>
+                    </div>
                     <p>{extractSummary(focus.content, 155)}</p>
-                    <button type="button" className="cx-text-action" onClick={() => void copy(focus.path)}>
+                    <button
+                      type="button"
+                      className="cx-text-action"
+                      onClick={() => void copy(focus.path)}
+                    >
                       <AnimatedIcon name="copy" size={14} /> {t("Copy source path")}
                     </button>
                   </div>
@@ -689,8 +742,14 @@ export default function Canvas() {
                 </div>
                 <div className="cx-fact">
                   <span className="cx-fact-label">{t("Publication")}</span>
-                  <div className="cx-readonly"><span className="cx-live-dot" /> {t("Static · read-only")}</div>
-                  <p>{t("Built from allowlisted Git-tracked documents. Local changes do not modify the repository.")}</p>
+                  <div className="cx-readonly">
+                    <span className="cx-live-dot" /> {t("Static · read-only")}
+                  </div>
+                  <p>
+                    {t(
+                      "Built from allowlisted Git-tracked documents. Local changes do not modify the repository.",
+                    )}
+                  </p>
                 </div>
                 <div className="cx-fact">
                   <span className="cx-fact-label">{t("Source revision")}</span>
