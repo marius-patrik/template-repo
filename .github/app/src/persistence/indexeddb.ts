@@ -202,27 +202,27 @@ export class CanvasPersistence {
         }
         try {
           if (
-          db.version !== INDEXED_DB_VERSION ||
-          STORES.some((s) => !db.objectStoreNames.contains(s)) ||
-          !db
-            .transaction("documents")
-            .objectStore("documents")
-            .indexNames.contains("byWorkspace") ||
-          !db
-            .transaction("documents")
-            .objectStore("documents")
-            .indexNames.contains("byWorkspaceAndDeletedAt") ||
-          !db
-            .transaction("workspaces")
-            .objectStore("workspaces")
-            .indexNames.contains("byDeletedAt") ||
-          !db.transaction("migration").objectStore("migration").indexNames.contains("byStatus") ||
-          !db.transaction("backups").objectStore("backups").indexNames.contains("byKey") ||
-          !db.transaction("backups").objectStore("backups").indexNames.contains("byCapturedAt")
-        ) {
-          db.close();
-          finish(fail("UNSUPPORTED_SCHEMA", "Missing required IndexedDB stores or indexes"));
-          return;
+            db.version !== INDEXED_DB_VERSION ||
+            STORES.some((s) => !db.objectStoreNames.contains(s)) ||
+            !db
+              .transaction("documents")
+              .objectStore("documents")
+              .indexNames.contains("byWorkspace") ||
+            !db
+              .transaction("documents")
+              .objectStore("documents")
+              .indexNames.contains("byWorkspaceAndDeletedAt") ||
+            !db
+              .transaction("workspaces")
+              .objectStore("workspaces")
+              .indexNames.contains("byDeletedAt") ||
+            !db.transaction("migration").objectStore("migration").indexNames.contains("byStatus") ||
+            !db.transaction("backups").objectStore("backups").indexNames.contains("byKey") ||
+            !db.transaction("backups").objectStore("backups").indexNames.contains("byCapturedAt")
+          ) {
+            db.close();
+            finish(fail("UNSUPPORTED_SCHEMA", "Missing required IndexedDB stores or indexes"));
+            return;
           }
         } catch (cause) {
           db.close();

@@ -35,24 +35,3 @@ jobs:
       - name: Verify real IndexedDB transactions in Chromium
         timeout-minutes: 3
         run: node .github/tests/persistence/canvas-persistence.mjs
-
-  d01-format-proof:
-    if: ${{ github.event_name == 'pull_request' && github.head_ref == 'agent/canvas-c01-idb-foundation' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: '1.3.11'
-      - name: Install pinned formatter
-        working-directory: .github/app
-        run: bun install --frozen-lockfile
-      - name: Emit canonical Biome formatted IndexedDB implementation
-        working-directory: .github/app
-        run: |
-          bunx biome format --write src/persistence/indexeddb.ts
-          printf 'D01_BLOB src/persistence/indexeddb.ts '
-          base64 -w0 src/persistence/indexeddb.ts
-          printf '\n'
