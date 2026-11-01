@@ -1,6 +1,6 @@
 # df-control-bridge: 1
-# GitHub requires issues, workflow_dispatch and schedules on the default branch.
-# Configuration and executable workflows reside on this repository's default branch.
+# The default-branch runtime still handles issue/approval automation.
+# Keep PR quality tokens read-only; never inherit agent secrets into it.
 name: DarkFactory Runtime
 on:
   push:
@@ -18,13 +18,41 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "43 5 * * *"
+
 permissions:
-  contents: write
-  issues: write
-  pull-requests: write
-  actions: write
-  repository-projects: write
+  contents: read
+
 jobs:
-  governed:
+  governed-quality:
+    if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: read
+      pull-requests: read
     uses: ./.github/workflows/darkfactory-control.yml
+    with:
+      mode: quality
+
+  governed-agent:
+    if: github.event_name == 'issues' || github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment'
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      actions: write
+      repository-projects: write
+    uses: ./.github/workflows/darkfactory-control.yml
+    with:
+      mode: agent
+    secrets: inherit
+
+  governed-approvals:
+    if: github.event_name == 'pull_request_review' || github.event_name == 'issue_comment'
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      repository-projects: write
+    uses: ./.github/workflows/darkfactory-control.yml
+    with:
+      mode: approvals
     secrets: inherit

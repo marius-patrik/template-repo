@@ -2,15 +2,18 @@
 name: DarkFactory Control
 on:
   workflow_call:
+    inputs:
+      mode:
+        description: Choose the isolated read-only quality, agent, or approval path.
+        required: true
+        type: string
 permissions:
-  contents: write
-  issues: write
-  pull-requests: write
-  actions: write
-  repository-projects: write
+  contents: read
 jobs:
   detect:
-    if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: read
+    if: inputs.mode == 'quality' && (github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
@@ -34,7 +37,9 @@ jobs:
           echo "matrix=$(jq -c .matrix "$RUNNER_TEMP/df-quality.json")" >> "$GITHUB_OUTPUT"
           if [ "$(jq ".matrix | length" "$RUNNER_TEMP/df-quality.json")" -gt 0 ]; then echo "has-actions=true" >> "$GITHUB_OUTPUT"; else echo "has-actions=false" >> "$GITHUB_OUTPUT"; fi
   execute-quality:
-    if: needs.detect.outputs.has-actions == 'true'
+    permissions:
+      contents: read
+    if: inputs.mode == 'quality' && needs.detect.outputs.has-actions == 'true'
     needs: detect
     name: ${{ matrix.id }}
     runs-on: ubuntu-latest
@@ -117,7 +122,9 @@ jobs:
   quality:
     name: released-df-quality
     runs-on: ubuntu-latest
-    if: always() && (github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch')
+    permissions:
+      contents: read
+    if: inputs.mode == 'quality' && always() && (github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch')
     needs: [detect, execute-quality]
     steps:
       - name: Require all actual supported quality actions green
@@ -129,7 +136,13 @@ jobs:
           test "$DF_DETECT" = "success"
           if [ "$DF_HAS_ACTIONS" = "true" ]; then test "$DF_QUALITY" = "success"; fi
   agent:
-    if: github.event_name == 'issues' || github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment'
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      actions: write
+      repository-projects: write
+    if: inputs.mode == 'agent' && (github.event_name == 'issues' || github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment')
     uses: marius-patrik/DarkFactory/.github/workflows/agent.yml@fc5896c9ffbf9b1ac5762a271ec2b26ee0efafd4
     with:
       pipeline-ref: "fc5896c9ffbf9b1ac5762a271ec2b26ee0efafd4"
@@ -137,14 +150,21 @@ jobs:
       agent-enabled: ${{ vars.AGENT_ENABLED }}
     secrets: inherit
   issue-binding:
-    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: read
+    if: inputs.mode == 'quality' && github.event_name == 'pull_request'
     uses: marius-patrik/DarkFactory/.github/workflows/verify-pr-issue.yml@fc5896c9ffbf9b1ac5762a271ec2b26ee0efafd4
     with:
       pipeline-ref: "fc5896c9ffbf9b1ac5762a271ec2b26ee0efafd4"
       pipeline-repo: marius-patrik/DarkFactory
-    secrets: inherit
   approvals:
-    if: github.event_name == 'pull_request_review' || github.event_name == 'issue_comment'
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      repository-projects: write
+    if: inputs.mode == 'approvals' && (github.event_name == 'pull_request_review' || github.event_name == 'issue_comment')
     uses: marius-patrik/DarkFactory/.github/workflows/pr-approval-automerge.yml@fc5896c9ffbf9b1ac5762a271ec2b26ee0efafd4
     with:
       pipeline-ref: "fc5896c9ffbf9b1ac5762a271ec2b26ee0efafd4"

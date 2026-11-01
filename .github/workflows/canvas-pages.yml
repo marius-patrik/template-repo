@@ -1,37 +1,50 @@
-name: Canvas — GitHub Pages
+name: Canvas Quality
+
 on:
   pull_request:
     branches: [development, main]
   push:
-    branches: [main, 'feat/canvas-react-pages']
+    branches: ['**']
     paths:
       - '.github/app/**'
+      - '.github/tests/**'
       - '.github/workflows/canvas-pages.yml'
       - '.agents/**'
       - 'AGENTS.md'
       - 'repo.dfconfig'
   workflow_dispatch:
 
+# No Pages or OIDC authority exists in this workflow, including for same-repo PRs.
+# Production publication belongs to the separately reviewed release workflow.
 permissions:
   contents: read
 
 concurrency:
-  group: canvas-pages-${{ github.ref }}
+  group: canvas-quality-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build:
+  canvas-quality:
+    # Dispatch is only for the integration branch. Feature branches are checked
+    # via push/PR events and cannot use dispatch as an alternate execution path.
+    if: github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/development'
+    name: canvas-quality
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v4
         with:
-          # Preview the exact feature-branch head, not a synthetic PR merge commit.
-          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+          # PR builds test the merge candidate, not unreviewed head-only state.
           fetch-depth: 1
           submodules: false
-      - uses: actions/configure-pages@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Validate workflow security and repository Python tests
+        run: |
+          python -m pip install PyYAML==6.0.3
+          python -m unittest discover -s .github/tests -p 'test_*.py'
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: '1.3.11'
@@ -44,7 +57,7 @@ jobs:
           bun run lint
           bun run format:check
           bun run build
-      - name: Check compiled Pages application HTML
+      - name: Check compiled Canvas application HTML
         run: |
           node .github/app/scripts/verify-build.mjs .canvas-dist/index.html
           test -s .canvas-dist/index.html
@@ -55,35 +68,12 @@ jobs:
         run: |
           bunx playwright install --with-deps chromium
           node ../tests/smoke_canvas.mjs ../../.canvas-dist/index.html
-      - uses: actions/upload-pages-artifact@v4
+      - name: Retain PR build for inspection (not a Pages deployment)
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
         with:
-          path: .canvas-dist
-
-  deploy:
-    # Only trusted same-repository Canvas PRs may publish unmerged previews.
-    # Pull-request builds previously passed while deployment was always skipped.
-    if: >-
-      github.event.repository.private == false &&
-      (
-        (
-          github.event_name == 'push' &&
-          (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/canvas-react-pages')
-        ) ||
-        (
-          github.event_name == 'pull_request' &&
-          github.event.pull_request.head.repo.full_name == github.repository &&
-          github.event.pull_request.head.ref == 'feat/canvas-react-pages' &&
-          github.event.pull_request.base.ref == 'development'
-        )
-      )
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: ${{ github.ref == 'refs/heads/main' && 'github-pages' || 'canvas-preview' }}
-      url: ${{ steps.deployment.outputs.page_url }}
-    permissions:
-      pages: write
-      id-token: write
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          name: canvas-pr-preview
+          path: .canvas-dist/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
