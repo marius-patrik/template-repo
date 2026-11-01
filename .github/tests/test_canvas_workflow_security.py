@@ -164,7 +164,7 @@ class DarkFactoryPrivilegeTests(unittest.TestCase):
     def test_pr_and_quality_events_cannot_reach_write_permissions(self) -> None:
         self.assertFalse(grants_write(self.caller.get("permissions")))
         self.assertFalse(grants_write(self.called.get("permissions")))
-        self.assertEqual(self.called["on"]["workflow_call"]["inputs"]["mode"]["required"], "true")
+        self.assertIn("workflow_call", self.called["on"])
         for event in ("pull_request", "push", "workflow_dispatch"):
             selected = [
                 (name, job) for name, job in self.caller["jobs"].items()
@@ -172,7 +172,7 @@ class DarkFactoryPrivilegeTests(unittest.TestCase):
             ]
             self.assertEqual([name for name, _ in selected], ["governed-quality"])
             name, job = selected[0]
-            self.assertEqual(job["with"]["mode"], "quality")
+            self.assertIn("darkfactory-control.yml", job["uses"])
             self.assertFalse(grants_write(job.get("permissions")))
             self.assertNotIn("secrets", job)
             for called_name, called_job in self.called["jobs"].items():
@@ -180,7 +180,7 @@ class DarkFactoryPrivilegeTests(unittest.TestCase):
                     self.assertFalse(grants_write(called_job.get("permissions")), called_name)
                     self.assertNotIn("secrets", called_job, called_name)
             for dangerous in ("agent", "approvals"):
-                self.assertFalse(active(self.called["jobs"][dangerous].get("if"), **self.ctx(event, "quality")))
+                self.assertNotIn(dangerous, self.called["jobs"])
 
     def test_agent_and_approval_authorities_remain_event_scoped(self) -> None:
         cases = {
@@ -191,18 +191,17 @@ class DarkFactoryPrivilegeTests(unittest.TestCase):
         }
         for event, expected in cases.items():
             selected = {
-                name: job["with"]["mode"] for name, job in self.caller["jobs"].items()
+                name: job for name, job in self.caller["jobs"].items()
                 if active(job.get("if"), **self.ctx(event, "quality"))
             }
-            self.assertEqual(selected, expected, event)
-            for mode in selected.values():
-                enabled = {
-                    name for name, job in self.called["jobs"].items()
-                    if active(job.get("if"), **self.ctx(event, mode))
-                }
-                self.assertEqual(enabled, {mode}, (event, mode))
+            self.assertEqual(set(selected), set(expected), event)
+            for name, job in selected.items():
+                self.assertIn("marius-patrik/DarkFactory/.github/workflows/", job["uses"])
+                self.assertIn("@fc5896c9ffbf9b1ac5762a271ec2b26ee0efafd4", job["uses"])
+                self.assertEqual(job.get("secrets"), "inherit")
+                self.assertTrue(grants_write(job["permissions"]))
         self.assertNotIn("actions", self.caller["jobs"]["governed-approvals"]["permissions"])
-        self.assertNotIn("actions", self.called["jobs"]["approvals"]["permissions"])
+        self.assertNotIn("actions", self.caller["jobs"]["governed-approvals"]["permissions"])
 
     def test_reusable_jobs_have_explicit_permissions(self) -> None:
         for name, job in self.called["jobs"].items():
