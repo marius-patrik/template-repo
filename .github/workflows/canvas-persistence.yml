@@ -1,0 +1,37 @@
+name: Canvas persistence acceptance
+
+on:
+  pull_request:
+    branches: [development, main]
+    paths:
+      - '.github/app/src/domain/**'
+      - '.github/app/src/persistence/**'
+      - '.github/tests/persistence/**'
+      - '.github/workflows/canvas-persistence.yml'
+      - '.github/app/package.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  persistence-acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.3.11'
+      - name: Install application test dependencies
+        working-directory: .github/app
+        run: bun install --frozen-lockfile
+      - name: Run domain contract tests
+        run: node .github/tests/persistence/domain-contract.mjs
+      - name: Install Chromium
+        working-directory: .github/app
+        run: bunx playwright install --with-deps chromium
+      - name: Verify real IndexedDB transactions in Chromium
+        timeout-minutes: 3
+        run: node .github/tests/persistence/canvas-persistence.mjs
